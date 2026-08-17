@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------
+   Token system
+   Subject: an Indian Railways departure board + signal panel, redrawn as
+   a journey-planning console. The board casing is a warm near-black
+   (not a generic neon-on-black dashboard); the signature accent is the
+   split-flap amber LED color; journey status uses real signal-lamp
+   colors (green/amber/red) instead of generic pill colors, because
+   that's the actual vocabulary of the domain this app lives in.
+------------------------------------------------------------------------ */
+
+@theme {
+  --color-board: #12100d;
+  --color-board-raised: #1b1815;
+  --color-board-panel: #221e19;
+  --color-board-line: #34302a;
+  --color-board-line-soft: #221f1b;
+
+  --color-ink: #f3ede2;
+  --color-ink-muted: #a99c88;
+  --color-ink-dim: #6b6055;
+
+  --color-flap: #ff8a00;
+  --color-flap-dim: #b5680f;
+  --color-flap-soft: #402d14;
+
+  --color-signal-green: #3ecf6e;
+  --color-signal-green-soft: #17301f;
+  --color-signal-amber: #f5b93f;
+  --color-signal-amber-soft: #3a2d10;
+  --color-signal-red: #e5484d;
+  --color-signal-red-soft: #3a1a1a;
+
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--color-board);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  background-image: radial-gradient(circle at 12% -10%, rgba(255, 138, 0, 0.07), transparent 42%),
+    radial-gradient(circle at 92% 8%, rgba(62, 207, 110, 0.05), transparent 38%);
+  background-attachment: fixed;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--color-flap);
+  color: #14100a;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-flap);
+  outline-offset: 2px;
+}
+
+@keyframes rail-flow {
+  to {
+    background-position: -24px 0;
+  }
+}
+
+.rail-segment-flow {
+  animation: rail-flow 0.9s linear infinite;
+}
+
+@keyframes flap {
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(-90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
