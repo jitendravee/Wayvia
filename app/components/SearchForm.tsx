@@ -34,55 +34,65 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
       onSubmit={onSubmit}
       className="mb-6 rounded-2xl border border-border bg-white p-5 shadow-sm shadow-violet-soft/40"
     >
-      <div className="grid grid-cols-2 items-end gap-3.5 sm:grid-cols-6">
-        <StationInput id="from" label="From" value={values.from} onChange={(code) => set("from", code)} placeholder="Delhi or NDLS" />
+      <div className="flex flex-col gap-3.5 sm:flex-row sm:items-end">
+        {/* From / swap / To — grouped together so swap always sits between the two, at every breakpoint */}
+        <div className="flex flex-1 items-end gap-2">
+          <div className="flex-1">
+            <StationInput id="from" label="From" value={values.from} onChange={(code) => set("from", code)} placeholder="Delhi or NDLS" />
+          </div>
 
-        <button
-          type="button"
-          onClick={swap}
-          title="Swap origin/destination"
-          className="row-start-1 hidden h-[42px] w-[42px] items-center justify-center self-end rounded-lg border border-border bg-surface-alt font-mono text-sm text-ink-muted transition-colors hover:border-violet-ring hover:text-violet sm:flex"
-        >
-          ⇄
-        </button>
+          <button
+            type="button"
+            onClick={swap}
+            title="Swap origin/destination"
+            aria-label="Swap origin and destination"
+            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg border border-border bg-surface-alt font-mono text-sm text-ink-muted transition-colors hover:border-violet-ring hover:text-violet"
+          >
+            ⇄
+          </button>
 
-        <StationInput id="to" label="To" value={values.to} onChange={(code) => set("to", code)} placeholder="Mumbai or BCT" />
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="date" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            Date
-          </label>
-          <input
-            id="date"
-            type="date"
-            value={values.date}
-            onChange={(e) => set("date", e.target.value)}
-            className={fieldClass}
-          />
+          <div className="flex-1">
+            <StationInput id="to" label="To" value={values.to} onChange={(code) => set("to", code)} placeholder="Mumbai or BCT" />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="cls" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            Class
-          </label>
-          <select id="cls" value={values.travelClass} onChange={(e) => set("travelClass", e.target.value)} className={fieldClass}>
-            {["1A", "2A", "3A", "SL", "3E", "CC", "2S"].map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
+        <div className="grid grid-cols-3 gap-3.5 sm:flex sm:shrink-0">
+          <div className="flex flex-col gap-1.5 sm:w-36">
+            <label htmlFor="date" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+              Date
+            </label>
+            <input
+              id="date"
+              type="date"
+              value={values.date}
+              onChange={(e) => set("date", e.target.value)}
+              className={fieldClass}
+            />
+          </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="quota" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            Quota
-          </label>
-          <select id="quota" value={values.quota} onChange={(e) => set("quota", e.target.value)} className={fieldClass}>
-            <option value="GN">General</option>
-            <option value="TQ">Tatkal</option>
-            <option value="LD">Ladies</option>
-          </select>
+          <div className="flex flex-col gap-1.5 sm:w-24">
+            <label htmlFor="cls" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+              Class
+            </label>
+            <select id="cls" value={values.travelClass} onChange={(e) => set("travelClass", e.target.value)} className={fieldClass}>
+              {["1A", "2A", "3A", "SL", "3E", "CC", "2S"].map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5 sm:w-28">
+            <label htmlFor="quota" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+              Quota
+            </label>
+            <select id="quota" value={values.quota} onChange={(e) => set("quota", e.target.value)} className={fieldClass}>
+              <option value="GN">General</option>
+              <option value="TQ">Tatkal</option>
+              <option value="LD">Ladies</option>
+            </select>
+          </div>
         </div>
       </div>
 

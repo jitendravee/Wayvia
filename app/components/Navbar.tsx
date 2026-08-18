@@ -12,10 +12,12 @@ export default function Navbar() {
     <header className="sticky top-0 z-30 border-b border-border bg-white/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3.5 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet font-display text-sm font-bold text-white">
-            W
-          </span>
-          <span className="font-display text-lg font-semibold tracking-tight text-ink">Wayvia</span>
+         <img
+  src="/logo.png"
+  alt="Wayvia"
+  className="h-12 w-12 rounded-lg object-contain"
+/>
+          <span className="font-display text-lg font-semibold mt-2 text-ink">Wayvia</span>
         </Link>
 
         <nav className="hidden items-center gap-6 sm:flex">
