@@ -74,9 +74,32 @@ export async function stationLive(code: string): Promise<ParsedResult<LiveStatio
   return prettify.LiveStation($);
 }
 
+/**
+ * PNR status. Tries erail.in's own PNR page first — https://erail.in/pnr-status/{pnr}
+ * is a server-rendered page in the same family as the running-status page
+ * (lib/erail/runningStatus.ts), and erail's own client-side JS reads the
+ * result back out of a `data = {...};` block embedded in the page (that's
+ * what the PNR_Save call in the wild is re-posting, not fetching — so the
+ * real data has to already be in this initial HTML). This sandbox has no
+ * network egress to erail.in, so that assumption is untested; if erail.in's
+ * PNR page doesn't actually embed the data this way, this falls back to the
+ * previously-working confirmtkt.com scrape.
+ */
 export async function pnrStatus(pnr: string) {
-  const url = `https://www.confirmtkt.com/pnr-status/${pnr}`;
-  const res = await fetch(url, { headers: { "User-Agent": ua() } });
-  const text = await res.text();
-  return prettify.PnrStatus(text);
+  try {
+    const url = `https://erail.in/pnr-status/${pnr}`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": ua(), Accept: "text/html" },
+      cache: "no-store",
+    });
+    const text = await res.text();
+    const parsed = prettify.PnrStatus(text);
+    if (parsed?.data) return parsed;
+    throw new Error("erail.in PNR page did not contain an embedded data block");
+  } catch {
+    const url = `https://www.confirmtkt.com/pnr-status/${pnr}`;
+    const res = await fetch(url, { headers: { "User-Agent": ua() } });
+    const text = await res.text();
+    return prettify.PnrStatus(text);
+  }
 }

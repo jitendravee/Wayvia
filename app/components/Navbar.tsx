@@ -1,10 +1,8 @@
 import Link from "next/link";
 
 const LINKS = [
-  { href: "/", label: "Search" },
-  { href: "/routes", label: "Popular routes" },
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/about", label: "About" },
+  { href: "/running-status", label: "Running Status" },
+  { href: "/pnr-status", label: "PNR Status" },
 ];
 
 export default function Navbar() {
@@ -12,11 +10,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-30 border-b border-border bg-white/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3.5 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-         <img
-  src="/logo.png"
-  alt="Wayvia"
-  className="h-12 w-12 rounded-lg object-contain"
-/>
+          <img src="/logo.png" alt="Wayvia" className="h-12 w-12 rounded-lg object-contain" />
           <span className="font-display text-lg font-semibold mt-2 text-ink">Wayvia</span>
         </Link>
 
@@ -33,10 +27,10 @@ export default function Navbar() {
         </nav>
 
         <Link
-          href="/"
-          className="rounded-full bg-violet px-4 py-2 font-display text-[13px] font-semibold text-white shadow-sm shadow-violet-soft transition-colors hover:bg-violet-dark"
+          href="/pnr-status"
+          className="rounded-full bg-violet px-4 py-2 font-display text-[13px] font-semibold text-white! shadow-sm shadow-violet-soft transition-colors hover:bg-violet-dark"
         >
-          Find a journey
+          Check PNR
         </Link>
       </div>
     </header>

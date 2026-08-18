@@ -8,33 +8,33 @@ const SITE_URL = "https://wayvia.com";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Wayvia — Find the smartest way to get there",
+    default: "Wayvia — Live Train Running Status & PNR Status",
     template: "%s | Wayvia",
   },
   description:
-    "Wayvia is a journey discovery platform. Tell us where you want to go and we search direct and connecting routes, check live seat availability, and rank every option by price, speed, and reliability. Starting with trains, expanding to buses and flights.",
+    "Wayvia gives you live Indian Railways train running status and PNR status. Search any train by number or name to see its current location, delay, next stop, and full station-wise schedule — plus instant PNR confirmation checks with a visual seat map.",
   keywords: [
-    "train route planner",
-    "alternative train routes",
-    "connecting trains India",
-    "cheapest way to travel by train",
-    "fastest train route",
-    "train availability checker",
-    "journey planner India",
-    "best train route between two cities",
+    "train running status",
+    "live train status",
+    "PNR status",
+    "PNR check",
+    "spot your train",
+    "Indian railway running status",
+    "train current location",
+    "train delay status",
   ],
   openGraph: {
     type: "website",
     url: SITE_URL,
     siteName: "Wayvia",
-    title: "Wayvia — Find the smartest way to get there",
+    title: "Wayvia — Live Train Running Status & PNR Status",
     description:
-      "We don't just show you the direct train. We explore connecting routes through nearby junctions, check live availability, and find the best way to get you there.",
+      "See exactly where your train is, how delayed it is, and what's next — plus instant PNR confirmation checks with a visual seat map.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Wayvia — Find the smartest way to get there",
-    description: "Direct or connecting, we find the best way to get you there — ranked by price, time and reliability.",
+    title: "Wayvia — Live Train Running Status & PNR Status",
+    description: "See exactly where your train is, right now — plus instant PNR confirmation checks.",
   },
   alternates: {
     canonical: SITE_URL,
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         name: "Wayvia",
         url: SITE_URL,
         description:
-          "Wayvia is a smart journey discovery platform that finds the best way to get from A to B by exploring direct and connecting routes.",
+          "Wayvia gives you live Indian Railways train running status and PNR status, with a station-by-station journey tracker and visual seat maps.",
         logo: `${SITE_URL}/favicon.ico`,
       },
       {
@@ -65,9 +65,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "@type": "SearchAction",
           target: {
             "@type": "EntryPoint",
-            urlTemplate: `${SITE_URL}/?from={from}&to={to}`,
+            urlTemplate: `${SITE_URL}/running-status/{train}`,
           },
-          "query-input": "required name=from,to",
+          "query-input": "required name=train",
         },
       },
     ],
@@ -86,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="flex min-h-screen flex-col bg-white text-ink antialiased">
+      <body className="flex min-h-screen flex-col bg-white  antialiased">
         <Navbar />
         <div className="flex-1">{children}</div>
         <Footer />

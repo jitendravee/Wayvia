@@ -13,17 +13,17 @@ export default function Footer() {
               <span className="font-display text-base font-semibold text-ink">Wayvia</span>
             </div>
             <p className="mt-2.5 max-w-xs text-[13px] leading-relaxed text-ink-muted">
-              You tell us where you want to go. We figure out the best way to get you there — direct or connecting,
-              ranked by price, time, and reliability.
+              Live train running status and PNR status, with a station-by-station journey tracker and visual
+              seat maps — no clutter, just where your train is right now.
             </p>
           </div>
 
           <div>
             <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-dim">Product</div>
             <ul className="space-y-2 text-[13px] text-ink-muted">
-              <li><Link href="/" className="hover:text-violet">Journey search</Link></li>
-              <li><Link href="/routes" className="hover:text-violet">Popular routes</Link></li>
-              <li><Link href="/how-it-works" className="hover:text-violet">How it works</Link></li>
+              <li><Link href="/running-status" className="hover:text-violet">Running status</Link></li>
+              <li><Link href="/pnr-status" className="hover:text-violet">PNR status</Link></li>
+              <li><Link href="/" className="hover:text-violet">How it works</Link></li>
             </ul>
           </div>
 
@@ -37,8 +37,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 flex flex-col gap-2 border-t border-border pt-5 text-[12px] text-ink-dim sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Wayvia. Journey discovery, not just ticket search.</span>
-          <span>Trains today. Buses and flights are on the way.</span>
+          <span>© {new Date().getFullYear()} Wayvia. Know where your train is, always.</span>
+          <span>Data sourced live from erail.in.</span>
         </div>
       </div>
     </footer>
