@@ -1,36 +1,36 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------
-   Token system
-   Subject: an Indian Railways departure board + signal panel, redrawn as
-   a journey-planning console. The board casing is a warm near-black
-   (not a generic neon-on-black dashboard); the signature accent is the
-   split-flap amber LED color; journey status uses real signal-lamp
-   colors (green/amber/red) instead of generic pill colors, because
-   that's the actual vocabulary of the domain this app lives in.
+   Wayvia design tokens
+   Clean, light, travel-app surface: white as the primary canvas, violet
+   as the single confident accent/CTA color. Signal colors (availability
+   states) stay semantically green/amber/red, tuned for a light UI.
 ------------------------------------------------------------------------ */
 
 @theme {
-  --color-board: #12100d;
-  --color-board-raised: #1b1815;
-  --color-board-panel: #221e19;
-  --color-board-line: #34302a;
-  --color-board-line-soft: #221f1b;
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f7f6fb;
+  --color-surface-hover: #f1eefb;
+  --color-border: #e6e3ee;
+  --color-border-soft: #efedf5;
 
-  --color-ink: #f3ede2;
-  --color-ink-muted: #a99c88;
-  --color-ink-dim: #6b6055;
+  --color-ink: #18131f;
+  --color-ink-muted: #6b6478;
+  --color-ink-dim: #9791a1;
 
-  --color-flap: #ff8a00;
-  --color-flap-dim: #b5680f;
-  --color-flap-soft: #402d14;
+  --color-violet: #7c3aed;
+  --color-violet-dark: #6423d1;
+  --color-violet-light: #9560f0;
+  --color-violet-soft: #f2ecfe;
+  --color-violet-ring: #e4d7fd;
 
-  --color-signal-green: #3ecf6e;
-  --color-signal-green-soft: #17301f;
-  --color-signal-amber: #f5b93f;
-  --color-signal-amber-soft: #3a2d10;
-  --color-signal-red: #e5484d;
-  --color-signal-red-soft: #3a1a1a;
+  --color-signal-green: #16a34a;
+  --color-signal-green-soft: #eaf8ee;
+  --color-signal-amber: #d97706;
+  --color-signal-amber-soft: #fef4e6;
+  --color-signal-red: #dc2626;
+  --color-signal-red-soft: #fdeded;
 
   --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
   --font-body: "Inter", system-ui, -apple-system, sans-serif;
@@ -45,12 +45,9 @@ html,
 body {
   padding: 0;
   margin: 0;
-  background: var(--color-board);
+  background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-body);
-  background-image: radial-gradient(circle at 12% -10%, rgba(255, 138, 0, 0.07), transparent 42%),
-    radial-gradient(circle at 92% 8%, rgba(62, 207, 110, 0.05), transparent 38%);
-  background-attachment: fixed;
 }
 
 a {
@@ -58,35 +55,40 @@ a {
 }
 
 ::selection {
-  background: var(--color-flap);
-  color: #14100a;
+  background: var(--color-violet-ring);
+  color: var(--color-violet-dark);
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-flap);
+  outline: 2px solid var(--color-violet);
   outline-offset: 2px;
 }
 
-@keyframes rail-flow {
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-violet-ring);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
   to {
-    background-position: -24px 0;
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.rail-segment-flow {
-  animation: rail-flow 0.9s linear infinite;
-}
-
-@keyframes flap {
-  0% {
-    transform: rotateX(0deg);
-  }
-  50% {
-    transform: rotateX(-90deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
+.fade-up {
+  animation: fade-up 0.35s ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -94,4 +96,30 @@ a {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Leaflet route map styling */
+.wayvia-map-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.wayvia-map-tooltip {
+  background: #ffffff !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-ink) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  padding: 1px 6px !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 4px rgba(24, 19, 31, 0.12) !important;
+}
+
+.wayvia-map-tooltip::before {
+  display: none !important;
+}
+
+.leaflet-container {
+  font-family: var(--font-body) !important;
 }

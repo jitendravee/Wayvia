@@ -1,6 +1,6 @@
 "use client";
 
-import { ConnectionFilter, DepartureWindow, FilterState, SortKey } from "./filters";
+import { ConnectionFilter, DepartureWindow, DEPARTURE_WINDOW_LABEL, FilterState, SortKey } from "./filters";
 
 interface Props {
   filters: FilterState;
@@ -22,23 +22,19 @@ const CONNECTION_OPTIONS: { key: ConnectionFilter; label: string }[] = [
   { key: "oneChange", label: "1 change max" },
 ];
 
-const DEPARTURE_OPTIONS: { key: DepartureWindow; label: string }[] = [
-  { key: "any", label: "Any time" },
-  { key: "early", label: "12am–6am" },
-  { key: "morning", label: "6am–12pm" },
-  { key: "afternoon", label: "12pm–6pm" },
-  { key: "night", label: "6pm–12am" },
-];
+const DEPARTURE_OPTIONS: { key: DepartureWindow; label: string }[] = (
+  ["any", "morning", "afternoon", "evening", "night"] as DepartureWindow[]
+).map((key) => ({ key, label: DEPARTURE_WINDOW_LABEL[key] }));
 
 const chipBase = "rounded-full border px-3 py-1 font-mono text-[11px] transition-colors";
-const chipOn = "border-flap bg-flap-soft text-flap";
-const chipOff = "border-board-line bg-board-panel text-ink-muted hover:border-flap-dim/40 hover:text-ink";
+const chipOn = "border-violet bg-violet-soft text-violet-dark";
+const chipOff = "border-border bg-white text-ink-muted hover:border-violet-ring hover:text-ink";
 
 export default function FiltersBar({ filters, onChange, fareCeiling, resultCount }: Props) {
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) => onChange({ ...filters, [key]: val });
 
   return (
-    <div className="mb-5 rounded-lg border border-board-line bg-board-raised/40 p-4">
+    <div className="mb-5 rounded-xl border border-border bg-surface-alt p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">Filters</div>
         <div className="font-mono text-[11px] text-ink-dim">{resultCount} match{resultCount === 1 ? "" : "es"}</div>
@@ -85,13 +81,13 @@ export default function FiltersBar({ filters, onChange, fareCeiling, resultCount
               type="checkbox"
               checked={filters.confirmedOnly}
               onChange={(e) => set("confirmedOnly", e.target.checked)}
-              className="h-3.5 w-3.5 accent-flap"
+              className="h-3.5 w-3.5 accent-violet"
             />
             Fully confirmed only
           </label>
 
           {fareCeiling > 0 && (
-            <label className="flex flex-1 min-w-[180px] items-center gap-2 font-mono text-[11px] text-ink-muted">
+            <label className="flex min-w-[180px] flex-1 items-center gap-2 font-mono text-[11px] text-ink-muted">
               Max fare
               <input
                 type="range"
@@ -100,7 +96,7 @@ export default function FiltersBar({ filters, onChange, fareCeiling, resultCount
                 step={Math.max(1, Math.round(fareCeiling / 50))}
                 value={filters.maxFare ?? fareCeiling}
                 onChange={(e) => set("maxFare", Number(e.target.value))}
-                className="flex-1 accent-flap"
+                className="flex-1 accent-violet"
               />
               <span className="w-16 shrink-0 text-right text-ink">
                 {filters.maxFare === null ? `₹${fareCeiling}` : `₹${filters.maxFare}`}

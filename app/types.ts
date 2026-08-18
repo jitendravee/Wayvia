@@ -57,6 +57,13 @@ export interface Narrative {
   detail: string;
 }
 
+export interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface SearchResponse {
   from: string;
   to: string;
@@ -70,5 +77,6 @@ export interface SearchResponse {
   fullyConfirmedCount?: number;
   narrative?: Narrative;
   results: RankedResults | null;
+  pagination?: PaginationMeta;
   error?: string;
 }

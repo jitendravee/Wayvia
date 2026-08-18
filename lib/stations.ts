@@ -1,0 +1,78 @@
+import { DEFAULT_HUBS } from "./graph/hubs";
+
+export interface Station {
+  code: string;
+  name: string;
+  state?: string;
+}
+
+/**
+ * Extra stations worth having in the autocomplete beyond the hub/junction
+ * list (which is optimized for transfer-relevance, not name coverage).
+ * Kept intentionally small and curated rather than a full ~8000-station
+ * timetable dump — this is a "type a city, get the right code" list, not a
+ * routing data source.
+ */
+const EXTRA_STATIONS: Station[] = [
+  { code: "BCT", name: "Mumbai Central", state: "Maharashtra" },
+  { code: "CSMT", name: "Mumbai CSMT (Chhatrapati Shivaji)", state: "Maharashtra" },
+  { code: "PUNE", name: "Pune Junction", state: "Maharashtra" },
+  { code: "SBC", name: "Bengaluru City (KSR Bengaluru)", state: "Karnataka" },
+  { code: "MAS", name: "Chennai Central", state: "Tamil Nadu" },
+  { code: "HWH", name: "Howrah Junction, Kolkata", state: "West Bengal" },
+  { code: "NDLS", name: "New Delhi", state: "Delhi" },
+  { code: "SC", name: "Secunderabad Junction, Hyderabad", state: "Telangana" },
+  { code: "JP", name: "Jaipur Junction", state: "Rajasthan" },
+  { code: "ADI", name: "Ahmedabad Junction", state: "Gujarat" },
+  { code: "LKO", name: "Lucknow Charbagh", state: "Uttar Pradesh" },
+  { code: "PNBE", name: "Patna Junction", state: "Bihar" },
+  { code: "BBS", name: "Bhubaneswar", state: "Odisha" },
+  { code: "GHY", name: "Guwahati", state: "Assam" },
+  { code: "TVC", name: "Thiruvananthapuram Central", state: "Kerala" },
+  { code: "ERS", name: "Ernakulam Junction, Kochi", state: "Kerala" },
+  { code: "MAO", name: "Madgaon, Goa", state: "Goa" },
+  { code: "ASR", name: "Amritsar Junction", state: "Punjab" },
+  { code: "CDG", name: "Chandigarh", state: "Chandigarh" },
+  { code: "DDN", name: "Dehradun", state: "Uttarakhand" },
+  { code: "JU", name: "Jodhpur Junction", state: "Rajasthan" },
+  { code: "UDZ", name: "Udaipur City", state: "Rajasthan" },
+  { code: "INDB", name: "Indore Junction", state: "Madhya Pradesh" },
+  { code: "BPL", name: "Bhopal Junction", state: "Madhya Pradesh" },
+  { code: "NGP", name: "Nagpur Junction", state: "Maharashtra" },
+  { code: "VSKP", name: "Visakhapatnam", state: "Andhra Pradesh" },
+  { code: "TPTY", name: "Tirupati", state: "Andhra Pradesh" },
+  { code: "MYS", name: "Mysuru Junction", state: "Karnataka" },
+  { code: "CBE", name: "Coimbatore Junction", state: "Tamil Nadu" },
+  { code: "MDU", name: "Madurai Junction", state: "Tamil Nadu" },
+];
+
+const byCode = new Map<string, Station>();
+for (const h of DEFAULT_HUBS) byCode.set(h.code, { code: h.code, name: h.name });
+for (const s of EXTRA_STATIONS) byCode.set(s.code, s); // extra entries win — richer city names
+
+export const ALL_STATIONS: Station[] = Array.from(byCode.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+/**
+ * Ranks matches: exact code match first, then code-starts-with, then
+ * name-starts-with, then name-contains. Keeps the dropdown feeling
+ * "typeahead smart" rather than a plain filter.
+ */
+export function searchStations(query: string, limit = 8): Station[] {
+  const q = query.trim().toUpperCase();
+  if (!q) return [];
+
+  const scored = ALL_STATIONS.map((s) => {
+    const code = s.code.toUpperCase();
+    const name = s.name.toUpperCase();
+    let score = -1;
+    if (code === q) score = 100;
+    else if (code.startsWith(q)) score = 80;
+    else if (name.startsWith(q)) score = 60;
+    else if (name.includes(q)) score = 40;
+    else if (code.includes(q)) score = 20;
+    return { s, score };
+  }).filter((x) => x.score > 0);
+
+  scored.sort((a, b) => b.score - a.score || a.s.name.localeCompare(b.s.name));
+  return scored.slice(0, limit).map((x) => x.s);
+}

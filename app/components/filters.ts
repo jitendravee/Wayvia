@@ -2,7 +2,7 @@ import type { AnnotatedJourney } from "../types";
 
 export type SortKey = "best" | "cheapest" | "fastest" | "fewestChanges";
 export type ConnectionFilter = "any" | "direct" | "oneChange";
-export type DepartureWindow = "any" | "early" | "morning" | "afternoon" | "night";
+export type DepartureWindow = "any" | "morning" | "afternoon" | "evening" | "night";
 
 export interface FilterState {
   sort: SortKey;
@@ -20,20 +20,28 @@ export const DEFAULT_FILTERS: FilterState = {
   maxFare: null,
 };
 
+export const DEPARTURE_WINDOW_LABEL: Record<DepartureWindow, string> = {
+  any: "Any time",
+  morning: "Morning · 6am–12pm",
+  afternoon: "Afternoon · 12pm–5pm",
+  evening: "Evening · 5pm–9pm",
+  night: "Night · 9pm–6am",
+};
+
 function departureHour(journey: AnnotatedJourney): number {
   return Math.floor((journey.legs[0].depAbsMin % 1440) / 60);
 }
 
 function inWindow(hour: number, window: DepartureWindow): boolean {
   switch (window) {
-    case "early":
-      return hour >= 0 && hour < 6;
     case "morning":
       return hour >= 6 && hour < 12;
     case "afternoon":
-      return hour >= 12 && hour < 18;
+      return hour >= 12 && hour < 17;
+    case "evening":
+      return hour >= 17 && hour < 21;
     case "night":
-      return hour >= 18 && hour < 24;
+      return hour >= 21 || hour < 6;
     default:
       return true;
   }

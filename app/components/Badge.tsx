@@ -1,6 +1,6 @@
 export function TagBadge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full bg-flap-soft px-2.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-flap">
+    <span className="rounded-full bg-violet-soft px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-violet-dark">
       {children}
     </span>
   );
@@ -11,8 +11,8 @@ export function Badge({ children, variant }: { children: React.ReactNode; varian
     variant === "fare"
       ? "bg-signal-green-soft text-signal-green"
       : variant === "duration"
-      ? "bg-board-panel text-ink"
-      : "bg-board-panel text-ink-muted";
+      ? "bg-surface-alt text-ink border border-border-soft"
+      : "bg-surface-alt text-ink-muted border border-border-soft";
   return <span className={`rounded-md px-2 py-0.5 font-mono text-[11px] ${styles}`}>{children}</span>;
 }
 

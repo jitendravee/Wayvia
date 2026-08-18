@@ -17,7 +17,7 @@ export default function RouteStrip({ legs }: { legs: AnnotatedLeg[] }) {
           <div className="contents" key={`${node.code}-${i}`}>
             <div className="flex min-w-[64px] flex-col items-center">
               <div
-                className={`h-2.5 w-2.5 rounded-full ring-2 ring-board ${
+                className={`h-2.5 w-2.5 rounded-full ring-2 ring-white ${
                   i === 0 ? "bg-ink-dim" : SIGNAL_DOT[signalFor(legs[i - 1]?.availability?.category)]
                 }`}
               />

@@ -10,6 +10,8 @@ export async function GET(req: NextRequest) {
   const travelClass = req.nextUrl.searchParams.get("class") ?? "3A";
   const quota = req.nextUrl.searchParams.get("quota") ?? "GN";
   const maxHubs = Number(req.nextUrl.searchParams.get("maxHubs") ?? "10");
+  const page = Math.max(1, Number(req.nextUrl.searchParams.get("page") ?? "1") || 1);
+  const pageSize = Math.min(50, Math.max(1, Number(req.nextUrl.searchParams.get("pageSize") ?? "10") || 10));
 
   if (!from || !to) {
     return NextResponse.json({ error: "from and to are required (station codes, e.g. NDLS, BCT)" }, { status: 400 });
@@ -56,6 +58,20 @@ export async function GET(req: NextRequest) {
     const ranked = rankJourneys(availableOnly);
     const narrative = buildNarrative(ranked, direct.length, viaHub.length, annotated.length, availableOnly.length);
 
+    // 4. PAGINATION — applied to the "all" list only, after full ranking.
+    // bestOverall / cheapest / fastest / etc always reflect the complete,
+    // unpaginated result set so the top picks never shift page to page.
+    let pagedResults = ranked;
+    let pagination = undefined;
+    if (ranked) {
+      const total = ranked.all.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      const safePage = Math.min(page, totalPages);
+      const start = (safePage - 1) * pageSize;
+      pagedResults = { ...ranked, all: ranked.all.slice(start, start + pageSize) };
+      pagination = { page: safePage, pageSize, total, totalPages };
+    }
+
     return NextResponse.json({
       from,
       to,
@@ -72,7 +88,8 @@ export async function GET(req: NextRequest) {
       },
       fullyConfirmedCount: annotated.filter((j) => j.fullyConfirmed).length,
       narrative,
-      results: ranked,
+      results: pagedResults,
+      pagination,
     });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

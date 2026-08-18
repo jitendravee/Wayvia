@@ -1,5 +1,7 @@
 "use client";
 
+import StationInput from "./StationInput";
+
 export interface SearchFormValues {
   from: string;
   to: string;
@@ -17,7 +19,7 @@ interface Props {
 }
 
 const fieldClass =
-  "w-full rounded-md border border-board-line bg-board-raised px-3 py-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-flap";
+  "w-full rounded-lg border border-border bg-white px-3 py-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet-ring";
 
 export default function SearchForm({ values, onChange, onSubmit, loading }: Props) {
   const set = <K extends keyof SearchFormValues>(key: K, val: SearchFormValues[K]) =>
@@ -30,43 +32,21 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
   return (
     <form
       onSubmit={onSubmit}
-      className="mb-6 rounded-lg border border-board-line bg-board-raised/60 p-5 shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]"
+      className="mb-6 rounded-2xl border border-border bg-white p-5 shadow-sm shadow-violet-soft/40"
     >
-      <div className="grid grid-cols-2 gap-3.5 items-end sm:grid-cols-6">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="from" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            From
-          </label>
-          <input
-            id="from"
-            value={values.from}
-            onChange={(e) => set("from", e.target.value.toUpperCase())}
-            placeholder="NDLS"
-            className={fieldClass}
-          />
-        </div>
+      <div className="grid grid-cols-2 items-end gap-3.5 sm:grid-cols-6">
+        <StationInput id="from" label="From" value={values.from} onChange={(code) => set("from", code)} placeholder="Delhi or NDLS" />
 
         <button
           type="button"
           onClick={swap}
           title="Swap origin/destination"
-          className="row-start-1 hidden h-[42px] w-[42px] items-center justify-center self-end rounded-md border border-board-line bg-board-panel font-mono text-sm text-ink-muted transition-colors hover:border-flap-dim hover:text-flap sm:flex"
+          className="row-start-1 hidden h-[42px] w-[42px] items-center justify-center self-end rounded-lg border border-border bg-surface-alt font-mono text-sm text-ink-muted transition-colors hover:border-violet-ring hover:text-violet sm:flex"
         >
           ⇄
         </button>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="to" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            To
-          </label>
-          <input
-            id="to"
-            value={values.to}
-            onChange={(e) => set("to", e.target.value.toUpperCase())}
-            placeholder="BCT"
-            className={fieldClass}
-          />
-        </div>
+        <StationInput id="to" label="To" value={values.to} onChange={(code) => set("to", code)} placeholder="Mumbai or BCT" />
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="date" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
@@ -127,7 +107,7 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-flap px-6 py-2.5 font-display text-sm font-semibold text-board transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="rounded-full bg-violet px-6 py-2.5 font-display text-sm font-semibold text-white transition-colors hover:bg-violet-dark disabled:opacity-50"
         >
           {loading ? "Looking for the best way…" : "Find my journey"}
         </button>

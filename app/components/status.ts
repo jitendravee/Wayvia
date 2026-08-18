@@ -27,17 +27,17 @@ export const SIGNAL_LABEL: Record<AvlStatusCategory, string> = {
 };
 
 export const SIGNAL_DOT: Record<SignalState, string> = {
-  clear: "bg-signal-green shadow-[0_0_8px_var(--color-signal-green)]",
-  caution: "bg-signal-amber shadow-[0_0_8px_var(--color-signal-amber)]",
-  stop: "bg-signal-red shadow-[0_0_8px_var(--color-signal-red)]",
+  clear: "bg-signal-green",
+  caution: "bg-signal-amber",
+  stop: "bg-signal-red",
   unknown: "bg-ink-dim",
 };
 
 export const SIGNAL_LINE: Record<SignalState, string> = {
-  clear: "bg-signal-green/70",
-  caution: "bg-signal-amber/70",
-  stop: "bg-signal-red/70",
-  unknown: "bg-board-line",
+  clear: "bg-signal-green/60",
+  caution: "bg-signal-amber/60",
+  stop: "bg-signal-red/60",
+  unknown: "bg-border",
 };
 
 export const SIGNAL_TEXT: Record<SignalState, string> = {
