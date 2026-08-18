@@ -1,13 +1,16 @@
 import Link from "next/link";
 import TrainSearchBox from "./components/TrainSearchBox";
 import { POPULAR_TRAINS } from "@/lib/trains";
-import { PageInner } from "./journey-planner/page";
+import { PageInner } from "./components/PageClient";
+import { Suspense } from "react";
 
 export default function Page() {
   return (
     <main className="mx-auto max-w-4xl px-5 pb-24 pt-14 sm:px-6 sm:pt-20">
       {/* Hero + search */}
-      <PageInner />
+      <Suspense fallback={null}>
+        <PageInner />
+      </Suspense>
       {/* <section className="text-center">
         <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">Wayvia · live train tracking</div>
         <h1 className="mx-auto mt-2 max-w-2xl font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
