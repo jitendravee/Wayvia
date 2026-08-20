@@ -27,11 +27,21 @@ export interface AnnotatedLeg {
 export interface AnnotatedJourney {
   legs: AnnotatedLeg[];
   hub?: string;
+  hub2?: string;
+  hubSource?: "static" | "live" | "route-topology";
   fullyConfirmed: boolean;
   hasBlockedLeg: boolean;
   totalFare: number | null;
   totalDurationMin: number;
   connections: number;
+}
+
+export interface PartialCoverage {
+  type: "reaches_hub" | "from_hub";
+  hub: string;
+  hubName?: string;
+  leg: AnnotatedLeg;
+  note: string;
 }
 
 export interface RankedResults {
@@ -49,7 +59,9 @@ export interface GraphStats {
   nodesDiscovered: number;
   edgesDiscovered: number;
   layers: number;
-  hubsExplored: { code: string; name: string; relevance: number }[];
+  hubsExplored: { code: string; name: string; relevance: number; source?: string }[];
+  dynamicHubsUsed?: boolean;
+  twoHubUsed?: boolean;
 }
 
 export interface Narrative {
@@ -78,5 +90,6 @@ export interface SearchResponse {
   narrative?: Narrative;
   results: RankedResults | null;
   pagination?: PaginationMeta;
+  partial?: PartialCoverage[];
   error?: string;
 }

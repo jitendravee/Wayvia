@@ -20,6 +20,7 @@ const CONNECTION_OPTIONS: { key: ConnectionFilter; label: string }[] = [
   { key: "any", label: "Any" },
   { key: "direct", label: "Direct only" },
   { key: "oneChange", label: "1 change max" },
+  { key: "twoChanges", label: "2 changes max" },
 ];
 
 const DEPARTURE_OPTIONS: { key: DepartureWindow; label: string }[] = (

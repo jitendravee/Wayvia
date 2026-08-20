@@ -1,5 +1,5 @@
 import { buildAvlKey, fetchAvailability, toAvlDate, AvlAvailability, AvlFare } from "./erail/avl";
-import type { JourneyCandidate, Leg } from "./graph/types";
+import type { JourneyCandidate, Leg, PartialCoverage } from "./graph/types";
 
 export interface AnnotatedLeg extends Leg {
   avlKey: string;
@@ -64,6 +64,37 @@ export async function annotateWithAvailability(
       totalFare,
       totalDurationMin,
       connections: legs.length - 1,
+    };
+  });
+}
+
+export interface AnnotatedPartialCoverage extends PartialCoverage {
+  leg: AnnotatedLeg;
+}
+
+/**
+ * Same live-data pass as annotateWithAvailability, but for partial-coverage
+ * results (single real leg each) — so "we got you to X" also shows real
+ * seat status and fare, not just a schedule.
+ */
+export async function annotatePartialCoverage(
+  partial: PartialCoverage[],
+  date: string,
+  travelClass: string,
+  quota: string = "GN"
+): Promise<AnnotatedPartialCoverage[]> {
+  if (partial.length === 0) return [];
+  const avlDate = toAvlDate(date);
+  const keys = partial.map((p) => buildAvlKey(p.leg.trainNo, p.leg.from, p.leg.to, travelClass, quota, avlDate));
+  const { availability, fares } = await fetchAvailability(keys);
+
+  return partial.map((p, i) => {
+    const key = keys[i];
+    const avl = availability.get(key) ?? null;
+    const fareEntry = fares.get(key) ?? null;
+    return {
+      ...p,
+      leg: { ...p.leg, avlKey: key, availability: avl, fare: fareEntry ? fareEntry.estimatedFare : null },
     };
   });
 }

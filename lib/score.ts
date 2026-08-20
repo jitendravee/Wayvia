@@ -90,7 +90,9 @@ export function buildNarrative(
   directCount: number,
   viaHubCount: number,
   structuralCount = 0,
-  availableCount = 0
+  availableCount = 0,
+  partialCount = 0,
+  twoHubCount = 0
 ): { headline: string; detail: string } {
   if (!ranked) {
     if (structuralCount > 0 && availableCount === 0) {
@@ -101,14 +103,28 @@ export function buildNarrative(
           "Seats open up as people cancel or quota releases happen, so it's worth checking again closer to your date. Waitlisted and RAC options exist for this route too — we're just not showing those yet until that status gets cleaner handling here.",
       };
     }
+    if (partialCount > 0) {
+      return {
+        headline: `No complete route found yet, but ${partialCount} real train${partialCount === 1 ? "" : "s"} cover part of the way.`,
+        detail:
+          "No direct or fully-connecting train matched this date, even after checking nearby junctions and real route data — but some of the leg-by-leg matches below are genuinely running trains that get you partway there. Worth combining with a manual search for the remaining leg, or widening \"junctions to explore\" and trying again.",
+      };
+    }
     return {
       headline: "No trains found for this route on this date — no worries, here's what to try.",
       detail:
-        "Nothing came back structurally feasible, direct or via a nearby junction. Try a nearby date, double check the station codes, or widen the hub search. As soon as bus and flight results are wired in, they'll show up here automatically as a backup for this exact search.",
+        "Nothing came back structurally feasible, direct, via a nearby junction, or via a second connection. Try a nearby date, double check the station codes, or widen the hub search. As soon as bus and flight results are wired in, they'll show up here automatically as a backup for this exact search.",
     };
   }
 
   const { bestOverall, cheapest, mostReliable } = ranked;
+
+  if (directCount === 0 && twoHubCount > 0 && viaHubCount === 0) {
+    return {
+      headline: `No direct or single-junction trains today — but a 2-junction route gets you there.`,
+      detail: "We had to go two connections deep to find this one, so double-check the transfer windows, but it's a real, running option.",
+    };
+  }
 
   if (directCount === 0) {
     return {

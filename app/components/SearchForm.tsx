@@ -9,7 +9,11 @@ export interface SearchFormValues {
   travelClass: string;
   quota: string;
   maxHubs: number;
+  /** Explicitly opt into the more expensive 2-junction search tier even when the cheap tiers aren't thin. */
+  twoHub: boolean;
 }
+
+const MAX_HUBS_CEILING = 60;
 
 interface Props {
   values: SearchFormValues;
@@ -97,21 +101,40 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
       </div>
 
       <div className="mt-3.5 flex flex-wrap items-end justify-between gap-3.5">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="hubs" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            Junctions to check
-          </label>
-          <select
+        <div className="flex flex-1 flex-col gap-1.5 sm:min-w-[240px] sm:max-w-sm">
+          <div className="flex items-center justify-between">
+            <label htmlFor="hubs" className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+              Junctions to explore
+            </label>
+            <span className="font-mono text-[11px] text-ink">
+              {values.maxHubs}
+              {values.maxHubs >= MAX_HUBS_CEILING ? " (max)" : ""}
+            </span>
+          </div>
+          <input
             id="hubs"
+            type="range"
+            min={3}
+            max={MAX_HUBS_CEILING}
+            step={1}
             value={values.maxHubs}
             onChange={(e) => set("maxHubs", Number(e.target.value))}
-            className={`${fieldClass} w-36`}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={34}>All (34)</option>
-          </select>
+            className="w-full accent-violet"
+          />
+          <p className="font-mono text-[10px] leading-relaxed text-ink-dim">
+            Pulled live from erail.in&rsquo;s station directory — not a fixed list, so more here means genuinely more
+            junctions get checked.
+          </p>
+
+          <label className="mt-1 flex cursor-pointer items-center gap-2 font-mono text-[11px] text-ink-muted">
+            <input
+              type="checkbox"
+              checked={values.twoHub}
+              onChange={(e) => set("twoHub", e.target.checked)}
+              className="h-3.5 w-3.5 accent-violet"
+            />
+            Also try 2-junction routes (slower, for hard-to-connect routes)
+          </label>
         </div>
 
         <button

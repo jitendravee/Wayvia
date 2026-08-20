@@ -1,7 +1,7 @@
 import type { AnnotatedJourney } from "../types";
 
 export type SortKey = "best" | "cheapest" | "fastest" | "fewestChanges";
-export type ConnectionFilter = "any" | "direct" | "oneChange";
+export type ConnectionFilter = "any" | "direct" | "oneChange" | "twoChanges";
 export type DepartureWindow = "any" | "morning" | "afternoon" | "evening" | "night";
 
 export interface FilterState {
@@ -51,6 +51,7 @@ export function applyFilters(journeys: AnnotatedJourney[], filters: FilterState)
   let out = journeys.filter((j) => {
     if (filters.connections === "direct" && j.connections !== 0) return false;
     if (filters.connections === "oneChange" && j.connections > 1) return false;
+    if (filters.connections === "twoChanges" && j.connections > 2) return false;
     if (filters.confirmedOnly && !j.fullyConfirmed) return false;
     if (filters.departure !== "any" && !inWindow(departureHour(j), filters.departure)) return false;
     if (filters.maxFare !== null && j.totalFare !== null && j.totalFare > filters.maxFare) return false;

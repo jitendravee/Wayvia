@@ -4,11 +4,18 @@
  * erail.in doesn't give us a bulk "all stations + connectivity" dump the
  * way a downloaded government timetable would, so instead of pre-building
  * a full graph we query outward from a curated list of major junctions,
- * live, on demand, per search. This list covers the big, well-connected
- * junctions across every zone — extend it further if you need deeper
- * regional coverage. (A future upgrade: derive hub candidates from real
- * intermediate stops of nearby trains via the getRoute endpoint, instead
- * of a static list — see the note at the bottom of this file.)
+ * live, on demand, per search. This list is the fast, zero-network-cost
+ * first tier — it covers the big, well-connected junctions across every
+ * zone and has known coordinates, so `scoreHub` can rank it geographically
+ * before any erail.in request is made.
+ *
+ * It's no longer the *only* tier. Two more hub sources get merged in
+ * alongside this one (see lib/graph/discover.ts):
+ *   - lib/erail/stationDirectory.ts's live + discovered station list, so
+ *     the "junctions to explore" pool isn't capped at this file's length.
+ *   - lib/graph/dynamicHubs.ts, which derives extra hub candidates from the
+ *     *real* intermediate stops of actual trains via getRoute(), for when
+ *     this geo list + the live directory still come up thin.
  */
 export interface Hub {
   code: string;
@@ -169,7 +176,12 @@ export function scoreHub(hub: Hub, origin: string, destination: string): ScoredH
   const originStn = HUBS_BY_CODE.get(origin.toUpperCase());
   const destStn = HUBS_BY_CODE.get(destination.toUpperCase());
 
-  if (!originStn || !destStn) {
+  // Hubs merged in from the live directory or route-topology discovery don't carry real
+  // coordinates (lat/lon 0,0 is the sentinel — off the coast of Africa, never a real station).
+  // Score those neutrally rather than geo-scoring against a fake (0,0) position.
+  const hubHasCoords = !(hub.lat === 0 && hub.lon === 0);
+
+  if (!originStn || !destStn || !hubHasCoords) {
     return { ...hub, relevance: 0.5, detourRatio: null };
   }
 
@@ -190,23 +202,24 @@ export function scoreHub(hub: Hub, origin: string, destination: string): ScoredH
 
 /**
  * Returns candidate hubs ranked by relevance (best first), excluding the
- * origin/destination themselves, capped to `max`.
+ * origin/destination themselves, capped to `max`. `hubs` defaults to the
+ * static geo list but callers (see lib/graph/discover.ts) pass in a merged
+ * pool that also includes live/discovered stations from
+ * lib/erail/stationDirectory.ts — those don't have coordinates, so they
+ * score as a neutral 0.5 via the "no geo data" branch in scoreHub, which
+ * keeps them eligible without letting them crowd out well-scored geo hubs.
  */
 export function rankedCandidateHubs(from: string, to: string, max = 10, hubs: Hub[] = DEFAULT_HUBS): ScoredHub[] {
   const f = from.toUpperCase();
   const t = to.toUpperCase();
-  return hubs
+  // De-dupe by code first (a merged pool can contain the same station from multiple sources).
+  const byCode = new Map<string, Hub>();
+  for (const h of hubs) if (!byCode.has(h.code)) byCode.set(h.code, h);
+
+  return Array.from(byCode.values())
     .filter((h) => h.code !== f && h.code !== t)
     .map((h) => scoreHub(h, f, t))
     .filter((h) => h.relevance > 0)
     .sort((a, b) => b.relevance - a.relevance)
     .slice(0, max);
 }
-
-/**
- * FUTURE IMPROVEMENT: instead of a static curated list, derive hub
- * candidates dynamically by fetching getRoute() for a few near-miss trains
- * and reading their real intermediate stops. That would replace this
- * geo-heuristic with actual timetable topology. Left as a follow-up since
- * it needs another erail round-trip per candidate train.
- */

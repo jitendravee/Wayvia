@@ -1,5 +1,3 @@
-
-
 "use client"
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -9,6 +7,7 @@ import NarrativeBanner from "../components/NarrativeBanner";
 import EmptyState from "../components/EmptyState";
 import StatsStrip from "../components/StatsStrip";
 import JourneyCard from "../components/JourneyCard";
+import PartialMatchCard from "../components/PartialMatchCard";
 import FiltersBar from "../components/FiltersBar";
 import Pagination from "../components/Pagination";
 import { applyFilters, DEFAULT_FILTERS, FilterState, maxFareInSet } from "../components/filters";
@@ -23,6 +22,7 @@ export function PageInner() {
     travelClass: "3A",
     quota: "GN",
     maxHubs: 10,
+    twoHub: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -54,6 +54,7 @@ export function PageInner() {
         class: form.travelClass,
         quota: form.quota,
         maxHubs: String(form.maxHubs),
+        twoHub: form.twoHub ? "1" : "0",
         page: String(targetPage),
         pageSize: String(PAGE_SIZE),
       });
@@ -128,7 +129,20 @@ export function PageInner() {
 
           {data.narrative && <NarrativeBanner narrative={data.narrative} tone={ranked ? "clear" : "empty"} />}
 
-          {!ranked && <EmptyState from={data.from} to={data.to} />}
+          {!ranked && <EmptyState from={data.from} to={data.to} partialCount={data.partial?.length ?? 0} />}
+
+          {page === 1 && data.partial && data.partial.length > 0 && (
+            <section className="mb-6">
+              <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+                Partway-there matches — real trains covering part of this route
+              </div>
+              <div className="space-y-3">
+                {data.partial.map((p, i) => (
+                  <PartialMatchCard key={`${p.type}-${p.hub}-${p.leg.trainNo}-${i}`} match={p} />
+                ))}
+              </div>
+            </section>
+          )}
 
           {ranked && (
             <>
