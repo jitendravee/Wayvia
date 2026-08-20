@@ -22,7 +22,7 @@ export function PageInner() {
     travelClass: "3A",
     quota: "GN",
     maxHubs: 10,
-    twoHub: false,
+    maxConnections: 2,
   });
 
   const [loading, setLoading] = useState(false);
@@ -41,20 +41,22 @@ export function PageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function runSearch(e: React.FormEvent, targetPage = 1) {
+  async function runSearch(e: React.FormEvent, targetPage = 1, overrides?: Partial<SearchFormValues>) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     if (targetPage === 1) setFilters(DEFAULT_FILTERS);
+    const effective = overrides ? { ...form, ...overrides } : form;
+    if (overrides) setForm(effective);
     try {
       const params = new URLSearchParams({
-        from: form.from,
-        to: form.to,
-        date: form.date,
-        class: form.travelClass,
-        quota: form.quota,
-        maxHubs: String(form.maxHubs),
-        twoHub: form.twoHub ? "1" : "0",
+        from: effective.from,
+        to: effective.to,
+        date: effective.date,
+        class: effective.travelClass,
+        quota: effective.quota,
+        maxHubs: String(effective.maxHubs),
+        maxConnections: String(effective.maxConnections),
         page: String(targetPage),
         pageSize: String(PAGE_SIZE),
       });
@@ -128,6 +130,20 @@ export function PageInner() {
           <StatsStrip data={data} />
 
           {data.narrative && <NarrativeBanner narrative={data.narrative} tone={ranked ? "clear" : "empty"} />}
+
+          {data.suggestion && (
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-violet-ring bg-violet-soft/40 px-5 py-3.5">
+              <div className="text-[13px] leading-relaxed text-ink">{data.suggestion.message}</div>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => runSearch({ preventDefault() {} } as React.FormEvent, 1, { maxConnections: data.suggestion!.nextConnections })}
+                className="shrink-0 rounded-full bg-violet px-4 py-2 font-display text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-dark disabled:opacity-50"
+              >
+                Search via {data.suggestion.nextConnections} junctions
+              </button>
+            </div>
+          )}
 
           {!ranked && <EmptyState from={data.from} to={data.to} partialCount={data.partial?.length ?? 0} />}
 

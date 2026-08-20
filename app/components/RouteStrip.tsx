@@ -13,6 +13,11 @@ export default function RouteStrip({ legs }: { legs: AnnotatedLeg[] }) {
       {nodes.map((node, i) => {
         const leg = legs[i];
         const signal = leg ? signalFor(leg.availability?.category) : "unknown";
+        // Interior nodes (not the origin, not the final destination) are the
+        // via-junctions this journey changes trains at — flagged distinctly so a
+        // 3-junction (4-leg) strip still reads clearly at a glance, not just as
+        // "a lot of dots".
+        const isJunction = i > 0 && i < nodes.length - 1;
         return (
           <div className="contents" key={`${node.code}-${i}`}>
             <div className="flex min-w-[64px] flex-col items-center">
@@ -23,6 +28,11 @@ export default function RouteStrip({ legs }: { legs: AnnotatedLeg[] }) {
               />
               <div className="mt-1.5 font-mono text-[13px] font-semibold text-ink">{node.code}</div>
               <div className="font-mono text-[11px] text-ink-dim">{node.time}</div>
+              {isJunction && (
+                <div className="mt-0.5 rounded bg-surface-alt px-1 py-[1px] font-mono text-[9px] uppercase tracking-wide text-ink-dim">
+                  junction
+                </div>
+              )}
             </div>
 
             {i < legs.length && (

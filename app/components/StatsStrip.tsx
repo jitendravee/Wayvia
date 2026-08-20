@@ -11,7 +11,13 @@ export default function StatsStrip({ data }: { data: SearchResponse }) {
   }
   if (data.candidates) {
     items.push({ label: "direct", value: String(data.candidates.direct) });
-    items.push({ label: "via a junction", value: String(data.candidates.oneConnection) });
+    items.push({ label: "via 1 junction", value: String(data.candidates.oneConnection) });
+    if (data.candidates.twoConnection > 0 || (data.maxConnections ?? 2) >= 2) {
+      items.push({ label: "via 2 junctions", value: String(data.candidates.twoConnection) });
+    }
+    if (data.candidates.threeConnection > 0 || (data.maxConnections ?? 2) >= 3) {
+      items.push({ label: "via 3 junctions", value: String(data.candidates.threeConnection) });
+    }
   }
 
   return (

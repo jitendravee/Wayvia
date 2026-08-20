@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     if (allCandidates.length === 0) {
       const annotatedPartial = await annotatePartialCoverage(partial, date, travelClass, quota);
-      const narrative = buildNarrative(null, 0, 0, 0, 0, annotatedPartial.length, 0);
+      const narrative = buildNarrative(null, 0, 0, 0, 0, annotatedPartial.length, 0, 0);
       return NextResponse.json({
         from,
         to,
@@ -56,8 +56,10 @@ export async function GET(req: NextRequest) {
         mode: "train",
         modesAvailable: ["train"], // bus / flight slot in here once wired up
         graph,
-        candidates: { direct: 0, oneConnection: 0, twoConnection: 0 },
+        maxConnections,
+        candidates: { direct: 0, oneConnection: 0, twoConnection: 0, threeConnection: 0 },
         narrative,
+        suggestion,
         results: null,
         partial: annotatedPartial,
       });
@@ -87,7 +89,8 @@ export async function GET(req: NextRequest) {
       annotated.length,
       availableOnly.length,
       annotatedPartial.length,
-      viaTwoHub.length
+      viaTwoHub.length,
+      viaThreeHub.length
     );
 
     // 4. PAGINATION — applied to the "all" list only, after full ranking.
@@ -113,13 +116,16 @@ export async function GET(req: NextRequest) {
       mode: "train",
       modesAvailable: ["train"], // bus / flight slot in here once wired up
       graph,
+      maxConnections,
       candidates: {
         direct: direct.length,
         oneConnection: viaHub.length,
         twoConnection: viaTwoHub.length,
+        threeConnection: viaThreeHub.length,
       },
       fullyConfirmedCount: annotated.filter((j) => j.fullyConfirmed).length,
       narrative,
+      suggestion,
       results: pagedResults,
       pagination,
       // Only meaningful when the primary result set is thin — see THIN_RESULTS_THRESHOLD

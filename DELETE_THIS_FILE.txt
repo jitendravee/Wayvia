@@ -1,0 +1,1 @@
+app/RouteStrip.tsx was deleted (dead duplicate) — not included, delete it from your repo too

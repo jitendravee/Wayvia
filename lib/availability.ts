@@ -10,6 +10,9 @@ export interface AnnotatedLeg extends Leg {
 export interface AnnotatedJourney {
   legs: AnnotatedLeg[];
   hub?: string;
+  hub2?: string;
+  hub3?: string;
+  hubSource?: "static" | "live" | "route-topology";
   /** True only if every leg's status is AVAILABLE. */
   fullyConfirmed: boolean;
   /** True if at least one leg is NOT_AVAILABLE or REGRET (worth deprioritizing, not necessarily excluding). */
@@ -59,6 +62,9 @@ export async function annotateWithAvailability(
     return {
       legs,
       hub: c.hub,
+      hub2: c.hub2,
+      hub3: c.hub3,
+      hubSource: c.hubSource,
       fullyConfirmed,
       hasBlockedLeg,
       totalFare,

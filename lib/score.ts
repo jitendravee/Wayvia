@@ -92,7 +92,8 @@ export function buildNarrative(
   structuralCount = 0,
   availableCount = 0,
   partialCount = 0,
-  twoHubCount = 0
+  twoHubCount = 0,
+  threeHubCount = 0
 ): { headline: string; detail: string } {
   if (!ranked) {
     if (structuralCount > 0 && availableCount === 0) {
@@ -118,6 +119,13 @@ export function buildNarrative(
   }
 
   const { bestOverall, cheapest, mostReliable } = ranked;
+
+  if (directCount === 0 && viaHubCount === 0 && twoHubCount === 0 && threeHubCount > 0) {
+    return {
+      headline: `Nothing simpler worked — but a 3-junction route gets you there.`,
+      detail: "We had to go three connections deep to find this one, so double-check every transfer window, but it's a real, running option.",
+    };
+  }
 
   if (directCount === 0 && twoHubCount > 0 && viaHubCount === 0) {
     return {

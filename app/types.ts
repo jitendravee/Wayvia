@@ -28,6 +28,7 @@ export interface AnnotatedJourney {
   legs: AnnotatedLeg[];
   hub?: string;
   hub2?: string;
+  hub3?: string;
   hubSource?: "static" | "live" | "route-topology";
   fullyConfirmed: boolean;
   hasBlockedLeg: boolean;
@@ -62,6 +63,12 @@ export interface GraphStats {
   hubsExplored: { code: string; name: string; relevance: number; source?: string }[];
   dynamicHubsUsed?: boolean;
   twoHubUsed?: boolean;
+  threeHubUsed?: boolean;
+}
+
+export interface ConnectionSuggestion {
+  nextConnections: 2 | 3;
+  message: string;
 }
 
 export interface Narrative {
@@ -85,9 +92,11 @@ export interface SearchResponse {
   mode?: "train";
   modesAvailable?: string[];
   graph?: GraphStats;
-  candidates?: { direct: number; oneConnection: number; twoConnection: number };
+  maxConnections?: 1 | 2 | 3;
+  candidates?: { direct: number; oneConnection: number; twoConnection: number; threeConnection: number };
   fullyConfirmedCount?: number;
   narrative?: Narrative;
+  suggestion?: ConnectionSuggestion | null;
   results: RankedResults | null;
   pagination?: PaginationMeta;
   partial?: PartialCoverage[];

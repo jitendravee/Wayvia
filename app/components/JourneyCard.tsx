@@ -14,6 +14,7 @@ const RouteMap = dynamic(() => import("./RouteMap"), {
 
 export default function JourneyCard({ journey, tag }: { journey: AnnotatedJourney; tag?: string }) {
   const [showMap, setShowMap] = useState(false);
+  const viaChain = [journey.hub, journey.hub2, journey.hub3].filter((h): h is string => Boolean(h));
 
   return (
     <div className="rounded-xl border border-border bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
@@ -22,7 +23,7 @@ export default function JourneyCard({ journey, tag }: { journey: AnnotatedJourne
         {journey.totalFare !== null && <Badge variant="fare">₹{journey.totalFare}</Badge>}
         <Badge variant="duration">{durationLabel(journey.totalDurationMin)}</Badge>
         <Badge>{journey.connections === 0 ? "direct" : `${journey.connections} connection${journey.connections > 1 ? "s" : ""}`}</Badge>
-        {journey.hub && <Badge>via {journey.hub}</Badge>}
+        {viaChain.length > 0 && <Badge>via {viaChain.join(" → ")}</Badge>}
         <StatusBadge fullyConfirmed={journey.fullyConfirmed} hasBlockedLeg={journey.hasBlockedLeg} />
 
         <button
