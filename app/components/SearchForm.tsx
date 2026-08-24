@@ -6,16 +6,21 @@ import {
   CalendarIcon,
   ChevronDownIcon,
   JunctionIcon,
-  SeatIcon,
   SlidersIcon,
   SwapIcon,
-  TicketIcon,
 } from "./Icons";
 
 export interface SearchFormValues {
   from: string;
   to: string;
   date: string;
+  /**
+   * Not shown in this form on purpose. Class/quota are train-specific
+   * refinements, not part of the base "where + when" search — they're
+   * surfaced on FiltersBar instead, once results exist, so this box stays
+   * mode-agnostic as bus/flight get added. Kept here (with sane defaults)
+   * because the search API still needs *some* class/quota to price fares.
+   */
   travelClass: string;
   quota: string;
   maxHubs: number;
@@ -123,46 +128,6 @@ function RangeField({
   );
 }
 
-function SelectField({
-  id,
-  icon,
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  id: string;
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-        <span className="text-violet">{icon}</span>
-        {label}
-      </label>
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${fieldClass} cursor-pointer appearance-none pr-8`}
-        >
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-dim" />
-      </div>
-    </div>
-  );
-}
-
 export default function SearchForm({ values, onChange, onSubmit, loading }: Props) {
   const dateInputRef = useRef<HTMLInputElement>(null);
   const set = <K extends keyof SearchFormValues>(key: K, val: SearchFormValues[K]) =>
@@ -216,8 +181,8 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3.5 px-5 py-4 sm:grid-cols-4">
-        <div className="flex flex-col gap-1.5">
+      <div className="grid grid-cols-1 gap-3.5 px-5 py-4 sm:grid-cols-3">
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
           <label htmlFor="date" className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
             <span className="text-violet">
               <CalendarIcon className="h-3.5 w-3.5" />
@@ -239,28 +204,6 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
           />
         </div>
 
-        <SelectField
-          id="cls"
-          icon={<SeatIcon className="h-3.5 w-3.5" />}
-          label="Class"
-          value={values.travelClass}
-          onChange={(v) => set("travelClass", v)}
-          options={["1A", "2A", "3A", "SL", "3E", "CC", "2S"].map((c) => ({ value: c, label: c }))}
-        />
-
-        <SelectField
-          id="quota"
-          icon={<TicketIcon className="h-3.5 w-3.5" />}
-          label="Quota"
-          value={values.quota}
-          onChange={(v) => set("quota", v)}
-          options={[
-            { value: "GN", label: "General" },
-            { value: "TQ", label: "Tatkal" },
-            { value: "LD", label: "Ladies" },
-          ]}
-        />
-
         <div className="flex flex-col justify-end">
           <button
             type="submit"
@@ -278,6 +221,10 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
           </button>
         </div>
       </div>
+
+      <p className="px-5 pb-3 -mt-1 font-mono text-[10.5px] leading-relaxed text-ink-dim">
+        Class &amp; quota now live in the filters below — change them any time without retyping your route.
+      </p>
 
       <div className="grid grid-cols-1 gap-3.5 border-t border-border-soft bg-surface-alt/30 px-5 py-4 sm:grid-cols-2">
         <RangeField

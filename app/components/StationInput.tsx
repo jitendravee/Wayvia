@@ -14,9 +14,17 @@ interface Props {
   value: string; // always a station code, e.g. "NDLS"
   onChange: (code: string) => void;
   placeholder?: string;
+  /** Override the label's classes — lets callers (e.g. the hero search) match a different visual context. */
+  labelClassName?: string;
+  /** Override the input's classes — lets callers (e.g. the hero search) match a different visual context. */
+  inputClassName?: string;
 }
 
-export default function StationInput({ id, label, value, onChange, placeholder }: Props) {
+const DEFAULT_LABEL_CLASS = "font-mono text-[10px] uppercase tracking-wider text-ink-muted";
+const DEFAULT_INPUT_CLASS =
+  "w-full rounded-lg border border-border bg-white px-3 py-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet-ring";
+
+export default function StationInput({ id, label, value, onChange, placeholder, labelClassName, inputClassName }: Props) {
   const [query, setQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<StationSuggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -90,7 +98,7 @@ export default function StationInput({ id, label, value, onChange, placeholder }
 
   return (
     <div ref={wrapRef} className="relative flex flex-col gap-1.5">
-      <label htmlFor={id} className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+      <label htmlFor={id} className={labelClassName ?? DEFAULT_LABEL_CLASS}>
         {label}
       </label>
       <input
@@ -105,7 +113,7 @@ export default function StationInput({ id, label, value, onChange, placeholder }
         aria-expanded={open}
         aria-autocomplete="list"
         aria-controls={`${id}-listbox`}
-        className="w-full rounded-lg border border-border bg-white px-3 py-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet-ring"
+        className={inputClassName ?? DEFAULT_INPUT_CLASS}
       />
 
       {open && (suggestions.length > 0 || loading) && (

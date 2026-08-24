@@ -53,6 +53,8 @@ export async function GET(req: NextRequest) {
         from,
         to,
         date,
+        travelClass,
+        quota,
         mode: "train",
         modesAvailable: ["train"], // bus / flight slot in here once wired up
         graph,

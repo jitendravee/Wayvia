@@ -1,5 +1,5 @@
 "use client"
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ModeSelector from "../components/ModeSelector";
 import SearchForm, { SearchFormValues } from "../components/SearchForm";
@@ -12,8 +12,9 @@ import FiltersBar from "../components/FiltersBar";
 import Pagination from "../components/Pagination";
 import { applyFilters, DEFAULT_FILTERS, FilterState, maxFareInSet } from "../components/filters";
 import { SearchResponse, AnnotatedJourney, RankedResults } from "../types";
-const todayIso = () => new Date().toISOString().slice(0, 10);
+import { todayIso } from "@/lib/date";
 const PAGE_SIZE = 10;
+
 export function PageInner() {
   const [form, setForm] = useState<SearchFormValues>({
     from: "NDLS",
@@ -26,28 +27,24 @@ export function PageInner() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [refining, setRefining] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<SearchResponse | null>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
-    if (from || to) {
-      setForm((f) => ({ ...f, ...(from ? { from: from.toUpperCase() } : {}), ...(to ? { to: to.toUpperCase() } : {}) }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function runSearch(e: React.FormEvent, targetPage = 1, overrides?: Partial<SearchFormValues>) {
-    e.preventDefault();
-    setLoading(true);
+  // Core search call, decoupled from any specific form-submit event so it can
+  // be triggered by: the search form's submit, the filters bar's class/quota
+  // "ask the backend again" action, pagination, or — on first load — a
+  // from/to/date already sitting in the URL (e.g. someone arrived here via
+  // the hero search or a JourneySearchButton elsewhere on the site).
+  async function doSearch(effective: SearchFormValues, targetPage: number, opts?: { resetFilters?: boolean; asRefine?: boolean }) {
+    const resetFilters = opts?.resetFilters ?? true;
+    if (opts?.asRefine) setRefining(true);
+    else setLoading(true);
     setError(null);
-    if (targetPage === 1) setFilters(DEFAULT_FILTERS);
-    const effective = overrides ? { ...form, ...overrides } : form;
-    if (overrides) setForm(effective);
+    if (targetPage === 1 && resetFilters) setFilters(DEFAULT_FILTERS);
     try {
       const params = new URLSearchParams({
         from: effective.from,
@@ -69,11 +66,58 @@ export function PageInner() {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
+      setRefining(false);
     }
   }
 
+  // Picks up from/to/date/class/quota from the URL on first mount and, if a
+  // route (from + to) is present, runs the search immediately — so landing
+  // on /journey-planner?from=NDLS&to=BCT&date=2026-08-24 (e.g. from the hero
+  // search or any JourneySearchButton) shows results without an extra click.
+  useEffect(() => {
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
+    const date = searchParams.get("date");
+    const cls = searchParams.get("class");
+    const quota = searchParams.get("quota");
+
+    if (!from && !to && !date && !cls && !quota) return;
+
+    const effective: SearchFormValues = {
+      ...form,
+      ...(from ? { from: from.toUpperCase() } : {}),
+      ...(to ? { to: to.toUpperCase() } : {}),
+      ...(date ? { date } : {}),
+      ...(cls ? { travelClass: cls.toUpperCase() } : {}),
+      ...(quota ? { quota: quota.toUpperCase() } : {}),
+    };
+    setForm(effective);
+
+    if (effective.from && effective.to && effective.date) {
+      doSearch(effective, 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function runSearch(e: React.FormEvent, targetPage = 1, overrides?: Partial<SearchFormValues>) {
+    e.preventDefault();
+    const effective = overrides ? { ...form, ...overrides } : form;
+    if (overrides) setForm(effective);
+    doSearch(effective, targetPage);
+  }
+
+  // Class/quota live on FiltersBar, not the search form — picking a new one
+  // asks the backend again for this same from/to/date (fares and seat status
+  // are class/quota-specific), but keeps whatever sort/connections/etc. the
+  // person already picked instead of resetting them.
+  function refineByClassQuota(next: { travelClass?: string; quota?: string }) {
+    const effective = { ...form, ...next };
+    setForm(effective);
+    doSearch(effective, 1, { resetFilters: false, asRefine: true });
+  }
+
   function goToPage(p: number) {
-    runSearch({ preventDefault() {} } as React.FormEvent, p);
+    doSearch(form, p, { resetFilters: false });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -171,7 +215,16 @@ export function PageInner() {
 
               {(ranked.all.length > 1 || (data.pagination && data.pagination.total > 1)) && (
                 <>
-                  <FiltersBar filters={filters} onChange={setFilters} fareCeiling={fareCeiling} resultCount={filtered.length} />
+                  <FiltersBar
+                    filters={filters}
+                    onChange={setFilters}
+                    fareCeiling={fareCeiling}
+                    resultCount={filtered.length}
+                    travelClass={form.travelClass}
+                    quota={form.quota}
+                    onRefine={refineByClassQuota}
+                    refining={refining}
+                  />
 
                   <section>
                     <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
@@ -206,7 +259,9 @@ export function PageInner() {
       </p>
     </main>
   );
-}function tagFor(journey: AnnotatedJourney, ranked: RankedResults): string | undefined {
+}
+
+function tagFor(journey: AnnotatedJourney, ranked: RankedResults): string | undefined {
   if (ranked.cheapest && journey === ranked.cheapest) return "Cheapest";
   if (journey === ranked.fastest) return "Fastest";
   if (journey === ranked.easiest) return "Fewest changes";

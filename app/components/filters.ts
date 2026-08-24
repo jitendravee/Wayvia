@@ -20,6 +20,27 @@ export const DEFAULT_FILTERS: FilterState = {
   maxFare: null,
 };
 
+// Class/quota aren't part of FilterState on purpose: unlike the filters below,
+// they change what the backend actually queries (fare + seat availability are
+// class/quota-specific), so they live on the FiltersBar UI but are wired to
+// trigger a fresh /api/search call rather than a client-side re-filter. See
+// PageClient's refineByClassQuota.
+export const TRAVEL_CLASS_OPTIONS: { value: string; label: string }[] = [
+  { value: "1A", label: "1A · AC First" },
+  { value: "2A", label: "2A · AC 2-Tier" },
+  { value: "3A", label: "3A · AC 3-Tier" },
+  { value: "SL", label: "SL · Sleeper" },
+  { value: "3E", label: "3E · AC 3 Economy" },
+  { value: "CC", label: "CC · AC Chair Car" },
+  { value: "2S", label: "2S · Second Sitting" },
+];
+
+export const QUOTA_OPTIONS: { value: string; label: string }[] = [
+  { value: "GN", label: "General" },
+  { value: "TQ", label: "Tatkal" },
+  { value: "LD", label: "Ladies" },
+];
+
 export const DEPARTURE_WINDOW_LABEL: Record<DepartureWindow, string> = {
   any: "Any time",
   morning: "Morning · 6am–12pm",
