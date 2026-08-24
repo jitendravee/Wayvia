@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { todayIso } from "@/lib/date";
+import type { TripLeg } from "@/app/types";
 
 export interface JourneySearchButtonProps {
   /** Station code, e.g. "NDLS". Falls back to the current URL's ?from= if omitted. */
@@ -10,6 +11,12 @@ export interface JourneySearchButtonProps {
   to?: string;
   /** YYYY-MM-DD. Falls back to the current URL's ?date=, then today. */
   date?: string;
+  /**
+   * Multi-city stops — A→B on date1, B→C on date2, etc. When this has 2+
+   * entries it takes over from `from`/`to`/`date` entirely and the button
+   * navigates to the multi-city journey planner instead of a single search.
+   */
+  legs?: TripLeg[];
   /**
    * Optional — most callers should leave this unset. Train-specific refinements
    * like class/quota belong on the journey-planner's filters, not the base
@@ -28,7 +35,7 @@ export interface JourneySearchButtonProps {
   /** Return false to cancel navigation (e.g. to show a validation message instead). */
   onBeforeNavigate?: () => boolean | void;
   /** Called right before navigating, with the params that are about to be sent. */
-  onNavigate?: (params: { from: string; to: string; date: string }) => void;
+  onNavigate?: (params: { from: string; to: string; date: string } | { legs: TripLeg[] }) => void;
 }
 
 const VARIANT_CLASS: Record<NonNullable<JourneySearchButtonProps["variant"]>, string> = {
@@ -57,6 +64,7 @@ export default function JourneySearchButton({
   from,
   to,
   date,
+  legs,
   travelClass,
   quota,
   label = "Search trains",
@@ -74,6 +82,27 @@ export default function JourneySearchButton({
   function handleClick() {
     if (loading || disabled) return;
     if (onBeforeNavigate && onBeforeNavigate() === false) return;
+
+    // Multi-city takes priority: if the caller handed us 2+ stops, this is a
+    // "A→B on date1, B→C on date2, ..." itinerary, not a single search.
+    if (legs && legs.length >= 2) {
+      const cleanLegs: TripLeg[] = legs.map((l) => ({
+        from: l.from.trim().toUpperCase(),
+        to: l.to.trim().toUpperCase(),
+        date: l.date.trim(),
+      }));
+      if (cleanLegs.some((l) => !l.from || !l.to || !l.date)) return;
+
+      const params = new URLSearchParams();
+      params.set("mode", "multi");
+      params.set("legs", JSON.stringify(cleanLegs));
+      if (travelClass) params.set("class", travelClass);
+      if (quota) params.set("quota", quota);
+
+      onNavigate?.({ legs: cleanLegs });
+      router.push(`/journey-planner?${params.toString()}`);
+      return;
+    }
 
     // Anything not explicitly passed as a prop is picked up from whatever is
     // already in the address bar — so this button works both as a fully

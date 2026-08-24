@@ -1,4 +1,4 @@
-import type { AnnotatedJourney } from "../types";
+import type { AnnotatedJourney, RankedResults } from "../types";
 
 export type SortKey = "best" | "cheapest" | "fastest" | "fewestChanges";
 export type ConnectionFilter = "any" | "direct" | "oneChange" | "twoChanges" | "threeChanges";
@@ -101,4 +101,13 @@ export function applyFilters(journeys: AnnotatedJourney[], filters: FilterState)
 export function maxFareInSet(journeys: AnnotatedJourney[]): number {
   const fares = journeys.map((j) => j.totalFare).filter((f): f is number => f !== null);
   return fares.length > 0 ? Math.max(...fares) : 0;
+}
+
+/** Which badge (if any) a journey card should show, relative to the rest of its result set. */
+export function tagFor(journey: AnnotatedJourney, ranked: RankedResults): string | undefined {
+  if (ranked.cheapest && journey === ranked.cheapest) return "Cheapest";
+  if (journey === ranked.fastest) return "Fastest";
+  if (journey === ranked.easiest) return "Fewest changes";
+  if (journey === ranked.mostReliable && journey.fullyConfirmed) return "Fully confirmed backup";
+  return journey.connections === 0 ? "Direct backup" : "Backup route";
 }

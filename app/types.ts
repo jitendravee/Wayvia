@@ -102,3 +102,22 @@ export interface SearchResponse {
   partial?: PartialCoverage[];
   error?: string;
 }
+
+/** One user-defined leg of a multi-city itinerary: depart `from` on `date`, headed to `to`. */
+export interface TripLeg {
+  from: string;
+  to: string;
+  date: string;
+}
+
+/**
+ * Response for a multi-city search (A→B on date1, B→C on date2, ...). Each
+ * entry in `results` is a full, independent SearchResponse for that leg —
+ * same shape the single-leg /api/search returns — so every leg gets its own
+ * ranked list, filters, and pagination on the frontend.
+ */
+export interface MultiSearchResponse {
+  legs: TripLeg[];
+  results: SearchResponse[];
+  error?: string;
+}
