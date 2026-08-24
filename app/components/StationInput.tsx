@@ -22,7 +22,7 @@ interface Props {
 
 const DEFAULT_LABEL_CLASS = "font-mono text-[10px] uppercase tracking-wider text-ink-muted";
 const DEFAULT_INPUT_CLASS =
-  "w-full rounded-lg border border-border bg-white px-3 py-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet-ring";
+  "w-[180px] min-w-[140px] max-w-full rounded-lg border border-border bg-white px-3 py-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet-ring";
 
 export default function StationInput({ id, label, value, onChange, placeholder, labelClassName, inputClassName }: Props) {
   const [query, setQuery] = useState(value);

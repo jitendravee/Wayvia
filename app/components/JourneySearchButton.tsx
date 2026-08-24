@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { todayIso } from "@/lib/date";
 import type { TripLeg } from "@/app/types";
 
@@ -27,6 +28,8 @@ export interface JourneySearchButtonProps {
   quota?: string;
   label?: string;
   loadingLabel?: string;
+  /** Rendered after the label, e.g. an arrow icon. Hidden while loading. */
+  icon?: ReactNode;
   loading?: boolean;
   disabled?: boolean;
   className?: string;
@@ -40,7 +43,7 @@ export interface JourneySearchButtonProps {
 
 const VARIANT_CLASS: Record<NonNullable<JourneySearchButtonProps["variant"]>, string> = {
   primary:
-    "bg-gradient-to-r from-violet to-violet-dark text-white shadow-sm shadow-violet-soft hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100",
+    "bg-gradient-to-r from-violet to-violet-dark text-white shadow-sm shadow-violet-soft hover:brightness-[1.04] active:scale-[0.98] disabled:opacity-50 disabled:hover:brightness-100",
   outline:
     "border border-violet bg-white text-violet hover:bg-violet-soft/60 disabled:opacity-50",
   ghost: "bg-violet-soft/60 text-violet-dark hover:bg-violet-soft disabled:opacity-50",
@@ -49,7 +52,7 @@ const VARIANT_CLASS: Record<NonNullable<JourneySearchButtonProps["variant"]>, st
 const SIZE_CLASS: Record<NonNullable<JourneySearchButtonProps["size"]>, string> = {
   sm: "h-9 px-3.5 text-[12.5px]",
   md: "h-11 px-5 text-sm",
-  lg: "h-[52px] px-7 text-[15px]",
+  lg: "h-[52px] px-6 text-[15px]",
 };
 
 /**
@@ -69,6 +72,7 @@ export default function JourneySearchButton({
   quota,
   label = "Search trains",
   loadingLabel = "Searching…",
+  icon,
   loading = false,
   disabled = false,
   className = "",
@@ -132,7 +136,7 @@ export default function JourneySearchButton({
       type="button"
       onClick={handleClick}
       disabled={disabled || loading}
-      className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-display font-semibold transition-transform ${VARIANT_CLASS[variant]} ${SIZE_CLASS[size]} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-display font-semibold transition-[filter,transform] ${VARIANT_CLASS[variant]} ${SIZE_CLASS[size]} ${className}`}
     >
       {loading ? (
         <>
@@ -140,7 +144,10 @@ export default function JourneySearchButton({
           {loadingLabel}
         </>
       ) : (
-        label
+        <>
+          {label}
+          {icon}
+        </>
       )}
     </button>
   );
