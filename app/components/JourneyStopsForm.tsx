@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftRight, Calendar, MapPin, Plus, X } from "lucide-react";
+import { ArrowLeftRight, ArrowRight, Calendar, MapPin, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import StationInput from "./StationInput";
 import { formatDatePretty } from "@/lib/date";
@@ -402,13 +402,13 @@ function StopRow({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl bg-surface-alt/60 px-3 py-2.5 sm:flex-nowrap sm:gap-x-4">
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-soft font-sans text-[11px] font-semibold text-violet-dark">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl py-4 sm:flex-nowrap sm:gap-x-4">
+      {/* <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-soft font-sans text-[11px] font-semibold text-violet-dark">
         {stopNumber}
-      </span>
+      </span> */}
 
       <div className="flex min-w-0 shrink-0 items-start gap-1.5">
-        <MapPin size={14} className="mt-[3px] shrink-0 text-ink-dim" />
+        {/* <MapPin size={14} className="mt-[3px] shrink-0 text-ink-dim" /> */}
         <div className="flex min-w-0 flex-col leading-none">
           <span className="truncate font-semibold text-ink text-[13.5px] sm:text-[14px]">{from || "—"}</span>
           {fromName && <span className={`${captionClassName} mt-1`}>{fromName}</span>}
@@ -416,9 +416,11 @@ function StopRow({
       </div>
 
       <div className="hidden h-8 w-px shrink-0 bg-border sm:block" />
-
+<div className="w-8 rounded-full h-8 bg-white/80 flex items-center justify-between p-2">
+  <ArrowRight size={16} className="self-center-safe"/>
+</div>
       <div className="flex min-w-[140px] flex-1 items-start gap-1.5 basis-full sm:basis-auto sm:min-w-0">
-        <MapPin size={14} className="mt-[20px] shrink-0 text-violet" />
+        {/* <MapPin size={14} className="mt-[20px] shrink-0 text-violet" /> */}
         <StationInput
           id={`${idPrefix}-to`}
           label="To"

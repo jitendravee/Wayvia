@@ -6,14 +6,16 @@ import { Suspense } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/landing/Hero";
 import Image from "next/image";
+import HowWayviaThinks from "./components/landing/HowWayviaThinks";
 
 export default function Page() {
   return (
     <main className="">
       {/* HERO */}
-      {/* HERO */}
-      <section className="relative h-[90vh] w-full overflow-hidden bg-gray-50">
-        {/* Responsive background image */}
+      <section className="relative w-full overflow-hidden bg-gray-50 min-h-[620px] py-14 sm:min-h-[680px] sm:py-16 lg:h-[90vh] lg:py-0">
+        {/* Responsive background image — purely decorative, always fills the
+            section (object-cover) no matter what height the section ends up
+            at. It never drives layout; the content column below does. */}
         <picture className="absolute inset-0 block h-full w-full">
           {/* Mobile */}
           <source media="(max-width: 767px)" srcSet="/mobile-hero.png" />
@@ -33,10 +35,15 @@ export default function Page() {
         </picture>
         <div className="absolute inset-0 z-[1] bg-gradient-to-br from-white/80 md:from-white/40 to-transparent" />
 
-        {/* Hero content */}
-        <div className="relative z-10 mx-auto flex h-full w-full items-center px-5 sm:px-6 max-w-7xl">
+        {/* Hero content — a normal flowing column. On small screens the
+            section grows to fit it (min-h + padding above); on large
+            screens it's vertically centered inside the fixed 90vh box. */}
+        <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-5 sm:px-6">
           <Hero />
         </div>
+      </section>
+      <section>
+        <HowWayviaThinks />
       </section>
       {/* HOW IT WORKS */}
       <section className="mx-auto max-w-4xl px-5 py-20 sm:px-6">
