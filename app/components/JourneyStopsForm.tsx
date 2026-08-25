@@ -12,7 +12,7 @@ export interface StopEntry {
   date: string;
 }
 
-export const MAX_STOPS = 6;
+export const MAX_STOPS = 3;
 
 interface Props {
   origin: string;

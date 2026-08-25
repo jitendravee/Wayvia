@@ -64,7 +64,7 @@ export default function Navbar() {
 
         <Link
           href="/pnr-status"
-          className="rounded-full bg-violet px-4 py-2 font-display text-[13px] font-semibold text-white shadow-sm shadow-violet-soft transition-colors hover:bg-violet-dark"
+          className="rounded-full bg-violet px-4 py-2 font-display text-[13px] font-semibold text-white! shadow-sm shadow-violet-soft transition-colors hover:bg-violet-dark"
         >
           Check PNR
         </Link>
