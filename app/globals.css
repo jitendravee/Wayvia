@@ -31,10 +31,9 @@
   --color-signal-amber-soft: #fef4e6;
   --color-signal-red: #dc2626;
   --color-signal-red-soft: #fdeded;
-
-  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: var(--font-geist), "Inter", system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 * {

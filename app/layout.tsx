@@ -1,7 +1,23 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+
+const geist = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 const SITE_URL = "https://wayvia.com";
 
@@ -34,7 +50,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Wayvia — Live Train Running Status & PNR Status",
-    description: "See exactly where your train is, right now — plus instant PNR confirmation checks.",
+    description:
+      "See exactly where your train is, right now — plus instant PNR confirmation checks.",
   },
   alternates: {
     canonical: SITE_URL,
@@ -45,7 +62,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -74,19 +95,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${geist.variable} ${inter.variable} ${geistMono.variable}`}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd),
+          }}
         />
       </head>
-      <body className="flex min-h-screen flex-col bg-white  antialiased">
+
+      <body className="flex min-h-screen flex-col  antialiased">
         <Navbar />
         <div className="flex-1">{children}</div>
         <Footer />

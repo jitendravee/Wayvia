@@ -1,4 +1,4 @@
-import type { AnnotatedJourney } from "../types";
+import type { AnnotatedJourney, RankedResults } from "../types";
 
 export type SortKey = "best" | "cheapest" | "fastest" | "fewestChanges";
 export type ConnectionFilter = "any" | "direct" | "oneChange" | "twoChanges" | "threeChanges";
@@ -19,6 +19,27 @@ export const DEFAULT_FILTERS: FilterState = {
   departure: "any",
   maxFare: null,
 };
+
+// Class/quota aren't part of FilterState on purpose: unlike the filters below,
+// they change what the backend actually queries (fare + seat availability are
+// class/quota-specific), so they live on the FiltersBar UI but are wired to
+// trigger a fresh /api/search call rather than a client-side re-filter. See
+// PageClient's refineByClassQuota.
+export const TRAVEL_CLASS_OPTIONS: { value: string; label: string }[] = [
+  { value: "1A", label: "1A · AC First" },
+  { value: "2A", label: "2A · AC 2-Tier" },
+  { value: "3A", label: "3A · AC 3-Tier" },
+  { value: "SL", label: "SL · Sleeper" },
+  { value: "3E", label: "3E · AC 3 Economy" },
+  { value: "CC", label: "CC · AC Chair Car" },
+  { value: "2S", label: "2S · Second Sitting" },
+];
+
+export const QUOTA_OPTIONS: { value: string; label: string }[] = [
+  { value: "GN", label: "General" },
+  { value: "TQ", label: "Tatkal" },
+  { value: "LD", label: "Ladies" },
+];
 
 export const DEPARTURE_WINDOW_LABEL: Record<DepartureWindow, string> = {
   any: "Any time",
@@ -80,4 +101,13 @@ export function applyFilters(journeys: AnnotatedJourney[], filters: FilterState)
 export function maxFareInSet(journeys: AnnotatedJourney[]): number {
   const fares = journeys.map((j) => j.totalFare).filter((f): f is number => f !== null);
   return fares.length > 0 ? Math.max(...fares) : 0;
+}
+
+/** Which badge (if any) a journey card should show, relative to the rest of its result set. */
+export function tagFor(journey: AnnotatedJourney, ranked: RankedResults): string | undefined {
+  if (ranked.cheapest && journey === ranked.cheapest) return "Cheapest";
+  if (journey === ranked.fastest) return "Fastest";
+  if (journey === ranked.easiest) return "Fewest changes";
+  if (journey === ranked.mostReliable && journey.fullyConfirmed) return "Fully confirmed backup";
+  return journey.connections === 0 ? "Direct backup" : "Backup route";
 }

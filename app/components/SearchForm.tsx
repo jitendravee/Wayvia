@@ -1,21 +1,21 @@
 "use client";
 
-import { useRef } from "react";
-import StationInput from "./StationInput";
-import {
-  CalendarIcon,
-  ChevronDownIcon,
-  JunctionIcon,
-  SeatIcon,
-  SlidersIcon,
-  SwapIcon,
-  TicketIcon,
-} from "./Icons";
+import { useMemo } from "react";
+import JourneyStopsForm, { StopEntry } from "./JourneyStopsForm";
+import { CalendarIcon, JunctionIcon, SlidersIcon } from "./Icons";
+import type { TripLeg } from "../types";
 
 export interface SearchFormValues {
   from: string;
   to: string;
   date: string;
+  /**
+   * Not shown in this form on purpose. Class/quota are train-specific
+   * refinements, not part of the base "where + when" search — they're
+   * surfaced on FiltersBar instead, once results exist, so this box stays
+   * mode-agnostic as bus/flight get added. Kept here (with sane defaults)
+   * because the search API still needs *some* class/quota to price fares.
+   */
   travelClass: string;
   quota: string;
   maxHubs: number;
@@ -39,19 +39,14 @@ const CONNECTIONS_LABEL: Record<1 | 2 | 3, string> = {
 interface Props {
   values: SearchFormValues;
   onChange: (values: SearchFormValues) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  /** "Add a stop" chain beyond the base from→to leg above — B→C, C→D, etc. */
+  extraStops: StopEntry[];
+  onExtraStopsChange: (stops: StopEntry[]) => void;
+  /** Single-leg submit — fired when there are no extra stops. */
+  onSubmit: () => void;
+  /** Multi-city submit — fired instead of onSubmit whenever 1+ extra stops are present. */
+  onSubmitMulti: (legs: TripLeg[]) => void;
   loading: boolean;
-}
-
-const fieldClass =
-  "flex h-[44px] w-full items-center rounded-xl border border-border bg-white px-3.5 font-mono text-sm text-ink outline-none transition-all focus:border-violet focus:ring-4 focus:ring-violet-ring";
-
-function formatDatePretty(iso: string): string {
-  if (!iso) return "Select date";
-  const [y, m, d] = iso.split("-").map(Number);
-  if (!y || !m || !d) return iso;
-  const dt = new Date(y, m - 1, d);
-  return dt.toLocaleDateString(undefined, { weekday: "short", day: "2-digit", month: "short" });
 }
 
 /** Shared slider look — a filled track drawn under a transparent native range input, so both sliders line up pixel-for-pixel. */
@@ -123,148 +118,71 @@ function RangeField({
   );
 }
 
-function SelectField({
-  id,
-  icon,
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  id: string;
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-        <span className="text-violet">{icon}</span>
-        {label}
-      </label>
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${fieldClass} cursor-pointer appearance-none pr-8`}
-        >
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-dim" />
-      </div>
-    </div>
-  );
-}
-
-export default function SearchForm({ values, onChange, onSubmit, loading }: Props) {
-  const dateInputRef = useRef<HTMLInputElement>(null);
+export default function SearchForm({ values, onChange, extraStops, onExtraStopsChange, onSubmit, onSubmitMulti, loading }: Props) {
   const set = <K extends keyof SearchFormValues>(key: K, val: SearchFormValues[K]) =>
     onChange({ ...values, [key]: val });
 
-  function swap() {
-    onChange({ ...values, from: values.to, to: values.from });
+  // Row 0 of the shared stops editor is this form's own from/to/date; any
+  // extra rows chain onward from it (B→C, C→D, ...). Keeping them as one
+  // list here (like the hero does) means single-leg and multi-city share
+  // the exact same editing UI.
+  const stopsForEditor: StopEntry[] = useMemo(
+    () => [{ id: "base", to: values.to, date: values.date }, ...extraStops],
+    [values.to, values.date, extraStops]
+  );
+
+  function handleStopsChange(next: StopEntry[]) {
+    const [base, ...rest] = next;
+    onChange({ ...values, to: base.to, date: base.date });
+    onExtraStopsChange(rest);
   }
 
-  function openDatePicker() {
-    const el = dateInputRef.current;
-    if (!el) return;
-    const withPicker = el as HTMLInputElement & { showPicker?: () => void };
-    if (typeof withPicker.showPicker === "function") {
-      try {
-        withPicker.showPicker();
-        return;
-      } catch {
-        /* fall through to focus/click */
-      }
-    }
-    el.focus();
-    el.click();
+  const legs: TripLeg[] = useMemo(() => {
+    const chain = [values.from, ...stopsForEditor.map((s) => s.to)];
+    return stopsForEditor.map((s, i) => ({ from: chain[i], to: chain[i + 1], date: s.date }));
+  }, [values.from, stopsForEditor]);
+
+  const multi = extraStops.length > 0;
+  const invalid = legs.some(
+    (l) => !l.from.trim() || !l.to.trim() || !l.date.trim() || l.from.trim().toUpperCase() === l.to.trim().toUpperCase()
+  );
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (invalid) return;
+    if (multi) onSubmitMulti(legs);
+    else onSubmit();
   }
 
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm shadow-violet-soft/40"
     >
       <div className="border-b border-border-soft bg-gradient-to-r from-violet-soft/50 via-white to-white px-5 py-4">
-        {/* From / swap / To */}
-        <div className="flex items-end gap-2">
-          <div className="flex-1">
-            <StationInput id="from" label="From" value={values.from} onChange={(code) => set("from", code)} placeholder="Delhi or NDLS" />
-          </div>
-
-          <button
-            type="button"
-            onClick={swap}
-            title="Swap origin/destination"
-            aria-label="Swap origin and destination"
-            className="mb-[1px] flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-xl border border-border bg-white text-ink-muted transition-all hover:rotate-180 hover:border-violet-ring hover:text-violet"
-          >
-            <SwapIcon className="h-4.5 w-4.5" />
-          </button>
-
-          <div className="flex-1">
-            <StationInput id="to" label="To" value={values.to} onChange={(code) => set("to", code)} placeholder="Mumbai or BCT" />
-          </div>
-        </div>
+        <JourneyStopsForm
+          idPrefix="planner"
+          origin={values.from}
+          onOriginChange={(code) => set("from", code)}
+          stops={stopsForEditor}
+          onStopsChange={handleStopsChange}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-3.5 px-5 py-4 sm:grid-cols-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="date" className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            <span className="text-violet">
-              <CalendarIcon className="h-3.5 w-3.5" />
-            </span>
-            Date
-          </label>
-          <button type="button" onClick={openDatePicker} className={`${fieldClass} justify-between text-left`}>
-            <span>{formatDatePretty(values.date)}</span>
-            <ChevronDownIcon className="h-3.5 w-3.5 text-ink-dim" />
-          </button>
-          <input
-            ref={dateInputRef}
-            id="date"
-            type="date"
-            value={values.date}
-            onChange={(e) => set("date", e.target.value)}
-            tabIndex={-1}
-            className="sr-only"
-          />
+      <div className="grid grid-cols-1 gap-3.5 px-5 py-4 sm:grid-cols-3">
+        <div className="hidden sm:col-span-2 sm:flex sm:items-center">
+          <p className="flex items-center gap-1.5 font-mono text-[10.5px] leading-relaxed text-ink-dim">
+            <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-violet" />
+            {multi
+              ? `${legs.length} legs — each priced and searched on its own date.`
+              : "Class & quota now live in the filters below — change them any time without retyping your route."}
+          </p>
         </div>
-
-        <SelectField
-          id="cls"
-          icon={<SeatIcon className="h-3.5 w-3.5" />}
-          label="Class"
-          value={values.travelClass}
-          onChange={(v) => set("travelClass", v)}
-          options={["1A", "2A", "3A", "SL", "3E", "CC", "2S"].map((c) => ({ value: c, label: c }))}
-        />
-
-        <SelectField
-          id="quota"
-          icon={<TicketIcon className="h-3.5 w-3.5" />}
-          label="Quota"
-          value={values.quota}
-          onChange={(v) => set("quota", v)}
-          options={[
-            { value: "GN", label: "General" },
-            { value: "TQ", label: "Tatkal" },
-            { value: "LD", label: "Ladies" },
-          ]}
-        />
 
         <div className="flex flex-col justify-end">
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || invalid}
             className="flex h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet to-violet-dark font-display text-sm font-semibold text-white shadow-sm shadow-violet-soft transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
           >
             {loading ? (
@@ -272,6 +190,8 @@ export default function SearchForm({ values, onChange, onSubmit, loading }: Prop
                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                 Searching…
               </>
+            ) : multi ? (
+              `Find my ${legs.length}-stop trip`
             ) : (
               "Find my journey"
             )}

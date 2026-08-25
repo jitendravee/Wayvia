@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const LINKS = [
   { href: "/running-status", label: "Running Status" },
@@ -6,12 +9,45 @@ const LINKS = [
 ];
 
 export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-white/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3.5 sm:px-6">
+    <header
+      className={`
+        fixed inset-x-0 top-0 z-50
+        transition-all duration-300 ease-out
+        ${
+          scrolled
+            ? "border-b border-white/40 bg-white/75 shadow-[0_4px_24px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+            : "border-b border-transparent bg-transparent shadow-none"
+        }
+      `}
+    >
+      <div className="mx-auto flex items-center justify-between px-5 py-3.5 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Wayvia" className="h-12 w-12 rounded-lg object-contain" />
-          <span className="font-display text-lg font-semibold mt-2 text-ink">Wayvia</span>
+          <img
+            src="/logo.png"
+            alt="Wayvia"
+            className="h-12 w-12 rounded-lg object-contain"
+          />
+
+          <span className="mt-2 font-display text-lg font-semibold text-ink">
+            Wayvia
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 sm:flex">
