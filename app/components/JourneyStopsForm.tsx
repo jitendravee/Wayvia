@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowLeftRight, ArrowRight, Calendar, MapPin, Plus, X } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ArrowRight,
+  Calendar,
+  MapPin,
+  Plus,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import StationInput from "./StationInput";
 import { formatDatePretty } from "@/lib/date";
@@ -48,7 +55,8 @@ function newStop(prefill?: Partial<StopEntry>): StopEntry {
 const DEFAULT_LABEL = "font-sans text-[11px] text-ink-muted";
 const DEFAULT_INPUT =
   "w-full bg-transparent p-0 font-semibold text-[14px] text-ink outline-none placeholder:text-ink/40 placeholder:font-normal";
-const DEFAULT_CAPTION = "font-sans text-[12px] leading-none text-ink-muted truncate";
+const DEFAULT_CAPTION =
+  "font-sans text-[12px] leading-none text-ink-muted truncate";
 
 function dayName(date: string) {
   if (!date) return "";
@@ -70,10 +78,12 @@ function useResolvedStationName(code: string) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/stations?q=${encodeURIComponent(c)}&limit=8`);
+        const res = await fetch(
+          `/api/stations?q=${encodeURIComponent(c)}&limit=8`,
+        );
         const json = await res.json();
         const match = (json.results ?? []).find(
-          (r: { code: string; name: string }) => r.code.toUpperCase() === c
+          (r: { code: string; name: string }) => r.code.toUpperCase() === c,
         );
         if (!cancelled) setName(match?.name ?? "");
       } catch {
@@ -165,7 +175,9 @@ export default function JourneyStopsForm({
             captionClassName={caption}
           />
         </div>
-        {searchButton && <div className="hidden shrink-0 sm:block">{searchButton}</div>}
+        {searchButton && (
+          <div className="hidden shrink-0 sm:block">{searchButton}</div>
+        )}
       </div>
 
       {/* Same CTA, full-width, its own row — mobile only */}
@@ -328,12 +340,18 @@ function PrimaryRow({
 
       {/* Date */}
       <div className="flex items-end justify-between gap-2 pt-3 sm:items-center sm:pt-0 sm:pl-4 sm:min-w-[150px]">
-        <button type="button" onClick={openDatePicker} className="flex flex-col gap-1 text-left">
+        <button
+          type="button"
+          onClick={openDatePicker}
+          className="flex flex-col gap-1 text-left"
+        >
           <span className={labelClassName}>Date</span>
           <span className="font-semibold text-ink text-[13.5px] leading-none sm:text-[14px]">
             {formatDatePretty(date)}
           </span>
-          {dayName(date) && <span className={captionClassName}>{dayName(date)}</span>}
+          {dayName(date) && (
+            <span className={captionClassName}>{dayName(date)}</span>
+          )}
         </button>
         <button
           type="button"
@@ -410,17 +428,22 @@ function StopRow({
       <div className="flex min-w-0 shrink-0 items-start gap-1.5">
         {/* <MapPin size={14} className="mt-[3px] shrink-0 text-ink-dim" /> */}
         <div className="flex min-w-0 flex-col leading-none">
-          <span className="truncate font-semibold text-ink text-[13.5px] sm:text-[14px]">{from || "—"}</span>
-          {fromName && <span className={`${captionClassName} mt-1`}>{fromName}</span>}
+          <span className="truncate font-semibold text-ink text-[13.5px] sm:text-[14px]">
+            {from || "—"}
+          </span>
+          {fromName && (
+            <span className={`${captionClassName} mt-1`}>{fromName}</span>
+          )}
         </div>
       </div>
 
       <div className="hidden h-8 w-px shrink-0 bg-border sm:block" />
-<div className="w-8 rounded-full h-8 bg-white/80 flex items-center justify-between p-2">
-  <ArrowRight size={16} className="self-center-safe"/>
-</div>
+      <div className="w-8 rounded-full max-sm:hidden h-8 bg-white/80 flex items-center justify-between p-2">
+        <ArrowRight size={16} className="self-center-safe" />
+      </div>
       <div className="flex min-w-[140px] flex-1 items-start gap-1.5 basis-full sm:basis-auto sm:min-w-0">
         {/* <MapPin size={14} className="mt-[20px] shrink-0 text-violet" /> */}
+
         <StationInput
           id={`${idPrefix}-to`}
           label="To"
@@ -440,7 +463,9 @@ function StopRow({
         className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5"
       >
         <Calendar size={13} className="text-violet" />
-        <span className="font-semibold text-ink text-[12px] sm:text-[12.5px]">{formatDatePretty(date)}</span>
+        <span className="font-semibold text-ink text-[12px] sm:text-[12.5px]">
+          {formatDatePretty(date)}
+        </span>
       </button>
       <input
         ref={dateInputRef}

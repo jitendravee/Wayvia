@@ -2,7 +2,14 @@
 
 import { Fragment } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Bus, Plane, TrainFront, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Bus,
+  BusFront,
+  Plane,
+  TrainFront,
+  type LucideIcon,
+} from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                 */
@@ -12,7 +19,7 @@ type Mode = "train" | "bus" | "flight";
 
 const MODE_ICON: Record<Mode, LucideIcon> = {
   train: TrainFront,
-  bus: Bus,
+  bus: BusFront,
   flight: Plane,
 };
 
@@ -67,12 +74,20 @@ function bezierPoint(
   p1: { x: number; y: number },
   p2: { x: number; y: number },
   p3: { x: number; y: number },
-  t: number
+  t: number,
 ) {
   const mt = 1 - t;
   return {
-    x: mt ** 3 * p0.x + 3 * mt ** 2 * t * p1.x + 3 * mt * t ** 2 * p2.x + t ** 3 * p3.x,
-    y: mt ** 3 * p0.y + 3 * mt ** 2 * t * p1.y + 3 * mt * t ** 2 * p2.y + t ** 3 * p3.y,
+    x:
+      mt ** 3 * p0.x +
+      3 * mt ** 2 * t * p1.x +
+      3 * mt * t ** 2 * p2.x +
+      t ** 3 * p3.x,
+    y:
+      mt ** 3 * p0.y +
+      3 * mt ** 2 * t * p1.y +
+      3 * mt * t ** 2 * p2.y +
+      t ** 3 * p3.y,
   };
 }
 
@@ -82,14 +97,26 @@ function connectorFor(i: number) {
   const p3 = { x: 6, y: rowCenterY(i) };
   const p1 = { x: -4, y: p0.y };
   const p2 = { x: -4, y: p3.y };
-  return { p0, p1, p2, p3, d: `M ${p0.x} ${p0.y} C ${p1.x} ${p1.y}, ${p2.x} ${p2.y}, ${p3.x} ${p3.y}` };
+  return {
+    p0,
+    p1,
+    p2,
+    p3,
+    d: `M ${p0.x} ${p0.y} C ${p1.x} ${p1.y}, ${p2.x} ${p2.y}, ${p3.x} ${p3.y}`,
+  };
 }
 
 // Precompute the traveling-dot path for the "best" (last) row.
 const BEST_CONNECTOR = connectorFor(ROW_COUNT - 1);
 const DOT_STEPS = 36;
 const DOT_PATH = Array.from({ length: DOT_STEPS + 1 }, (_, i) =>
-  bezierPoint(BEST_CONNECTOR.p0, BEST_CONNECTOR.p1, BEST_CONNECTOR.p2, BEST_CONNECTOR.p3, i / DOT_STEPS)
+  bezierPoint(
+    BEST_CONNECTOR.p0,
+    BEST_CONNECTOR.p1,
+    BEST_CONNECTOR.p2,
+    BEST_CONNECTOR.p3,
+    i / DOT_STEPS,
+  ),
 );
 
 /* ------------------------------------------------------------------ */
@@ -97,7 +124,13 @@ const DOT_PATH = Array.from({ length: DOT_STEPS + 1 }, (_, i) =>
 /* ------------------------------------------------------------------ */
 
 /** A dashed line whose dashes continuously flow in one direction. */
-function DashLine({ vertical = false, active = false }: { vertical?: boolean; active?: boolean }) {
+function DashLine({
+  vertical = false,
+  active = false,
+}: {
+  vertical?: boolean;
+  active?: boolean;
+}) {
   return (
     <span
       aria-hidden
@@ -120,7 +153,9 @@ function LegPill({ mode }: { mode: Mode }) {
   return (
     <span className="flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-1.5">
       <Icon size={14} className="text-violet" />
-      <span className="font-sans text-[12px] font-medium text-ink">{MODE_LABEL[mode]}</span>
+      <span className="font-sans text-[12px] font-medium text-ink">
+        {MODE_LABEL[mode]}
+      </span>
     </span>
   );
 }
@@ -128,8 +163,11 @@ function LegPill({ mode }: { mode: Mode }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="font-sans text-[10.5px] text-ink-dim">{label}</span>
-      <span className="font-display text-[13px] font-semibold text-ink">{value}</span>
+      <span className="font-display text-[13px] font-semibold text-ink">
+        {value}
+      </span>
+            <span className=" text-[10.5px] text-ink-dim">{label}</span>
+
     </div>
   );
 }
@@ -144,28 +182,35 @@ function BestMatchCard({ className = "" }: { className?: string }) {
       className={`relative rounded-2xl border border-violet/25 bg-white p-4 shadow-lg shadow-violet-soft/40 ${className}`}
     >
       <motion.span
-        animate={{ opacity: [0.75, 1, 0.75] }}
+        animate={{ scale: [0.9, 1, 0.9] }}
         transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-        className="inline-flex items-center rounded-full bg-violet px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-white"
+        className="inline-flex items-center rounded-full bg-violet px-2.5 py-1  text-[10px] font-bold uppercase tracking-wide text-white font-display"
       >
         Best match
       </motion.span>
-
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex items-center gap-2 flex-wrap">
         {BEST_MATCH.legs.map((mode, i) => {
           const Icon = MODE_ICON[mode];
+
           return (
             <Fragment key={i}>
-              {i > 0 && <ArrowRight size={13} className="shrink-0 text-ink-dim" />}
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-soft text-violet-dark">
-                <Icon size={15} />
+              {i > 0 && (
+                <ArrowRight size={13} className="shrink-0 text-ink-dim" />
+              )}
+
+              <span className="flex items-center gap-2 ">
+                <span className="flex  shrink-0 items-center justify-center rounded-full  text-ink">
+                  <Icon size={14} />
+                </span>
+
+                <span className="font-display text-[12px] font-semibold text-ink">
+                  {MODE_LABEL[mode]}
+                </span>
               </span>
             </Fragment>
           );
         })}
       </div>
-
-      <p className="mt-3 font-display text-[14px] font-semibold text-ink">{BEST_MATCH.label}</p>
 
       <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3">
         <Stat label="Duration" value={BEST_MATCH.duration} />
@@ -217,8 +262,12 @@ function DesktopRow({ option, index }: { option: RouteOption; index: number }) {
           isBest ? "" : "rounded-xl border border-border bg-white px-3 py-1.5"
         }`}
       >
-        <span className="font-sans text-[12px] font-semibold text-ink">{DESTINATION.name}</span>
-        <span className="font-mono text-[10px] text-ink-dim">{DESTINATION.code}</span>
+        <span className="font-sans text-[12px] font-semibold text-ink">
+          {DESTINATION.name}
+        </span>
+        <span className="font-mono text-[10px] text-ink-dim">
+          {DESTINATION.code}
+        </span>
       </div>
     </motion.div>
   );
@@ -226,12 +275,16 @@ function DesktopRow({ option, index }: { option: RouteOption; index: number }) {
 
 function DesktopGraph() {
   return (
-    <div className="hidden lg:grid lg:grid-cols-[1fr_28px_260px] lg:items-center lg:gap-2">
+    <div className="hidden lg:grid lg:grid-cols-[1fr_28px_285px] lg:items-center lg:gap-2">
       {/* Origin + curved connectors + rows */}
       <div className="flex items-center gap-10">
         <div className="shrink-0 rounded-2xl border border-border bg-white px-4 py-3">
-          <div className="font-display text-[13px] font-bold leading-tight text-ink">{ORIGIN.name}</div>
-          <div className="font-mono text-[10px] text-ink-dim">{ORIGIN.code}</div>
+          <div className="font-display text-[13px] font-bold leading-tight text-ink">
+            {ORIGIN.name}
+          </div>
+          <div className="font-mono text-[10px] text-ink-dim">
+            {ORIGIN.code}
+          </div>
         </div>
 
         <div className="relative flex-1" style={{ height: GRAPH_H }}>
@@ -250,7 +303,11 @@ function DesktopGraph() {
                   d={d}
                   fill="none"
                   strokeWidth={opt.best ? 2 : 1.5}
-                  className={opt.best ? "stroke-violet wayvia-path-fast" : "stroke-ink/20 wayvia-path"}
+                  className={
+                    opt.best
+                      ? "stroke-violet wayvia-path-fast"
+                      : "stroke-ink/20 wayvia-path"
+                  }
                   strokeDasharray="5 6"
                   strokeLinecap="round"
                 />
@@ -261,7 +318,10 @@ function DesktopGraph() {
               r={3.5}
               className="fill-violet"
               style={{ filter: "drop-shadow(0 0 3px rgba(124,92,255,0.85))" }}
-              animate={{ cx: DOT_PATH.map((p) => p.x), cy: DOT_PATH.map((p) => p.y) }}
+              animate={{
+                cx: DOT_PATH.map((p) => p.x),
+                cy: DOT_PATH.map((p) => p.y),
+              }}
               transition={{ duration: 2.6, repeat: Infinity, ease: "linear" }}
             />
           </svg>
@@ -306,7 +366,9 @@ function MobileRow({ option, index }: { option: RouteOption; index: number }) {
     >
       <span
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold ${
-          isBest ? "bg-violet text-white" : "border border-violet/40 bg-white text-violet-dark"
+          isBest
+            ? "bg-violet text-white"
+            : "border border-violet/40 bg-white text-violet-dark"
         }`}
       >
         {option.id}
@@ -335,8 +397,12 @@ function MobileGraph() {
     <div className="flex flex-col gap-8 lg:hidden">
       <div className="flex items-stretch gap-4">
         <div className="flex shrink-0 flex-col justify-center rounded-2xl border border-border bg-white px-3.5 py-3">
-          <span className="font-display text-[13px] font-bold leading-tight text-ink">{ORIGIN.name}</span>
-          <span className="font-mono text-[10px] text-ink-dim">{ORIGIN.code}</span>
+          <span className="font-display text-[13px] font-bold leading-tight text-ink">
+            {ORIGIN.name}
+          </span>
+          <span className="font-mono text-[10px] text-ink-dim">
+            {ORIGIN.code}
+          </span>
         </div>
 
         <div className="relative flex-1">
@@ -371,15 +437,16 @@ export default function HowWayviaThinks() {
   return (
     <section className="relative overflow-hidden bg-white py-20 sm:py-24">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
-        <div className="mx-auto max-w-xl text-center">
-          <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-violet">
+        <div className="mx-auto  flex flex-col text-center items-center gap-3">
+          <span className="text-[9px] md:text-[11px] max-w-fit font-semibold uppercase tracking-wider text-violet bg-violet/10 p-2 px-3 rounded-full">
             How Wayvia thinks
           </span>
-          <h2 className="mt-2 font-display text-2xl font-semibold text-ink sm:text-3xl">
+          <h2 className=" font-display text-2xl font-semibold text-ink sm:text-3xl">
             One destination. Thousands of ways.
           </h2>
-          <p className="mt-2 font-sans text-[13.5px] leading-relaxed text-ink-muted sm:text-[14px]">
-            Wayvia explores every possible combination across modes and connections.
+          <p className=" font-sans text-[13.5px] leading-relaxed text-ink-muted sm:text-[14px]">
+            Wayvia explores every possible combination across modes and
+            connections not just the obvious one.
           </p>
         </div>
 
