@@ -50,13 +50,15 @@ export default function Page() {
       <section>
         <HowWayviaThinks />
       </section>
+      
       <section>
         <WeDontStopAtFirstRoute />
       </section>
+            <WhereAreYouGoing />
+
       <AddAStopSection />
       <MoreWaysToGetThere />
       <BetterDependsOnYou />
-      <WhereAreYouGoing />
       {/* HOW IT WORKS */}
      
     </main>
