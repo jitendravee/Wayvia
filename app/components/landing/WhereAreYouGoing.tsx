@@ -6,10 +6,8 @@ import Image from "next/image";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
-/* Data                                                                 */
+/* Data                                                               */
 /* ------------------------------------------------------------------ */
-/* `image` is a plain path — swap these for the final asset URLs       */
-/* whenever they're ready, nothing else needs to change.               */
 
 interface Destination {
   id: string;
@@ -67,7 +65,6 @@ const DESTINATIONS: Destination[] = [
     image:
       "https://lp-cms-production.imgix.net/2024-12/shutterstockRF122394565.jpg?auto=format%2Ccompress&fit=crop&q=72",
   },
-  // ---- placeholders below, swap for real photography whenever ready ----
   {
     id: "delhi-kolkata",
     from: { name: "Delhi", code: "NDLS" },
@@ -113,7 +110,7 @@ const DESTINATIONS: Destination[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Card                                                                 */
+/* Card                                                               */
 /* ------------------------------------------------------------------ */
 
 function DestinationCard({ dest }: { dest: Destination }) {
@@ -128,13 +125,13 @@ function DestinationCard({ dest }: { dest: Destination }) {
       type="button"
       data-card
       onClick={handleClick}
-      className="group relative aspect-[3/4] w-[68vw] max-w-[240px] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-[220px] lg:w-[260px]"
+      className="group relative aspect-[3/4] w-full shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-[68vw] sm:max-w-[240px] lg:w-[260px]"
     >
       <Image
         src={dest.image}
         alt={`${dest.from.name} to ${dest.to.name}`}
         fill
-        sizes="(min-width: 1024px) 260px, (min-width: 640px) 220px, 68vw"
+        sizes="(min-width: 1024px) 260px, (min-width: 640px) 220px, 100vw"
         className="object-cover transition-transform duration-500 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
@@ -154,7 +151,7 @@ function DestinationCard({ dest }: { dest: Destination }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Carousel                                                             */
+/* Carousel                                                           */
 /* ------------------------------------------------------------------ */
 
 const AUTOPLAY_INTERVAL_MS = 4000;
@@ -172,7 +169,7 @@ export default function WhereAreYouGoing() {
 
     const card = el.querySelector<HTMLElement>("[data-card]");
     const cardWidth = card ? card.offsetWidth : el.clientWidth;
-    const gap = parseFloat(getComputedStyle(el).columnGap || "16");
+    const gap = parseFloat(getComputedStyle(el).columnGap || "0");
     const delta = cardWidth + gap;
     const maxScroll = el.scrollWidth - el.clientWidth;
 
@@ -206,7 +203,6 @@ export default function WhereAreYouGoing() {
     autoplayTimer.current = setInterval(() => step(1), AUTOPLAY_INTERVAL_MS);
   }, [step, stopAutoplay]);
 
-  // Pause autoplay for a while after any manual interaction, then resume.
   const handleManualInteraction = useCallback(() => {
     stopAutoplay();
     if (resumeTimer.current) clearTimeout(resumeTimer.current);
@@ -232,7 +228,7 @@ export default function WhereAreYouGoing() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <section className=" pl-6  lg:px-8 lg:pr-0">
       <h2 className="text-center font-display text-2xl font-semibold text-ink sm:text-3xl">
         Where are you going?
       </h2>
@@ -242,14 +238,12 @@ export default function WhereAreYouGoing() {
         onMouseEnter={stopAutoplay}
         onMouseLeave={startAutoplay}
       >
-        {/* Nav arrows: positioned fully inside the section's own padding,
-            with no negative horizontal translate, so they can never push
-            the page into horizontal overflow on small screens. */}
+        {/* Desktop navigation arrows (overlaid) */}
         <button
           type="button"
           aria-label="Previous destinations"
           onClick={() => handleArrowClick(-1)}
-          className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:-left-2 sm:p-2.5 lg:-left-4"
+          className="absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:flex sm:-left-2 sm:p-2.5 lg:-left-4"
         >
           <ChevronLeft size={16} />
         </button>
@@ -257,7 +251,7 @@ export default function WhereAreYouGoing() {
         <div
           ref={scrollerRef}
           onScroll={handleUserScroll}
-          className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-9 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:px-10 lg:px-12 [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-4 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-3 sm:px-9 sm:px-10 lg:px-12 [&::-webkit-scrollbar]:hidden"
         >
           {DESTINATIONS.map((dest) => (
             <DestinationCard key={dest.id} dest={dest} />
@@ -268,9 +262,29 @@ export default function WhereAreYouGoing() {
           type="button"
           aria-label="Next destinations"
           onClick={() => handleArrowClick(1)}
-          className="absolute right-0 top-1/2 z-10 -translate-y-1/2 flex items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:-right-2 sm:p-2.5 lg:-right-4"
+          className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:flex sm:-right-2 sm:p-2.5 lg:right-4"
         >
           <ChevronRight size={16} />
+        </button>
+      </div>
+
+      {/* Mobile navigation arrows (below carousel) */}
+      <div className="mt-4 flex items-center  gap-3 sm:hidden justify-between">
+        <button
+          type="button"
+          aria-label="Previous destinations"
+          onClick={() => handleArrowClick(-1)}
+          className="flex items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm transition hover:bg-white"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          type="button"
+          aria-label="Next destinations"
+          onClick={() => handleArrowClick(1)}
+          className="flex items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm transition hover:bg-white"
+        >
+          <ChevronRight size={18} />
         </button>
       </div>
     </section>
