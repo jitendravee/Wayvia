@@ -1,10 +1,16 @@
 "use client";
 
-import { Fragment } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Bus,
   BusFront,
   Plane,
   TrainFront,
@@ -32,50 +38,45 @@ const MODE_LABEL: Record<Mode, string> = {
 interface RouteOption {
   id: string;
   legs: Mode[];
-  /** The D row — Wayvia's picked combination, visually called out. */
+  /** The row Wayvia picked as the best combination, visually called out. */
   best?: boolean;
 }
 
 const ROUTE_OPTIONS: RouteOption[] = [
-  { id: "A", legs: ["train", "train"] },
+  { id: "A", legs: ["train", "train","train"] },
   { id: "B", legs: ["train", "bus"] },
   { id: "C", legs: ["flight", "train"] },
   { id: "D", legs: ["train", "bus", "train"], best: true },
 ];
 
+const BEST_INDEX = ROUTE_OPTIONS.findIndex((o) => o.best);
+
 const ORIGIN = { name: "New Delhi", code: "NDLS" };
-const DESTINATION = { name: "Mumbai Central", code: "MMCT" };
+const DESTINATION = { name: "Mumbai", code: "MMCT" };
 
 const BEST_MATCH = {
   legs: ["train", "bus", "train"] as Mode[],
-  label: "Train → Bus → Train",
   duration: "23h 45m",
   fare: "₹1,840",
   changes: 2,
 };
 
 /* ------------------------------------------------------------------ */
-/* Layout math for the desktop SVG connectors — kept in one place so    */
-/* the curves always land exactly on each row, however row height       */
-/* changes (edit ROW_H / ROW_GAP, everything below recalculates).       */
+/* Branch connector: measures each row's real position and draws a      */
+/* curved path from a single origin point to every row — this is the    */
+/* "one origin, many routes" visual and it stays correct no matter how  */
+/* tall any individual row renders (e.g. the best row wrapping).        */
 /* ------------------------------------------------------------------ */
 
-const ROW_H = 72;
-const ROW_GAP = 16;
-const ROW_COUNT = ROUTE_OPTIONS.length;
-const GRAPH_H = ROW_COUNT * ROW_H + (ROW_COUNT - 1) * ROW_GAP;
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-function rowCenterY(i: number) {
-  return i * (ROW_H + ROW_GAP) + ROW_H / 2;
+interface Point {
+  x: number;
+  y: number;
 }
 
-function bezierPoint(
-  p0: { x: number; y: number },
-  p1: { x: number; y: number },
-  p2: { x: number; y: number },
-  p3: { x: number; y: number },
-  t: number,
-) {
+function bezierPoint(p0: Point, p1: Point, p2: Point, p3: Point, t: number) {
   const mt = 1 - t;
   return {
     x:
@@ -91,68 +92,155 @@ function bezierPoint(
   };
 }
 
-/** Curve from the origin dot (left edge of the graph) into row `i`'s badge. */
-function connectorFor(i: number) {
-  const p0 = { x: -18, y: GRAPH_H / 2 };
-  const p3 = { x: 6, y: rowCenterY(i) };
-  const p1 = { x: -4, y: p0.y };
-  const p2 = { x: -4, y: p3.y };
-  return {
-    p0,
-    p1,
-    p2,
-    p3,
-    d: `M ${p0.x} ${p0.y} C ${p1.x} ${p1.y}, ${p2.x} ${p2.y}, ${p3.x} ${p3.y}`,
-  };
+function useBranchConnector(rowCount: number) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [height, setHeight] = useState(0);
+  const [centers, setCenters] = useState<number[]>([]);
+
+  const measure = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const containerTop = container.getBoundingClientRect().top;
+    const nextCenters = rowRefs.current.map((el) => {
+      if (!el) return 0;
+      const r = el.getBoundingClientRect();
+      return r.top - containerTop + r.height / 2;
+    });
+    setCenters(nextCenters);
+    setHeight(container.getBoundingClientRect().height);
+  }, []);
+
+  useIsomorphicLayoutEffect(() => {
+    measure();
+    const ro = new ResizeObserver(() => measure());
+    if (containerRef.current) ro.observe(containerRef.current);
+    rowRefs.current.forEach((el) => el && ro.observe(el));
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowCount, measure]);
+
+  const setRowRef = useCallback(
+    (i: number) => (el: HTMLDivElement | null) => {
+      rowRefs.current[i] = el;
+    },
+    [],
+  );
+
+  return { containerRef, setRowRef, height, centers };
 }
 
-// Precompute the traveling-dot path for the "best" (last) row.
-const BEST_CONNECTOR = connectorFor(ROW_COUNT - 1);
-const DOT_STEPS = 36;
-const DOT_PATH = Array.from({ length: DOT_STEPS + 1 }, (_, i) =>
-  bezierPoint(
-    BEST_CONNECTOR.p0,
-    BEST_CONNECTOR.p1,
-    BEST_CONNECTOR.p2,
-    BEST_CONNECTOR.p3,
-    i / DOT_STEPS,
-  ),
-);
+function BranchLines({
+  height,
+  centers,
+  bestIndex,
+  width,
+}: {
+  height: number;
+  centers: number[];
+  bestIndex: number;
+  width: number;
+}) {
+  if (!height || centers.length === 0) return null;
+
+  const originX = 3;
+  const originY = height / 2;
+  const endX = width - 2;
+  const midX = originX + (endX - originX) * 0.55;
+
+  const pathFor = (cy: number) => {
+    const p0: Point = { x: originX, y: originY };
+    const p1: Point = { x: midX, y: originY };
+    const p2: Point = { x: midX, y: cy };
+    const p3: Point = { x: endX, y: cy };
+    return {
+      p0,
+      p1,
+      p2,
+      p3,
+      d: `M ${p0.x} ${p0.y} C ${p1.x} ${p1.y}, ${p2.x} ${p2.y}, ${p3.x} ${p3.y}`,
+    };
+  };
+
+  const bestPath = bestIndex >= 0 ? pathFor(centers[bestIndex]) : null;
+  const steps = 40;
+  const dotPath = bestPath
+    ? Array.from({ length: steps + 1 }, (_, i) =>
+        bezierPoint(bestPath.p0, bestPath.p1, bestPath.p2, bestPath.p3, i / steps),
+      )
+    : [];
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+      height={height}
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute left-0 top-0 overflow-visible"
+    >
+      <circle cx={originX} cy={originY} r={4.5} className="fill-violet" />
+      {centers.map((cy, i) => {
+        const { d } = pathFor(cy);
+        const isBest = i === bestIndex;
+        return (
+          <path
+            key={i}
+            d={d}
+            fill="none"
+            strokeWidth={isBest ? 2 : 1.5}
+            className={isBest ? "stroke-violet wayvia-path-fast" : "stroke-ink/20 wayvia-path"}
+            strokeDasharray="5 6"
+            strokeLinecap="round"
+          />
+        );
+      })}
+      {bestPath && (
+        <motion.circle
+          r={3.5}
+          className="fill-violet"
+          style={{ filter: "drop-shadow(0 0 3px rgba(124,92,255,0.85))" }}
+          animate={{
+            cx: dotPath.map((p) => p.x),
+            cy: dotPath.map((p) => p.y),
+          }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+        />
+      )}
+    </svg>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Small shared pieces                                                  */
 /* ------------------------------------------------------------------ */
 
-/** A dashed line whose dashes continuously flow in one direction. */
-function DashLine({
-  vertical = false,
-  active = false,
-}: {
-  vertical?: boolean;
-  active?: boolean;
-}) {
+/** A dashed line that fills remaining space, like a connector cable. */
+function FillDashLine({ active = false }: { active?: boolean }) {
   return (
     <span
       aria-hidden
-      className={`block shrink-0 ${active ? "text-violet" : "text-ink/20"} ${
-        vertical ? "h-full w-[2px]" : "h-[2px] w-6"
+      className={`block h-[2px] min-w-[24px] flex-1 shrink ${
+        active ? "text-violet" : "text-ink/15"
       }`}
       style={{
-        backgroundImage: vertical
-          ? "repeating-linear-gradient(to bottom, currentColor 0 4px, transparent 4px 9px)"
-          : "repeating-linear-gradient(to right, currentColor 0 4px, transparent 4px 9px)",
-        backgroundSize: vertical ? "2px 13px" : "13px 2px",
-        animation: `${vertical ? "wayviaDashV" : "wayviaDashH"} 0.9s linear infinite`,
+        backgroundImage:
+          "repeating-linear-gradient(to right, currentColor 0 4px, transparent 4px 9px)",
+        backgroundSize: "13px 2px",
+        animation: "wayviaDashH 0.9s linear infinite",
       }}
     />
   );
 }
 
-function LegPill({ mode }: { mode: Mode }) {
+function LegPill({ mode, muted = false }: { mode: Mode; muted?: boolean }) {
   const Icon = MODE_ICON[mode];
   return (
     <span className="flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-1.5">
-      <Icon size={14} className="text-violet" />
+      <Icon size={14} className={muted ? "text-ink-dim" : "text-ink"} />
       <span className="font-sans text-[12px] font-medium text-ink">
         {MODE_LABEL[mode]}
       </span>
@@ -166,11 +254,12 @@ function Stat({ label, value }: { label: string; value: string }) {
       <span className="font-display text-[13px] font-semibold text-ink">
         {value}
       </span>
-            <span className=" text-[10.5px] text-ink-dim">{label}</span>
-
+      <span className="text-[10.5px] text-ink-dim">{label}</span>
     </div>
   );
 }
+
+
 
 function BestMatchCard({ className = "" }: { className?: string }) {
   return (
@@ -181,87 +270,96 @@ function BestMatchCard({ className = "" }: { className?: string }) {
       transition={{ duration: 0.45, delay: 0.35, ease: "easeOut" }}
       className={`relative rounded-2xl border border-violet/25 bg-white p-4 shadow-lg shadow-violet-soft/40 ${className}`}
     >
+      {" "}
       <motion.span
         animate={{ scale: [0.9, 1, 0.9] }}
         transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
         className="inline-flex items-center rounded-full bg-violet px-2.5 py-1  text-[10px] font-bold uppercase tracking-wide text-white font-display"
       >
-        Best match
-      </motion.span>
+        {" "}
+        Best match{" "}
+      </motion.span>{" "}
       <div className="mt-3 flex items-center gap-2 flex-wrap">
+        {" "}
         {BEST_MATCH.legs.map((mode, i) => {
           const Icon = MODE_ICON[mode];
-
           return (
             <Fragment key={i}>
+              {" "}
               {i > 0 && (
                 <ArrowRight size={13} className="shrink-0 text-ink-dim" />
-              )}
-
+              )}{" "}
               <span className="flex items-center gap-2 ">
+                {" "}
                 <span className="flex  shrink-0 items-center justify-center rounded-full  text-ink">
-                  <Icon size={14} />
-                </span>
-
+                  {" "}
+                  <Icon size={14} />{" "}
+                </span>{" "}
                 <span className="font-display text-[12px] font-semibold text-ink">
-                  {MODE_LABEL[mode]}
-                </span>
-              </span>
+                  {" "}
+                  {MODE_LABEL[mode]}{" "}
+                </span>{" "}
+              </span>{" "}
             </Fragment>
           );
-        })}
-      </div>
-
+        })}{" "}
+      </div>{" "}
       <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3">
-        <Stat label="Duration" value={BEST_MATCH.duration} />
-        <Stat label="Total Fare" value={BEST_MATCH.fare} />
-        <Stat label="Changes" value={String(BEST_MATCH.changes)} />
-      </div>
+        {" "}
+        <Stat label="Duration" value={BEST_MATCH.duration} />{" "}
+        <Stat label="Total Fare" value={BEST_MATCH.fare} />{" "}
+        <Stat label="Changes" value={String(BEST_MATCH.changes)} />{" "}
+      </div>{" "}
     </motion.div>
   );
 }
-
 /* ------------------------------------------------------------------ */
 /* Desktop / tablet layout (lg+)                                        */
 /* ------------------------------------------------------------------ */
 
-function DesktopRow({ option, index }: { option: RouteOption; index: number }) {
+function DesktopRow({
+  option,
+  index,
+  rowRef,
+}: {
+  option: RouteOption;
+  index: number;
+  rowRef: (el: HTMLDivElement | null) => void;
+}) {
   const isBest = option.best;
   return (
     <motion.div
+      ref={rowRef}
       initial={{ opacity: 0, x: -12 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.4, delay: index * 0.1, ease: "easeOut" }}
-      style={{ height: ROW_H }}
-      className={`flex items-center gap-3 rounded-2xl border px-4 ${
-        isBest ? "border-violet/30 bg-violet-soft/40" : "border-border bg-white"
+      transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+      className={`flex items-center gap-4 rounded-2xl px-4 py-3 ${
+        isBest ? "border border-violet/25 bg-violet-soft/40" : ""
       }`}
     >
       <span
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-mono text-[12px] font-bold ${
-          isBest ? "bg-violet text-white" : "bg-violet-soft text-violet-dark"
+        className={`w-14 shrink-0 font-sans text-[11px] font-semibold uppercase tracking-wide ${
+          isBest ? "text-violet" : "text-ink-dim"
         }`}
       >
-        {option.id}
+        Path {option.id}
       </span>
 
-      <div className="flex flex-1 items-center gap-2 overflow-hidden">
+      <div className="flex shrink-0 items-center gap-2">
         {option.legs.map((mode, i) => (
-          <div key={i} className="flex shrink-0 items-center gap-2">
-            {i > 0 && <DashLine active={isBest} />}
+          <Fragment key={i}>
+            {i > 0 && <ArrowRight size={13} className="shrink-0 text-ink-dim" />}
             <LegPill mode={mode} />
-          </div>
+          </Fragment>
         ))}
       </div>
 
+      <FillDashLine active={isBest} />
+
       <ArrowRight size={14} className="shrink-0 text-ink-dim" />
 
-      <div
-        className={`flex shrink-0 flex-col leading-tight ${
-          isBest ? "" : "rounded-xl border border-border bg-white px-3 py-1.5"
-        }`}
-      >
+      <div className="flex shrink-0 flex-col items-end leading-tight">
         <span className="font-sans text-[12px] font-semibold text-ink">
           {DESTINATION.name}
         </span>
@@ -274,67 +372,42 @@ function DesktopRow({ option, index }: { option: RouteOption; index: number }) {
 }
 
 function DesktopGraph() {
+  const { containerRef, setRowRef, height, centers } = useBranchConnector(
+    ROUTE_OPTIONS.length,
+  );
+  const branchWidth = 56;
+
   return (
-    <div className="hidden lg:grid lg:grid-cols-[1fr_28px_285px] lg:items-center lg:gap-2">
-      {/* Origin + curved connectors + rows */}
-      <div className="flex items-center gap-10">
+    <div className="hidden lg:grid lg:grid-cols-[1fr_28px_300px] lg:items-center lg:gap-2">
+      <div className="flex items-center" style={{ gap: branchWidth + 24 }}>
         <div className="shrink-0 rounded-2xl border border-border bg-white px-4 py-3">
           <div className="font-display text-[13px] font-bold leading-tight text-ink">
             {ORIGIN.name}
           </div>
-          <div className="font-mono text-[10px] text-ink-dim">
-            {ORIGIN.code}
-          </div>
+          <div className="font-mono text-[10px] text-ink-dim">{ORIGIN.code}</div>
         </div>
 
-        <div className="relative flex-1" style={{ height: GRAPH_H }}>
-          <svg
-            viewBox={`-20 0 44 ${GRAPH_H}`}
-            preserveAspectRatio="none"
-            className="pointer-events-none absolute left-[-44px] top-0 h-full overflow-visible"
-            style={{ width: "calc(100% + 44px)" }}
+        <div className="relative flex-1">
+          <div
+            className="absolute top-0"
+            style={{ left: -branchWidth, width: branchWidth, height }}
           >
-            <circle cx={-18} cy={GRAPH_H / 2} r={4.5} className="fill-violet" />
-            {ROUTE_OPTIONS.map((opt, i) => {
-              const { d } = connectorFor(i);
-              return (
-                <path
-                  key={opt.id}
-                  d={d}
-                  fill="none"
-                  strokeWidth={opt.best ? 2 : 1.5}
-                  className={
-                    opt.best
-                      ? "stroke-violet wayvia-path-fast"
-                      : "stroke-ink/20 wayvia-path"
-                  }
-                  strokeDasharray="5 6"
-                  strokeLinecap="round"
-                />
-              );
-            })}
-            {/* Glowing dot traveling along the highlighted (best) route */}
-            <motion.circle
-              r={3.5}
-              className="fill-violet"
-              style={{ filter: "drop-shadow(0 0 3px rgba(124,92,255,0.85))" }}
-              animate={{
-                cx: DOT_PATH.map((p) => p.x),
-                cy: DOT_PATH.map((p) => p.y),
-              }}
-              transition={{ duration: 2.6, repeat: Infinity, ease: "linear" }}
+            <BranchLines
+              height={height}
+              centers={centers}
+              bestIndex={BEST_INDEX}
+              width={branchWidth}
             />
-          </svg>
+          </div>
 
-          <div className="relative flex flex-col gap-4">
+          <div ref={containerRef} className="relative flex flex-col gap-3">
             {ROUTE_OPTIONS.map((opt, i) => (
-              <DesktopRow key={opt.id} option={opt} index={i} />
+              <DesktopRow key={opt.id} option={opt} index={i} rowRef={setRowRef(i)} />
             ))}
           </div>
         </div>
       </div>
 
-      {/* Connector hint between the graph and the Best Match card */}
       <motion.div
         animate={{ opacity: [0.4, 1, 0.4] }}
         transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
@@ -352,20 +425,29 @@ function DesktopGraph() {
 /* Mobile layout (below lg)                                             */
 /* ------------------------------------------------------------------ */
 
-function MobileRow({ option, index }: { option: RouteOption; index: number }) {
+function MobileRow({
+  option,
+  index,
+  rowRef,
+}: {
+  option: RouteOption;
+  index: number;
+  rowRef: (el: HTMLDivElement | null) => void;
+}) {
   const isBest = option.best;
   return (
     <motion.div
+      ref={rowRef}
       initial={{ opacity: 0, x: -8 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.35, delay: index * 0.08, ease: "easeOut" }}
-      className={`relative z-10 flex items-center gap-2.5 rounded-xl ${
-        isBest ? "bg-violet-soft/40 px-2.5 py-2" : "py-1.5"
+      className={`flex items-center gap-2.5 rounded-xl ${
+        isBest ? "border border-violet/25 bg-violet-soft/40 px-3 py-2.5" : "px-1 py-1.5"
       }`}
     >
       <span
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold ${
+        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-bold ${
           isBest
             ? "bg-violet text-white"
             : "border border-violet/40 bg-white text-violet-dark"
@@ -379,9 +461,9 @@ function MobileRow({ option, index }: { option: RouteOption; index: number }) {
           const Icon = MODE_ICON[mode];
           return (
             <span key={i} className="flex items-center gap-1.5">
-              {i > 0 && <ArrowRight size={11} className="text-ink-dim" />}
+              {i > 0 && <ArrowRight size={11} className="shrink-0 text-ink-dim" />}
               <span className="flex items-center gap-1 font-sans text-[12.5px] font-medium text-ink">
-                <Icon size={13} className="text-violet" />
+                <Icon size={13} className={isBest ? "text-violet" : "text-ink-dim"} />
                 {MODE_LABEL[mode]}
               </span>
             </span>
@@ -393,32 +475,37 @@ function MobileRow({ option, index }: { option: RouteOption; index: number }) {
 }
 
 function MobileGraph() {
+  const { containerRef, setRowRef, height, centers } = useBranchConnector(
+    ROUTE_OPTIONS.length,
+  );
+  const branchWidth = 34;
+
   return (
     <div className="flex flex-col gap-8 lg:hidden">
-      <div className="flex items-stretch gap-4">
+      <div className="flex items-center" style={{ gap: branchWidth + 16 }}>
         <div className="flex shrink-0 flex-col justify-center rounded-2xl border border-border bg-white px-3.5 py-3">
           <span className="font-display text-[13px] font-bold leading-tight text-ink">
             {ORIGIN.name}
           </span>
-          <span className="font-mono text-[10px] text-ink-dim">
-            {ORIGIN.code}
-          </span>
+          <span className="font-mono text-[10px] text-ink-dim">{ORIGIN.code}</span>
         </div>
 
         <div className="relative flex-1">
-          <div className="absolute bottom-3 left-[9px] top-3">
-            <DashLine vertical />
+          <div
+            className="absolute top-0"
+            style={{ left: -branchWidth, width: branchWidth, height }}
+          >
+            <BranchLines
+              height={height}
+              centers={centers}
+              bestIndex={BEST_INDEX}
+              width={branchWidth}
+            />
           </div>
-          <motion.span
-            aria-hidden
-            className="absolute left-[5px] h-2 w-2 rounded-full bg-violet"
-            style={{ boxShadow: "0 0 6px rgba(124,92,255,0.85)" }}
-            animate={{ top: ["4%", "96%", "4%"] }}
-            transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <div className="flex flex-col gap-3.5 pl-0">
+
+          <div ref={containerRef} className="relative flex flex-col gap-3">
             {ROUTE_OPTIONS.map((opt, i) => (
-              <MobileRow key={opt.id} option={opt} index={i} />
+              <MobileRow key={opt.id} option={opt} index={i} rowRef={setRowRef(i)} />
             ))}
           </div>
         </div>
@@ -437,16 +524,16 @@ export default function HowWayviaThinks() {
   return (
     <section className="relative overflow-hidden bg-white py-20 sm:py-24">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
-        <div className="mx-auto  flex flex-col text-center items-center gap-3">
-          <span className="text-[9px] md:text-[11px] max-w-fit font-semibold uppercase tracking-wider text-violet bg-violet/10 p-2 px-3 rounded-full">
+        <div className="mx-auto flex flex-col items-center gap-3 text-center">
+          <span className="max-w-fit rounded-full bg-violet/10 p-2 px-3 text-[9px] font-semibold uppercase tracking-wider text-violet md:text-[11px]">
             How Wayvia thinks
           </span>
-          <h2 className=" font-display text-2xl font-semibold text-ink sm:text-3xl">
+          <h2 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
             One destination. Thousands of ways.
           </h2>
-          <p className=" font-sans text-[13.5px] leading-relaxed text-ink-muted sm:text-[14px]">
+          <p className="font-sans text-[13.5px] leading-relaxed text-ink-muted sm:text-[14px]">
             Wayvia explores every possible combination across modes and
-            connections not just the obvious one.
+            connections — not just the obvious one.
           </p>
         </div>
 
@@ -460,11 +547,6 @@ export default function HowWayviaThinks() {
         @keyframes wayviaDashH {
           to {
             background-position: -13px 0;
-          }
-        }
-        @keyframes wayviaDashV {
-          to {
-            background-position: 0 -13px;
           }
         }
         .wayvia-path {
@@ -482,3 +564,5 @@ export default function HowWayviaThinks() {
     </section>
   );
 }
+
+
