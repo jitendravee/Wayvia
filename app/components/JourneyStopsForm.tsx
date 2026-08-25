@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowLeftRight, Calendar, Plus, X } from "lucide-react";
-import { useRef } from "react";
+import { ArrowLeftRight, Calendar, MapPin, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import StationInput from "./StationInput";
 import { formatDatePretty } from "@/lib/date";
 
@@ -19,9 +19,12 @@ interface Props {
   onOriginChange: (code: string) => void;
   stops: StopEntry[];
   onStopsChange: (stops: StopEntry[]) => void;
-  onAddStop?: () => void;
+  /** Visual context — pass the glass-hero classes on the landing page, omit for the default form look. */
   labelClassName?: string;
   inputClassName?: string;
+  /** Caption under From/To showing the resolved station name (e.g. "New Delhi"). Omit for the default form look. */
+  captionClassName?: string;
+  /** Keeps input ids unique when this form appears more than once on a page. */
   idPrefix: string;
 }
 
@@ -37,15 +40,54 @@ function newStop(prefill?: Partial<StopEntry>): StopEntry {
 const DEFAULT_LABEL = "font-sans text-[11px] text-ink-muted";
 const DEFAULT_INPUT =
   "w-full bg-transparent p-0 font-semibold text-[14px] text-ink outline-none placeholder:text-ink/40 placeholder:font-normal";
+const DEFAULT_CAPTION = "font-sans text-[12px] leading-none text-ink-muted truncate";
+
+function dayName(date: string) {
+  if (!date) return "";
+  const d = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", { weekday: "long" });
+}
+
+/** Looks up a bare station code's full name for read-only display (the chained-stop "from" chip). */
+function useResolvedStationName(code: string) {
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    const c = code.trim().toUpperCase();
+    if (!c) {
+      setName("");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/stations?q=${encodeURIComponent(c)}&limit=8`);
+        const json = await res.json();
+        const match = (json.results ?? []).find(
+          (r: { code: string; name: string }) => r.code.toUpperCase() === c
+        );
+        if (!cancelled) setName(match?.name ?? "");
+      } catch {
+        if (!cancelled) setName("");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
+
+  return name;
+}
 
 /**
  * Row 0 (origin → stops[0].to, on stops[0].date) is an ordinary single
  * search, laid out as one compact pill: From | swap | To | divider | Date.
- * The "Add a stop" toggle appends stops[1..] as lighter, chained rows below
- * — each one chains from the previous stop's destination, so all this
- * component ever needs is one growable list: A→B on date1 (row 0), B→C on
- * date2 (row 1), C→D on date3 (row 2), etc. Turning the toggle off just
- * truncates back to one row.
+ * A single "Add a stop" / "Add another stop" button at the bottom appends
+ * stops[1..] as chained rows — each one chains from the previous stop's
+ * destination, so all this component ever needs is one growable list:
+ * A→B on date1 (row 0), B→C on date2 (row 1), C→D on date3 (row 2), etc.
+ * Removing a stop (X) just shortens the list again.
  */
 export default function JourneyStopsForm({
   origin,
@@ -54,11 +96,12 @@ export default function JourneyStopsForm({
   onStopsChange,
   labelClassName,
   inputClassName,
+  captionClassName,
   idPrefix,
 }: Props) {
-  const multi = stops.length > 1;
   const label = labelClassName ?? DEFAULT_LABEL;
   const input = inputClassName ?? DEFAULT_INPUT;
+  const caption = captionClassName ?? DEFAULT_CAPTION;
 
   function setStop(i: number, patch: Partial<StopEntry>) {
     onStopsChange(stops.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
@@ -68,16 +111,6 @@ export default function JourneyStopsForm({
     const first = stops[0];
     onOriginChange(first.to);
     setStop(0, { to: origin });
-  }
-
-  function toggleMulti(on: boolean) {
-    if (on) {
-      if (stops.length < 2) {
-        onStopsChange([...stops, newStop({ date: stops[0]?.date ?? "" })]);
-      }
-    } else {
-      onStopsChange(stops.slice(0, 1));
-    }
   }
 
   function addStop() {
@@ -94,68 +127,62 @@ export default function JourneyStopsForm({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-
+    <div className="flex flex-col gap-2.5 sm:gap-3">
       {/* Row 0 — the primary From / To / Date pill */}
-      <div className="flex flex-col gap-2">
-        <PrimaryRow
-          idPrefix={`${idPrefix}-0`}
-          from={origin}
-          onFromChange={onOriginChange}
-          to={stops[0]?.to ?? ""}
-          onToChange={(v) => setStop(0, { to: v })}
-          date={stops[0]?.date ?? ""}
-          onDateChange={(v) => setStop(0, { date: v })}
-          onSwap={swapFirstLeg}
-          labelClassName={label}
-          inputClassName={input}
-        />
+      <PrimaryRow
+        idPrefix={`${idPrefix}-0`}
+        from={origin}
+        onFromChange={onOriginChange}
+        to={stops[0]?.to ?? ""}
+        onToChange={(v) => setStop(0, { to: v })}
+        date={stops[0]?.date ?? ""}
+        onDateChange={(v) => setStop(0, { date: v })}
+        onSwap={swapFirstLeg}
+        labelClassName={label}
+        inputClassName={input}
+        captionClassName={caption}
+      />
 
-        {/* Rows 1+ — chained stops, visually lighter so the eye reads them as extensions of row 0 */}
-        {multi && (
-          <div className="flex flex-col gap-1.5 border-l-2 border-violet/20 pl-3 ml-2">
-            {stops.slice(1).map((stop, idx) => {
-              const i = idx + 1;
-              return (
-                <StopRow
-                  key={stop.id}
-                  idPrefix={`${idPrefix}-${i}`}
-                  stopNumber={i}
-                  from={stops[i - 1].to}
-                  to={stop.to}
-                  onToChange={(v) => setStop(i, { to: v })}
-                  date={stop.date}
-                  onDateChange={(v) => setStop(i, { date: v })}
-                  onRemove={() => removeStop(i)}
-                  labelClassName={label}
-                  inputClassName={input}
-                />
-              );
-            })}
-          </div>
-        )}
+      {/* Rows 1+ — chained stops, one growable list appended by the button below */}
+      {stops.slice(1).map((stop, idx) => {
+        const i = idx + 1;
+        return (
+          <StopRow
+            key={stop.id}
+            idPrefix={`${idPrefix}-${i}`}
+            stopNumber={i}
+            from={stops[i - 1].to}
+            to={stop.to}
+            onToChange={(v) => setStop(i, { to: v })}
+            date={stop.date}
+            onDateChange={(v) => setStop(i, { date: v })}
+            onRemove={() => removeStop(i)}
+            labelClassName={label}
+            inputClassName={input}
+            captionClassName={caption}
+          />
+        );
+      })}
 
-        <div className="flex flex-wrap items-center gap-3 pt-0.5">
-          {multi && stops.length < MAX_STOPS && (
-            <button
-              type="button"
-              onClick={addStop}
-              className="flex items-center gap-1 rounded-full border border-violet/40 bg-violet-soft/50 px-2.5 py-1 font-sans text-[11px] font-medium text-violet-dark transition-colors hover:bg-violet-soft"
-            >
-              <Plus size={12} /> Add another stop
-            </button>
-          )}
-        </div>
-      </div>
+      {stops.length < MAX_STOPS && (
+        <button
+          type="button"
+          onClick={addStop}
+          className="flex w-fit items-center gap-1.5 rounded-full border border-violet/40 bg-violet-soft/50 px-3 py-1.5 font-sans text-[12px] font-medium text-violet-dark transition-colors hover:bg-violet-soft sm:text-[12.5px]"
+        >
+          <Plus size={13} /> {stops.length > 1 ? "Add another stop" : "Add a stop"}
+        </button>
+      )}
     </div>
   );
 }
 
 /**
- * The single-row search bar: From | swap | To | divider | Date, all inline,
- * matching the compact pill shown on the landing hero. The parent page
- * supplies the surrounding card (bg, radius, shadow) — this component only
- * lays out its own fields, so it stays reusable outside the hero too.
+ * The single-row search bar: From | swap | To | divider | Date. Rows to a
+ * column on mobile (fields block, then date block, split by a hairline) and
+ * to one inline row from `sm` up, matching the compact pill on the hero.
+ * The parent page supplies the surrounding card (bg, radius, shadow) — this
+ * component only lays out its own fields, so it stays reusable elsewhere.
  */
 function PrimaryRow({
   idPrefix,
@@ -168,6 +195,7 @@ function PrimaryRow({
   onSwap,
   labelClassName,
   inputClassName,
+  captionClassName,
 }: {
   idPrefix: string;
   from: string;
@@ -179,6 +207,7 @@ function PrimaryRow({
   onSwap: () => void;
   labelClassName: string;
   inputClassName: string;
+  captionClassName: string;
 }) {
   const dateInputRef = useRef<HTMLInputElement>(null);
 
@@ -199,9 +228,10 @@ function PrimaryRow({
   }
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:divide-x sm:divide-ink/10">
-      <div className="flex flex-1 items-center gap-2 sm:pr-3">
-        <div className="min-w-0 flex-1">
+    <div className="flex flex-col divide-y divide-ink/10 sm:flex-row sm:items-center sm:gap-4 sm:divide-y-0 sm:divide-x">
+      <div className="flex flex-1 items-center gap-2 pb-3 sm:gap-4 sm:pr-4 sm:pb-0">
+        <div className="flex min-w-0 flex-1 items-start gap-1.5 sm:gap-2">
+          <span className="mt-[20px] h-2 w-2 shrink-0 rounded-full bg-violet sm:mt-[22px]" />
           <StationInput
             id={`${idPrefix}-from`}
             label="From"
@@ -210,6 +240,8 @@ function PrimaryRow({
             placeholder="Delhi or NDLS"
             labelClassName={labelClassName}
             inputClassName={inputClassName}
+            showStationName
+            subLabelClassName={captionClassName}
           />
         </div>
 
@@ -218,12 +250,14 @@ function PrimaryRow({
           onClick={onSwap}
           title="Swap origin/destination"
           aria-label="Swap origin and destination"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface-alt text-ink-muted transition-transform hover:rotate-180 hover:text-violet"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-white text-violet shadow-sm transition-transform hover:rotate-180 sm:h-9 sm:w-9"
         >
-          <ArrowLeftRight size={14} />
+          <ArrowLeftRight size={14} className="sm:hidden" />
+          <ArrowLeftRight size={15} className="hidden sm:block" />
         </button>
 
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-start gap-1.5 sm:gap-2">
+          <MapPin size={15} className="mt-[18px] shrink-0 text-violet sm:mt-[20px] sm:size-4" />
           <StationInput
             id={`${idPrefix}-to`}
             label="To"
@@ -232,23 +266,20 @@ function PrimaryRow({
             placeholder="Mumbai or BCT"
             labelClassName={labelClassName}
             inputClassName={inputClassName}
+            showStationName
+            subLabelClassName={captionClassName}
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:min-w-[150px] sm:pl-3">
-        <button
-          type="button"
-          onClick={openDatePicker}
-          className="flex w-full items-center gap-2 rounded-lg py-1 text-left"
-        >
-          <Calendar size={15} className="shrink-0 text-violet" />
-          <span className="flex flex-col gap-0.5">
-            <span className={labelClassName}>Date</span>
-            <span className="font-semibold text-ink text-[14px] leading-none">
-              {formatDatePretty(date)}
-            </span>
+      <div className="flex items-start gap-1.5 pt-3 sm:min-w-[160px] sm:gap-2 sm:pt-0 sm:pl-4">
+        <Calendar size={15} className="mt-[18px] shrink-0 text-violet sm:mt-[20px] sm:size-4" />
+        <button type="button" onClick={openDatePicker} className="flex flex-col gap-1 text-left">
+          <span className={labelClassName}>Date</span>
+          <span className="font-semibold text-ink text-[13.5px] leading-none sm:text-[14px]">
+            {formatDatePretty(date)}
           </span>
+          {dayName(date) && <span className={captionClassName}>{dayName(date)}</span>}
         </button>
         <input
           ref={dateInputRef}
@@ -263,7 +294,7 @@ function PrimaryRow({
   );
 }
 
-/** A chained stop row (B→C, C→D, ...) — a lighter echo of the primary row. */
+/** A chained stop row (B→C, C→D, ...) — a lighter echo of the primary row. Wraps gracefully on narrow screens instead of squishing. */
 function StopRow({
   idPrefix,
   stopNumber,
@@ -275,6 +306,7 @@ function StopRow({
   onRemove,
   labelClassName,
   inputClassName,
+  captionClassName,
 }: {
   idPrefix: string;
   stopNumber: number;
@@ -286,8 +318,10 @@ function StopRow({
   onRemove: () => void;
   labelClassName: string;
   inputClassName: string;
+  captionClassName: string;
 }) {
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const fromName = useResolvedStationName(from);
 
   function openDatePicker() {
     const el = dateInputRef.current;
@@ -306,17 +340,23 @@ function StopRow({
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-xl bg-surface-alt/50 px-3 py-2">
-      <span className="shrink-0 rounded-full bg-violet-soft px-1.5 py-0.5 font-sans text-[10px] font-semibold text-violet-dark">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl bg-surface-alt/60 px-3 py-2.5 sm:flex-nowrap sm:gap-x-4">
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-soft font-sans text-[11px] font-semibold text-violet-dark">
         {stopNumber}
       </span>
 
-      <span className="hidden shrink-0 items-center gap-1 font-sans text-[12px] text-ink-muted sm:flex">
-        {from || "—"}
-        <ArrowLeftRight size={11} className="text-ink-dim" />
-      </span>
+      <div className="flex min-w-0 shrink-0 items-start gap-1.5">
+        <MapPin size={14} className="mt-[3px] shrink-0 text-ink-dim" />
+        <div className="flex min-w-0 flex-col leading-none">
+          <span className="truncate font-semibold text-ink text-[13.5px] sm:text-[14px]">{from || "—"}</span>
+          {fromName && <span className={`${captionClassName} mt-1`}>{fromName}</span>}
+        </div>
+      </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="hidden h-8 w-px shrink-0 bg-border sm:block" />
+
+      <div className="flex min-w-[140px] flex-1 items-start gap-1.5 basis-full sm:basis-auto sm:min-w-0">
+        <MapPin size={14} className="mt-[20px] shrink-0 text-violet" />
         <StationInput
           id={`${idPrefix}-to`}
           label="To"
@@ -325,6 +365,8 @@ function StopRow({
           placeholder="Next stop"
           labelClassName={labelClassName}
           inputClassName={inputClassName}
+          showStationName
+          subLabelClassName={captionClassName}
         />
       </div>
 
@@ -334,9 +376,7 @@ function StopRow({
         className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5"
       >
         <Calendar size={13} className="text-violet" />
-        <span className="font-semibold text-ink text-[12.5px]">
-          {formatDatePretty(date)}
-        </span>
+        <span className="font-semibold text-ink text-[12px] sm:text-[12.5px]">{formatDatePretty(date)}</span>
       </button>
       <input
         ref={dateInputRef}
@@ -352,7 +392,7 @@ function StopRow({
         onClick={onRemove}
         title="Remove this stop"
         aria-label="Remove this stop"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-ink-dim transition-colors hover:bg-signal-red-soft hover:text-signal-red"
+        className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-ink-dim transition-colors hover:bg-signal-red-soft hover:text-signal-red sm:ml-0"
       >
         <X size={14} />
       </button>

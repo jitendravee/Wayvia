@@ -18,18 +18,40 @@ interface Props {
   labelClassName?: string;
   /** Override the input's classes — lets callers (e.g. the hero search) match a different visual context. */
   inputClassName?: string;
+  /**
+   * Shows the resolved station name under the code (e.g. "NDLS" / "New Delhi"),
+   * like the two-line station display on the landing hero. When `value` is a
+   * bare code that hasn't been resolved yet (e.g. set from outside via swap,
+   * or an initial default), this looks it up against /api/stations.
+   */
+  showStationName?: boolean;
+  /** Classes for the resolved-name caption. Only used when showStationName is true. */
+  subLabelClassName?: string;
 }
 
 const DEFAULT_LABEL_CLASS = "font-mono text-[10px] uppercase tracking-wider text-ink-muted";
 const DEFAULT_INPUT_CLASS =
-  "w-[180px] min-w-[140px] max-w-full rounded-lg border border-border bg-white px-3 py-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet-ring";
+  "w-[180px] min-w-[140px] max-w-full rounded-lg bg-white px-3 py-2.5 font-mono text-sm text-ink outline-none";
+const DEFAULT_SUBLABEL_CLASS = "font-sans text-[12px] leading-none text-ink-muted truncate";
 
-export default function StationInput({ id, label, value, onChange, placeholder, labelClassName, inputClassName }: Props) {
+export default function StationInput({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  labelClassName,
+  inputClassName,
+  showStationName = false,
+  subLabelClassName,
+}: Props) {
   const [query, setQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<StationSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resolvedCode, setResolvedCode] = useState("");
+  const [resolvedName, setResolvedName] = useState("");
   const wrapRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -38,13 +60,47 @@ export default function StationInput({ id, label, value, onChange, placeholder, 
     setQuery(value);
   }, [value]);
 
+  // When we only have a bare code (e.g. the initial default, or a value set
+  // via swap) look its name up so the two-line "NDLS / New Delhi" display
+  // can render. Skipped once we already know the name for this exact code.
   useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    if (!showStationName) return;
+    const code = value.trim().toUpperCase();
+    if (!code) {
+      setResolvedCode("");
+      setResolvedName("");
+      return;
     }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
+    if (code === resolvedCode && resolvedName) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/stations?q=${encodeURIComponent(code)}&limit=8`);
+        const json = await res.json();
+        const match: StationSuggestion | undefined = (json.results ?? []).find(
+          (r: StationSuggestion) => r.code.toUpperCase() === code
+        );
+        if (cancelled) return;
+        if (match) {
+          setResolvedCode(match.code.toUpperCase());
+          setResolvedName(match.name);
+        } else {
+          setResolvedCode("");
+          setResolvedName("");
+        }
+      } catch {
+        if (!cancelled) {
+          setResolvedCode("");
+          setResolvedName("");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, showStationName]);
 
   function handleType(text: string) {
     setQuery(text.toUpperCase());
@@ -76,6 +132,8 @@ export default function StationInput({ id, label, value, onChange, placeholder, 
   function pick(s: StationSuggestion) {
     setQuery(s.code);
     onChange(s.code); // the station CODE is what gets sent to the journey-search API
+    setResolvedCode(s.code.toUpperCase());
+    setResolvedName(s.name);
     setOpen(false);
     setSuggestions([]);
   }
@@ -96,8 +154,11 @@ export default function StationInput({ id, label, value, onChange, placeholder, 
     }
   }
 
+  const showCaption =
+    showStationName && !open && !!resolvedName && query.trim().toUpperCase() === resolvedCode;
+
   return (
-    <div ref={wrapRef} className="relative flex flex-col gap-1.5">
+    <div ref={wrapRef} className="relative flex flex-col gap-1">
       <label htmlFor={id} className={labelClassName ?? DEFAULT_LABEL_CLASS}>
         {label}
       </label>
@@ -115,6 +176,7 @@ export default function StationInput({ id, label, value, onChange, placeholder, 
         aria-controls={`${id}-listbox`}
         className={inputClassName ?? DEFAULT_INPUT_CLASS}
       />
+      {showCaption && <span className={subLabelClassName ?? DEFAULT_SUBLABEL_CLASS}>{resolvedName}</span>}
 
       {open && (suggestions.length > 0 || loading) && (
         <ul

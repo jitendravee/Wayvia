@@ -31,7 +31,7 @@ export default function Page() {
             className="h-full w-full object-cover object-center"
           />
         </picture>
-        <div className="absolute inset-0 z-[1] bg-gradient-to-br from-white/40 to-transparent" />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-br from-white/80 md:from-white/40 to-transparent" />
 
         {/* Hero content */}
         <div className="relative z-10 mx-auto flex h-full w-full items-center px-5 sm:px-6 max-w-7xl">
