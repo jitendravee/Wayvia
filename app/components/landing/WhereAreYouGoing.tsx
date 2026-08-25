@@ -228,11 +228,7 @@ export default function WhereAreYouGoing() {
   }
 
   return (
-<<<<<<< HEAD
     <section className="   lg:px-8 lg:pr-0">
-=======
-    <section className=" pl-6  lg:px-8 lg:pr-0">
->>>>>>> 007ac1b6260b540d30fe49483bf4afe6e396dd3b
       <h2 className="text-center font-display text-2xl font-semibold text-ink sm:text-3xl">
         Where are you going?
       </h2>
