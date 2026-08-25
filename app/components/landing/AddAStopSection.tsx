@@ -24,7 +24,10 @@ import {
 
 type Mode = "train" | "bus";
 
-const MODE_ICON: Record<Mode, LucideIcon> = { train: TrainFront, bus: BusFront };
+const MODE_ICON: Record<Mode, LucideIcon> = {
+  train: TrainFront,
+  bus: BusFront,
+};
 const MODE_LABEL: Record<Mode, string> = { train: "Train", bus: "Bus" };
 
 interface Stop {
@@ -86,7 +89,10 @@ function useNodePositions(count: number) {
     const nextPoints = nodeRefs.current.map((el) => {
       if (!el) return { x: 0, y: 0 };
       const r = el.getBoundingClientRect();
-      return { x: r.left - cRect.left + r.width / 2, y: r.top - cRect.top + r.height / 2 };
+      return {
+        x: r.left - cRect.left + r.width / 2,
+        y: r.top - cRect.top + r.height / 2,
+      };
     });
     setPoints(nextPoints);
     setSize({ w: cRect.width, h: cRect.height });
@@ -115,7 +121,13 @@ function useNodePositions(count: number) {
   return { containerRef, setNodeRef, size, points };
 }
 
-function NodeConnector({ size, points }: { size: { w: number; h: number }; points: Point[] }) {
+function NodeConnector({
+  size,
+  points,
+}: {
+  size: { w: number; h: number };
+  points: Point[];
+}) {
   if (!size.w || !size.h || points.length < 2) return null;
   return (
     <svg
@@ -152,7 +164,9 @@ function StopLabel({ stop }: { stop: Stop }) {
       <div className="whitespace-nowrap font-display text-[9.5px] font-bold uppercase tracking-wide text-ink sm:text-[11px]">
         {stop.name}
       </div>
-      <div className="font-mono text-[8px] text-ink-dim sm:text-[9.5px]">{stop.code}</div>
+      <div className="font-mono text-[8px] text-ink-dim sm:text-[9.5px]">
+        {stop.code}
+      </div>
     </div>
   );
 }
@@ -179,11 +193,16 @@ function RouteOverviewNode({
         <motion.span
           ref={nodeRef}
           animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: index * 0.25 }}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet text-white shadow-md shadow-violet-soft/70 sm:h-9 sm:w-9"
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: index * 0.25,
+          }}
+          className="flex h-8 w-8 border-2 border-white shrink-0 items-center justify-center rounded-full bg-violet text-white shadow-md shadow-violet-soft/70 "
         >
-          <Plus size={14} strokeWidth={2.5} className="sm:hidden" />
-          <Plus size={16} strokeWidth={2.5} className="hidden sm:block" />
+          <Plus size={12} strokeWidth={2.5} className="sm:hidden" />
+          <Plus size={14} strokeWidth={2.5} className="hidden sm:block" />
         </motion.span>
       )}
 
@@ -193,13 +212,23 @@ function RouteOverviewNode({
 }
 
 function RouteOverview() {
-  const { containerRef, setNodeRef, size, points } = useNodePositions(STOPS.length);
+  const { containerRef, setNodeRef, size, points } = useNodePositions(
+    STOPS.length,
+  );
 
   return (
-    <div ref={containerRef} className="relative flex items-start justify-between gap-1 px-1">
+    <div
+      ref={containerRef}
+      className="relative flex items-start justify-between gap-1 "
+    >
       <NodeConnector size={size} points={points} />
       {STOPS.map((stop, i) => (
-        <RouteOverviewNode key={stop.code} stop={stop} index={i} nodeRef={setNodeRef(i)} />
+        <RouteOverviewNode
+          key={stop.code}
+          stop={stop}
+          index={i}
+          nodeRef={setNodeRef(i)}
+        />
       ))}
     </div>
   );
@@ -210,29 +239,32 @@ function RouteOverview() {
 /* ------------------------------------------------------------------ */
 
 function LegBreakdownDesktop() {
-  const items: Array<{ type: "stop"; stop: Stop } | { type: "leg"; leg: Leg }> = [];
+  const items: Array<{ type: "stop"; stop: Stop } | { type: "leg"; leg: Leg }> =
+    [];
   STOPS.forEach((stop, i) => {
     items.push({ type: "stop", stop });
     if (LEGS[i]) items.push({ type: "leg", leg: LEGS[i] });
   });
 
   return (
-    <div className="hidden flex-wrap items-center gap-x-2 gap-y-3 rounded-2xl border border-border bg-white px-4 py-3.5 md:flex">
+    <div className="hidden flex-wrap w-full justify-between items-center gap-x-2 gap-y-3 rounded-lg border border-border bg-white/60 px-4 py-3.5 md:flex shadow-ink-dim/40 shadow-xs">
       {items.map((item, i) => (
         <Fragment key={i}>
           {i > 0 && <ArrowRight size={13} className="shrink-0 text-ink-dim" />}
           {item.type === "stop" ? (
             <div className="flex flex-col leading-tight">
-              <span className="font-sans text-[12.5px] font-semibold text-ink">
+              <span className=" text-[12.5px] font-semibold text-ink">
                 {item.stop.name}
               </span>
-              <span className="font-mono text-[10px] text-ink-dim">{item.stop.code}</span>
+              <span className="font-mono text-[10px] text-ink-dim">
+                {item.stop.code}
+              </span>
             </div>
           ) : (
             (() => {
               const Icon = MODE_ICON[item.leg.mode];
               return (
-                <span className="flex items-center gap-1.5 text-[12px] font-medium text-ink-dim">
+                <span className="flex flex-col items-center gap-1.5 text-[12px] font-medium text-ink-dim">
                   <Icon size={14} className="text-ink-dim" />
                   {item.leg.duration}
                 </span>
@@ -250,16 +282,22 @@ function LegBreakdownDesktop() {
 /* ------------------------------------------------------------------ */
 
 function LegTimelineMobile() {
-  const items: Array<{ type: "stop"; stop: Stop } | { type: "leg"; leg: Leg }> = [];
+  const items: Array<{ type: "stop"; stop: Stop } | { type: "leg"; leg: Leg }> =
+    [];
   STOPS.forEach((stop, i) => {
     items.push({ type: "stop", stop });
     if (LEGS[i]) items.push({ type: "leg", leg: LEGS[i] });
   });
 
-  const { containerRef, setNodeRef, size, points } = useNodePositions(items.length);
+  const { containerRef, setNodeRef, size, points } = useNodePositions(
+    items.length,
+  );
 
   return (
-    <div ref={containerRef} className="relative flex flex-col gap-4 rounded-2xl border border-border bg-white p-4 md:hidden">
+    <div
+      ref={containerRef}
+      className="relative flex flex-col gap-4 rounded-2xl border border-border bg-white p-4 md:hidden"
+    >
       <NodeConnector size={size} points={points} />
       {items.map((item, i) =>
         item.type === "stop" ? (
@@ -269,12 +307,19 @@ function LegTimelineMobile() {
               className="h-2.5 w-2.5 shrink-0 rounded-full border-2 border-violet bg-white"
             />
             <div className="leading-tight">
-              <div className="font-sans text-[13px] font-semibold text-ink">{item.stop.name}</div>
-              <div className="font-mono text-[10px] text-ink-dim">{item.stop.code}</div>
+              <div className=" text-[13px] font-semibold text-ink">
+                {item.stop.name}
+              </div>
+              <div className="font-mono text-[10px] text-ink-dim">
+                {item.stop.code}
+              </div>
             </div>
           </div>
         ) : (
-          <div key={i} className="relative z-10 flex items-center gap-3 pl-[3px]">
+          <div
+            key={i}
+            className="relative z-10 flex items-center gap-3 pl-[3px]"
+          >
             <span
               ref={setNodeRef(i) as (el: HTMLSpanElement | null) => void}
               className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-soft/50 text-violet"
@@ -284,8 +329,8 @@ function LegTimelineMobile() {
                 return <Icon size={13} />;
               })()}
             </span>
-            <span className="font-sans text-[12.5px] font-medium text-ink-dim">
-              {MODE_LABEL[item.leg.mode]} \u00B7 {item.leg.duration}
+            <span className=" text-[12.5px] font-medium text-ink-dim">
+              {item.leg.duration}
             </span>
           </div>
         ),
@@ -300,9 +345,11 @@ function LegTimelineMobile() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col leading-tight">
-      <span className="font-display text-[13.5px] font-semibold text-ink">{value}</span>
-      <span className="text-[10.5px] text-ink-dim">{label}</span>
+    <div className="flex flex-col leading-tight gap-1 md:gap-2">
+      <span className="font-display text-[16.5px] font-semibold text-ink">
+        {value}
+      </span>
+      <span className="text-[12.5px] text-ink-dim">{label}</span>
     </div>
   );
 }
@@ -314,10 +361,10 @@ function BestRouteCard() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex flex-col gap-4 rounded-2xl border border-violet/25 bg-violet-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+      className="flex flex-col gap-4 rounded-lg border border-violet/25 bg-violet-soft/20 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
     >
       <div className="flex flex-col gap-3">
-        <span className="inline-flex w-fit items-center rounded-full bg-violet px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-wide text-white">
+        <span className="inline-flex w-fit items-center rounded-md bg-violet-200 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-wide text-violet">
           Best route
         </span>
 
@@ -329,22 +376,23 @@ function BestRouteCard() {
                 <Fragment key={i}>
                   {i > 0 && <ArrowRight size={13} className="text-ink-dim" />}
                   <span className="flex items-center gap-1 font-display text-[13px] font-semibold text-ink">
-                    <Icon size={15} className="text-violet" />
+                    <Icon size={15} className="text-ink" />
                     {MODE_LABEL[mode]}
                   </span>
                 </Fragment>
               );
             })}
           </div>
-          <Stat label="Duration" value={BEST_ROUTE.duration} />
-          <Stat label="Changes" value={String(BEST_ROUTE.changes)} />
-          <Stat label="Total Fare" value={BEST_ROUTE.fare} />
         </div>
       </div>
-
+      <div className="flex flex-wrap gap-5 md:gap-10 w-full  md:justify-center ">
+        <Stat label="Duration" value={BEST_ROUTE.duration} />
+        <Stat label="Changes" value={String(BEST_ROUTE.changes)} />
+        <Stat label="Total Fare" value={BEST_ROUTE.fare} />
+      </div>
       <button
         type="button"
-        className="flex w-full shrink-0 items-center justify-center gap-1.5 rounded-full bg-violet px-5 py-3 font-sans text-[13px] font-semibold text-white transition hover:bg-violet-dark sm:w-auto"
+        className="flex w-full shrink-0 items-center justify-center gap-1.5 rounded-xl bg-violet px-5 py-3  text-[13px] font-semibold text-white transition hover:bg-violet-dark sm:w-auto"
       >
         View details
         <ArrowRight size={15} />
@@ -360,7 +408,7 @@ function BestRouteCard() {
 function IntroPanel() {
   return (
     <div className="flex flex-col gap-4">
-      <span className="w-fit rounded-full bg-violet/10 px-3 py-1.5 font-sans text-[10px] font-semibold uppercase tracking-wider text-violet">
+      <span className="w-fit rounded-full bg-violet/10 px-3 py-1.5  text-[10px] font-semibold uppercase tracking-wider text-violet">
         Add a stop
       </span>
       <h2 className="font-display text-2xl font-bold leading-tight text-ink sm:text-[26px]">
@@ -368,25 +416,25 @@ function IntroPanel() {
         <br />
         Make the journey yours.
       </h2>
-      <p className="max-w-xs font-sans text-[13.5px] leading-relaxed text-ink-muted">
+      <p className="max-w-xs  text-[13.5px] leading-relaxed text-ink-muted">
         Going somewhere in between? Add a city, station or landmark and
         we&apos;ll find the best way through.
       </p>
       <button
         type="button"
-        className="flex w-fit items-center gap-2 rounded-full border border-violet/40 px-4 py-2.5 font-sans text-[13px] font-semibold text-violet transition hover:bg-violet/5"
+        className="flex w-fit items-center gap-2 rounded-full border border-violet/40 px-4 py-2.5  text-[13px] font-semibold text-violet transition hover:bg-violet/5"
       >
         <Plus size={15} />
         Add another stop
       </button>
-      <label className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-3">
+      {/* <label className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-3">
         <Search size={16} className="shrink-0 text-ink-dim" />
         <input
           type="text"
           placeholder="Search city, station or landmark"
-          className="w-full bg-transparent font-sans text-[13px] text-ink placeholder:text-ink-dim/70 focus:outline-none"
+          className="w-full bg-transparent  text-[13px] text-ink placeholder:text-ink-dim/70 focus:outline-none"
         />
-      </label>
+      </label> */}
     </div>
   );
 }
@@ -397,15 +445,15 @@ function IntroPanel() {
 
 export default function AddAStopSection() {
   return (
-    <section className="p-4 py-10 bg-violet-soft md:mx-10 rounded-lg">
-      <div className="mx-auto max-w-6xl px-5 sm:px-6">
+    <section className="p-4 py-10 bg-violet/5 md:mx-10 rounded-lg">
+      <div className="mx-auto max-w-6xl px-0 sm:px-6">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14">
           <div className="lg:w-[300px] lg:shrink-0">
             <IntroPanel />
           </div>
 
           <div className="flex flex-1 flex-col gap-5">
-            <div className="rounded-2xl border border-border bg-white px-5 py-7 sm:px-8">
+            <div className="rounded-2xl py-7 ">
               <RouteOverview />
             </div>
 

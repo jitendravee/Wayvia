@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ArrowRight, Bus, MoreHorizontal, Plane, TrainFront } from "lucide-react";
+import { ArrowRight, BusFront, MoreHorizontal, Plane, TrainFront } from "lucide-react";
 import JourneySearchButton from "../../JourneySearchButton";
 import JourneyStopsForm, { StopEntry } from "../../JourneyStopsForm";
 import { todayIso } from "@/lib/date";
@@ -21,7 +21,7 @@ type Mode = "train" | "bus" | "flight" | "more";
 
 const MODES: { id: Mode; label: string; icon: React.ElementType; enabled: boolean }[] = [
   { id: "train", label: "Trains", icon: TrainFront, enabled: true },
-  { id: "bus", label: "Buses", icon: Bus, enabled: false },
+  { id: "bus", label: "Buses", icon: BusFront, enabled: false },
   { id: "flight", label: "Flights", icon: Plane, enabled: false },
   { id: "more", label: "More", icon: MoreHorizontal, enabled: false },
 ];
