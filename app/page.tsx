@@ -15,7 +15,7 @@ import BetterDependsOnYou from "./components/landing/BetterDependsOnYou";
 
 export default function Page() {
   return (
-    <main className="flex flex-col gap-10 md:gap-20 h-full w-full overflow-hidden">
+    <main className="flex flex-col gap-10 md:gap-20 h-full w-full overflow-hidden pb-20">
       {/* HERO */}
       <section className="relative w-full overflow-hidden bg-gray-50 min-h-[620px] py-14 sm:min-h-[680px] sm:py-16 lg:h-[90vh] lg:py-0">
         {/* Responsive background image — purely decorative, always fills the
@@ -50,17 +50,16 @@ export default function Page() {
       <section>
         <HowWayviaThinks />
       </section>
-      
+
       <section>
         <WeDontStopAtFirstRoute />
       </section>
-            <WhereAreYouGoing />
+      <WhereAreYouGoing />
 
       <AddAStopSection />
       <MoreWaysToGetThere />
       <BetterDependsOnYou />
       {/* HOW IT WORKS */}
-     
     </main>
   );
 }

@@ -217,7 +217,7 @@ export default function BetterDependsOnYou() {
   }
 
   return (
-    <section className="mx-auto max-w-5xl">
+    <section className="mx-auto w-full max-w-5xl overflow-x-hidden px-4 sm:px-0">
       <div className="text-center">
         <h2 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
           Better depends on you.
@@ -228,7 +228,7 @@ export default function BetterDependsOnYou() {
       </div>
 
       {/* Goal chips */}
-      <div className="mt-6 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
         {GOALS.map((g) => {
           const Icon = g.icon;
           const active = goal === g.key;
@@ -252,12 +252,12 @@ export default function BetterDependsOnYou() {
       </div>
 
       {/* Controls */}
-      <div className="mx-4 mt-6 grid grid-cols-1 gap-6 rounded-2xl border border-border bg-white p-5 sm:mx-0 sm:p-6 lg:grid-cols-3 lg:gap-8">
+      <div className="mt-6 grid w-full grid-cols-1 gap-6 rounded-2xl border border-border bg-white p-4 sm:p-6 lg:grid-cols-3 lg:gap-8">
         {/* Budget */}
-        <div>
-          <div className="flex items-center justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center justify-between gap-2">
             <p className="font-sans text-[12.5px] font-semibold text-ink">Budget</p>
-            <span className="font-mono text-[12px] font-semibold text-violet">
+            <span className="shrink-0 font-mono text-[12px] font-semibold text-violet">
               ₹{budget.toLocaleString("en-IN")}
             </span>
           </div>
@@ -278,7 +278,7 @@ export default function BetterDependsOnYou() {
         </div>
 
         {/* Max changes */}
-        <div>
+        <div className="min-w-0">
           <p className="font-sans text-[12.5px] font-semibold text-ink">Maximum changes</p>
           <div className="mt-3 flex gap-2">
             {CHANGE_OPTIONS.map((opt) => {
@@ -303,7 +303,7 @@ export default function BetterDependsOnYou() {
         </div>
 
         {/* Departure time */}
-        <div>
+        <div className="min-w-0">
           <p className="font-sans text-[12.5px] font-semibold text-ink">Departure time</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {DEPARTURE_OPTIONS.map((opt) => {
@@ -331,25 +331,37 @@ export default function BetterDependsOnYou() {
       </div>
 
       {/* Live preview */}
-      <div className="mt-8 flex flex-col items-stretch gap-3 px-4 sm:px-0 lg:flex-row lg:items-center lg:gap-4">
-        {/* Direct route (static, unavailable) */}
-        <div className="rounded-2xl border border-rose-200 bg-rose-50/60 p-5 lg:flex-1">
-          <span className="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-rose-700">
+     <div className="mt-8 flex w-full flex-col items-stretch gap-3 lg:flex-row lg:items-stretch lg:gap-4">
+        {/* Direct route (static, unavailable) — stretches to match the alternative card's height */}
+              <div className="flex min-w-0 flex-col justify-center rounded-2xl border border-rose-200 bg-rose-50/60 p-5 lg:flex-1">
+          <span className="inline-flex  w-fit items-center  rounded-full bg-rose-100 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-rose-700">
             Direct route
           </span>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="font-display text-[14px] font-semibold text-ink">New Delhi</p>
+ 
+          <div className="mt-4 flex items-center gap-3">
+            <div className="min-w-0 shrink-0">
+              <p className="truncate font-display text-[14px] font-semibold text-ink">
+                New Delhi
+              </p>
               <p className="font-mono text-[11px] text-ink-dim">NDLS</p>
             </div>
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
-              <X size={14} strokeWidth={2.5} />
-            </span>
-            <div className="text-right">
-              <p className="font-display text-[14px] font-semibold text-ink">Mumbai Central</p>
+ 
+            {/* dashed connector with the X sitting on top of it */}
+            <div className="relative flex h-7 flex-1 items-center">
+              <div className="h-0 w-full border-t-2 border-dashed border-rose-300" />
+              <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-rose-50/60">
+                <X size={18} strokeWidth={3} className="text-rose-500" />
+              </span>
+            </div>
+ 
+            <div className="min-w-0 shrink-0 text-right">
+              <p className="truncate font-display text-[14px] font-semibold text-ink">
+                Mumbai Central
+              </p>
               <p className="font-mono text-[11px] text-ink-dim">MMCT</p>
             </div>
           </div>
+ 
           <p className="mt-3 text-center font-sans text-[12px] text-rose-600">
             Direct train unavailable
           </p>
@@ -363,18 +375,18 @@ export default function BetterDependsOnYou() {
           <ChevronsRight size={26} />
         </div>
 
-        {/* Alternative route — reacts to every control above */}
+        {/* Alternative route — reacts to every control above; this card's natural height sets the row height */}
         <div
-          className={`rounded-2xl border bg-white p-5 shadow-sm transition-shadow duration-300 lg:flex-[1.4] ${
+          className={`min-w-0 rounded-2xl border bg-white p-4 shadow-sm transition-shadow duration-300 sm:p-5 lg:flex-[1.4] ${
             pulse ? "border-violet ring-2 ring-violet/25" : "border-violet/20"
           }`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-soft px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wide text-violet-dark">
               <Route size={11} />
               Wayvia finds another way
             </span>
-            <ChevronDown size={14} className="text-ink-dim/50" />
+            <ChevronDown size={14} className="shrink-0 text-ink-dim/50" />
           </div>
 
           <AnimatePresence mode="wait">
@@ -391,7 +403,7 @@ export default function BetterDependsOnYou() {
                 {route.stops.map((stop, i) => (
                   <Fragment key={`${stop.code}-${i}`}>
                     {i > 0 && (
-                      <span className="flex items-center gap-1.5 text-ink-dim">
+                      <span className="flex flex-wrap items-center gap-1.5 text-ink-dim">
                         <ArrowRight size={12} />
                         {(() => {
                           const leg = route.legs[i - 1];
@@ -437,14 +449,14 @@ export default function BetterDependsOnYou() {
                 </div>
               )}
 
-              {/* Result footer */}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-sans text-[11.5px] font-semibold text-emerald-700">
+              {/* Result footer — stacks on mobile, row from sm+ */}
+              <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-sans text-[11.5px] font-semibold text-emerald-700">
                   <CircleCheck size={13} />
                   Alternative found
                 </span>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   <div className="leading-tight">
                     <p className="font-display text-[13.5px] font-semibold text-ink">
                       {route.duration}
@@ -460,7 +472,7 @@ export default function BetterDependsOnYou() {
                   <button
                     type="button"
                     onClick={handleViewRoute}
-                    className="flex items-center gap-1.5 rounded-xl border border-border px-3.5 py-2 font-sans text-[12px] font-semibold text-violet transition hover:border-violet hover:bg-violet hover:text-white"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border px-3.5 py-2 font-sans text-[12px] font-semibold text-violet transition hover:border-violet hover:bg-violet hover:text-white sm:w-auto"
                   >
                     View route
                     <ArrowRight size={12} />
