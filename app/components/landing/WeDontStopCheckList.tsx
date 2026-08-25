@@ -304,7 +304,7 @@ export default function WeDontStopAtFirstRoute() {
   const inView = useInView(sectionRef, { once: true, margin: "-80px" });
 
   return (
-    <section className="bg-white py-16 sm:py-20">
+    <section className="bg-white ">
       <div className="mx-auto max-w-4xl px-5 sm:px-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <h2 className="font-display text-xl font-semibold text-ink sm:text-2xl">

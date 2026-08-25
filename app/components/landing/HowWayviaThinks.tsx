@@ -522,7 +522,7 @@ function MobileGraph() {
 
 export default function HowWayviaThinks() {
   return (
-    <section className="relative overflow-hidden bg-white py-20 sm:py-24">
+    <section className="relative overflow-hidden bg-white ">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <div className="mx-auto flex flex-col items-center gap-3 text-center">
           <span className="max-w-fit rounded-full bg-violet/10 p-2 px-3 text-[9px] font-semibold uppercase tracking-wider text-violet md:text-[11px]">
