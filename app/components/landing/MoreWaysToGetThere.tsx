@@ -252,7 +252,7 @@ function RouteCard({ card }: { card: RouteCardData }) {
         onClick={handleViewRoute}
         className={`flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 font-sans text-[12.5px] font-semibold transition ${
           
-             "border border-border text-ink hover:border-violet hover:bg-violet hover:text-white"
+             "border border-border text-violet hover:border-violet hover:bg-violet hover:text-white"
         }`}
       >
         View route

@@ -10,10 +10,12 @@ import HowWayviaThinks from "./components/landing/HowWayviaThinks";
 import WeDontStopAtFirstRoute from "./components/landing/WeDontStopCheckList";
 import AddAStopSection from "./components/landing/AddAStopSection";
 import MoreWaysToGetThere from "./components/landing/MoreWaysToGetThere";
+import WhereAreYouGoing from "./components/landing/WhereAreYouGoing";
+import BetterDependsOnYou from "./components/landing/BetterDependsOnYou";
 
 export default function Page() {
   return (
-    <main className="flex flex-col gap-10 md:gap-20 h-full w-full">
+    <main className="flex flex-col gap-10 md:gap-20 h-full w-full overflow-hidden">
       {/* HERO */}
       <section className="relative w-full overflow-hidden bg-gray-50 min-h-[620px] py-14 sm:min-h-[680px] sm:py-16 lg:h-[90vh] lg:py-0">
         {/* Responsive background image — purely decorative, always fills the
@@ -53,6 +55,8 @@ export default function Page() {
       </section>
       <AddAStopSection />
       <MoreWaysToGetThere />
+      <BetterDependsOnYou />
+      <WhereAreYouGoing />
       {/* HOW IT WORKS */}
      
     </main>
