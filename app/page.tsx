@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/landing/Hero";
 import Image from "next/image";
 import HowWayviaThinks from "./components/landing/HowWayviaThinks";
+import WeDontStopAtFirstRoute from "./components/landing/WeDontStopCheckList";
 
 export default function Page() {
   return (
@@ -41,10 +42,15 @@ export default function Page() {
         <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-5 sm:px-6">
           <Hero />
         </div>
+        
       </section>
       <section>
         <HowWayviaThinks />
       </section>
+                    <section>
+              <WeDontStopAtFirstRoute />
+      </section>
+
       {/* HOW IT WORKS */}
       <section className="mx-auto max-w-4xl px-5 py-20 sm:px-6">
         <div className="mb-6 text-center">
