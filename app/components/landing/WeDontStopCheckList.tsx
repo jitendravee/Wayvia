@@ -111,7 +111,9 @@ function StatBlock({
       <span className="font-display text-[17px] font-bold text-ink sm:text-[18px]">
         {formatNumber(count)}
       </span>
-      <span className="whitespace-nowrap text-[10.5px] text-ink-dim">{label}</span>
+      <span className="whitespace-nowrap text-[10.5px] text-ink-dim">
+        {label}
+      </span>
     </div>
   );
 }
@@ -139,7 +141,9 @@ function CheckBadge({
   }
   if (state === "checking") {
     return (
-      <span className={`flex ${dim} items-center justify-center rounded-full bg-white text-violet`}>
+      <span
+        className={`flex ${dim} items-center justify-center rounded-full bg-white text-violet`}
+      >
         <Loader2 size={11} className="animate-spin" />
       </span>
     );
@@ -156,52 +160,63 @@ function DesktopChecklist({ inView }: { inView: boolean }) {
   const progressPct = (doneCount / CHECKS.length) * 100;
 
   return (
-    <div className="hidden overflow-hidden rounded-2xl border border-border bg-white shadow-sm md:block">
+    <div className="hidden overflow-hidden rounded-2xl border border-border bg-white shadow-sm md:block py-2">
       {/* Linear progress bar */}
-      <div className="relative h-[3px] w-full bg-violet-soft/40">
-        <motion.div
-          className="absolute inset-y-0 left-0 rounded-r-full bg-violet"
-          initial={{ width: 0 }}
-          animate={{ width: `${progressPct}%` }}
-          transition={{ duration: 0.45, ease: "easeInOut" }}
-        />
-      </div>
 
       <div className="flex items-stretch">
-        <div className="flex flex-1 items-stretch">
-          {CHECKS.map((item, i) => {
-            const state = i < doneCount ? "done" : i === doneCount && !allDone ? "checking" : "pending";
-            return (
-              <Fragment key={item.label}>
-                {i > 0 && (
-                  <div className="flex shrink-0 items-center justify-center px-0.5">
-                    <ArrowRight
-                      size={14}
-                      className={`transition-colors duration-300 ${
-                        i <= doneCount ? "text-violet" : "text-ink-dim/30"
-                      }`}
-                    />
-                  </div>
-                )}
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={inView ? { opacity: state === "pending" ? 0.45 : 1, y: 0 } : {}}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="flex flex-1 flex-col items-center justify-center gap-2 px-3 py-6 text-center"
-                >
-                  <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-violet-soft/50 text-violet">
-                    <item.icon size={18} />
-                    <span className="absolute -right-1 -top-1 ring-2 ring-white rounded-full">
-                      <CheckBadge state={state} />
+        <div className="flex flex-col gap-1 mx-3 pb-4">
+          <div className="flex flex-1 items-stretch">
+            {CHECKS.map((item, i) => {
+              const state =
+                i < doneCount
+                  ? "done"
+                  : i === doneCount && !allDone
+                    ? "checking"
+                    : "pending";
+              return (
+                <Fragment key={item.label}>
+                  {i > 0 && (
+                    <div className="flex shrink-0 items-center justify-center px-0.5">
+                      <ArrowRight
+                        size={14}
+                        className={`transition-colors duration-300 ${
+                          i <= doneCount ? "text-violet" : "text-ink-dim/30"
+                        }`}
+                      />
+                    </div>
+                  )}
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={
+                      inView
+                        ? { opacity: state === "pending" ? 0.45 : 1, y: 0 }
+                        : {}
+                    }
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className="flex flex-1 flex-col items-center justify-center gap-2 px-3 py-6 text-center"
+                  >
+                    <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-violet-soft/50 text-violet">
+                      <item.icon size={18} />
+                      <span className="absolute -right-1 -top-1 ring-2 ring-white rounded-full">
+                        <CheckBadge state={state} />
+                      </span>
                     </span>
-                  </span>
-                  <span className=" text-[11.5px] font-medium leading-tight text-ink-dim">
-                    {item.label}
-                  </span>
-                </motion.div>
-              </Fragment>
-            );
-          })}
+                    <span className=" text-[11.5px] font-medium leading-tight text-ink-dim">
+                      {item.label}
+                    </span>
+                  </motion.div>
+                </Fragment>
+              );
+            })}
+          </div>
+          <div className="relative h-[3px]  rounded-full w-full bg-violet-soft/40 ">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-r-full bg-violet"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.45, ease: "easeInOut" }}
+            />
+          </div>
         </div>
 
         <div className="flex flex-col items-start gap-4 border-l border-border px-6 py-6">
@@ -210,7 +225,11 @@ function DesktopChecklist({ inView }: { inView: boolean }) {
             value={STATS.combinationsChecked}
             active={allDone}
           />
-          <StatBlock label="ways found" value={STATS.waysFound} active={allDone} />
+          <StatBlock
+            label="ways found"
+            value={STATS.waysFound}
+            active={allDone}
+          />
         </div>
       </div>
     </div>
@@ -249,7 +268,12 @@ function MobileChecklist({ inView }: { inView: boolean }) {
 
         <div className="flex flex-col">
           {CHECKS.map((item, i) => {
-            const state = i < doneCount ? "done" : i === doneCount && !allDone ? "checking" : "pending";
+            const state =
+              i < doneCount
+                ? "done"
+                : i === doneCount && !allDone
+                  ? "checking"
+                  : "pending";
             return (
               <div
                 key={item.label}
@@ -289,7 +313,11 @@ function MobileChecklist({ inView }: { inView: boolean }) {
           active={allDone}
         />
         <div className="h-8 w-px bg-border" />
-        <StatBlock label="ways found" value={STATS.waysFound} active={allDone} />
+        <StatBlock
+          label="ways found"
+          value={STATS.waysFound}
+          active={allDone}
+        />
       </div>
     </div>
   );
