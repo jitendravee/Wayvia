@@ -228,7 +228,7 @@ export default function WhereAreYouGoing() {
   }
 
   return (
-    <section className="   lg:px-8 lg:pr-0">
+    <section className="   lg:px-8 lg:pr-0" id="popular-journeys">
       <h2 className="text-center font-display text-2xl font-semibold text-ink sm:text-3xl">
         Where are you going?
       </h2>
