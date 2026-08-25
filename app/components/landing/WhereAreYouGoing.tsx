@@ -17,7 +17,9 @@ interface Destination {
   to: { name: string; code: string };
   ways: number;
   image: string;
-}const DESTINATIONS: Destination[] = [
+}
+
+const DESTINATIONS: Destination[] = [
   {
     id: "delhi-mumbai",
     from: { name: "Delhi", code: "NDLS" },
@@ -31,8 +33,7 @@ interface Destination {
     from: { name: "Bengaluru", code: "SBC" },
     to: { name: "Chennai", code: "MAS" },
     ways: 8,
-    image:
-      "https://i.12go.co/images/upload-media/4269.jpeg",
+    image: "https://i.12go.co/images/upload-media/4269.jpeg",
   },
   {
     id: "mumbai-goa",
@@ -66,6 +67,49 @@ interface Destination {
     image:
       "https://lp-cms-production.imgix.net/2024-12/shutterstockRF122394565.jpg?auto=format%2Ccompress&fit=crop&q=72",
   },
+  // ---- placeholders below, swap for real photography whenever ready ----
+  {
+    id: "delhi-kolkata",
+    from: { name: "Delhi", code: "NDLS" },
+    to: { name: "Kolkata", code: "HWH" },
+    ways: 9,
+    image: "https://picsum.photos/seed/wayvia-kolkata/600/800",
+  },
+  {
+    id: "hyderabad-bengaluru",
+    from: { name: "Hyderabad", code: "SC" },
+    to: { name: "Bengaluru", code: "SBC" },
+    ways: 6,
+    image: "https://picsum.photos/seed/wayvia-hyderabad/600/800",
+  },
+  {
+    id: "chennai-kochi",
+    from: { name: "Chennai", code: "MAS" },
+    to: { name: "Kochi", code: "ERS" },
+    ways: 7,
+    image: "https://picsum.photos/seed/wayvia-kochi/600/800",
+  },
+  {
+    id: "delhi-shimla",
+    from: { name: "Delhi", code: "NDLS" },
+    to: { name: "Shimla", code: "SML" },
+    ways: 4,
+    image: "https://picsum.photos/seed/wayvia-shimla/600/800",
+  },
+  {
+    id: "ahmedabad-udaipur",
+    from: { name: "Ahmedabad", code: "ADI" },
+    to: { name: "Udaipur", code: "UDZ" },
+    ways: 5,
+    image: "https://picsum.photos/seed/wayvia-udaipur/600/800",
+  },
+  {
+    id: "varanasi-delhi",
+    from: { name: "Varanasi", code: "BSB" },
+    to: { name: "Delhi", code: "NDLS" },
+    ways: 8,
+    image: "https://picsum.photos/seed/wayvia-varanasi/600/800",
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -84,24 +128,24 @@ function DestinationCard({ dest }: { dest: Destination }) {
       type="button"
       data-card
       onClick={handleClick}
-   className="group relative aspect-[3/4] w-[calc(50vw-24px)] max-w-[180px] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-[240px] lg:w-[260px]"
+      className="group relative aspect-[3/4] w-[68vw] max-w-[240px] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-[220px] lg:w-[260px]"
     >
       <Image
         src={dest.image}
         alt={`${dest.from.name} to ${dest.to.name}`}
         fill
-        sizes="(min-width: 1024px) 260px, (min-width: 640px) 240px, 220px"
+        sizes="(min-width: 1024px) 260px, (min-width: 640px) 220px, 68vw"
         className="object-cover transition-transform duration-500 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 p-4">
-        <p className="flex flex-wrap items-center gap-x-1.5 font-display text-[15px] font-semibold leading-tight text-white">
+      <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+        <p className="flex flex-wrap items-center gap-x-1.5 font-display text-[14px] font-semibold leading-tight text-white sm:text-[15px]">
           <span>{dest.from.name}</span>
           <ArrowRight size={13} className="shrink-0 text-white/80" />
           <span>{dest.to.name}</span>
         </p>
-        <p className="mt-1 font-sans text-[12px] text-white/75">
+        <p className="mt-1 font-sans text-[11.5px] text-white/75 sm:text-[12px]">
           {dest.ways} {dest.ways === 1 ? "way" : "ways"}
         </p>
       </div>
@@ -155,7 +199,9 @@ export default function WhereAreYouGoing() {
 
   const startAutoplay = useCallback(() => {
     stopAutoplay();
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (prefersReducedMotion) return;
     autoplayTimer.current = setInterval(() => step(1), AUTOPLAY_INTERVAL_MS);
   }, [step, stopAutoplay]);
@@ -186,7 +232,7 @@ export default function WhereAreYouGoing() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <h2 className="text-center font-display text-2xl font-semibold text-ink sm:text-3xl">
         Where are you going?
       </h2>
@@ -196,19 +242,23 @@ export default function WhereAreYouGoing() {
         onMouseEnter={stopAutoplay}
         onMouseLeave={startAutoplay}
       >
+        {/* Nav arrows: positioned fully inside the section's own padding,
+            with no negative horizontal translate, so they can never push
+            the page into horizontal overflow on small screens. */}
         <button
           type="button"
           aria-label="Previous destinations"
           onClick={() => handleArrowClick(-1)}
-          className="absolute left-0 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/90 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:p-2.5"
+          className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:-left-2 sm:p-2.5 lg:-left-4"
         >
           <ChevronLeft size={16} />
         </button>
-<div
-  ref={scrollerRef}
-  onScroll={handleUserScroll}
-  className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-3 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:px-0 [&::-webkit-scrollbar]:hidden"
->
+
+        <div
+          ref={scrollerRef}
+          onScroll={handleUserScroll}
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-9 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:px-10 lg:px-12 [&::-webkit-scrollbar]:hidden"
+        >
           {DESTINATIONS.map((dest) => (
             <DestinationCard key={dest.id} dest={dest} />
           ))}
@@ -218,7 +268,7 @@ export default function WhereAreYouGoing() {
           type="button"
           aria-label="Next destinations"
           onClick={() => handleArrowClick(1)}
-          className="absolute right-0 top-1/2 z-10 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/90 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:p-2.5"
+          className="absolute right-0 top-1/2 z-10 -translate-y-1/2 flex items-center justify-center rounded-full border border-border bg-white/95 p-2 text-violet shadow-sm backdrop-blur transition hover:bg-white sm:-right-2 sm:p-2.5 lg:-right-4"
         >
           <ChevronRight size={16} />
         </button>
