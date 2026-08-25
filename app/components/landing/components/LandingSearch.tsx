@@ -12,10 +12,10 @@ import type { TripLeg } from "@/app/types";
 // Class, quota, and everything else train-specific live as filters on the
 // journey planner once real results are on screen, so this box stays valid
 // however many modes (train/bus/flight) end up behind it.
-const glassLabel = "font-sans text-[10.5px] text-ink/50 sm:text-[12px]";
+const glassLabel = "font-sans text-[10.5px] uppercase tracking-wide text-ink/45 sm:text-[11px]";
 const glassInput =
-  "w-full bg-transparent p-0 font-display font-semibold text-[14px] text-ink outline-none placeholder:text-ink/35 placeholder:font-normal sm:text-[16px]";
-const glassCaption = "font-sans text-[11px] leading-none text-ink/50 truncate sm:text-[12.5px]";
+  "w-full bg-transparent p-0 font-display font-semibold text-[15px] text-ink outline-none placeholder:text-ink/35 placeholder:font-normal sm:text-[16px]";
+const glassCaption = "font-sans text-[11.5px] leading-none text-ink/45 truncate sm:text-[12px]";
 
 type Mode = "train" | "bus" | "flight" | "more";
 
@@ -46,65 +46,67 @@ const LandingSearch = () => {
     (l) => !l.from.trim() || !l.to.trim() || !l.date.trim() || l.from.trim().toUpperCase() === l.to.trim().toUpperCase()
   );
 
-  return (
-    <div className="flex flex-col gap-2.5 sm:gap-3 max-w-[800px] ">
-      {/* Search card — From / To / Date, chained stops, CTA */}
-      <div className="rounded-2xl bg-gradient-to-br from-white/60 via-white/70 to-white/80 p-3.5 shadow-lg shadow-ink/10 backdrop-blur-sm sm:p-4 md:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          <div className="min-w-0 flex-1">
-            <JourneyStopsForm
-              idPrefix="hero"
-              origin={origin}
-              onOriginChange={setOrigin}
-              stops={stops}
-              onStopsChange={setStops}
-              labelClassName={glassLabel}
-              inputClassName={glassInput}
-              captionClassName={glassCaption}
-            />
-          </div>
+  // Rendered twice by JourneyStopsForm (inline on desktop, its own full-width
+  // row on mobile) — CSS hides whichever slot doesn't apply, so the click
+  // handling and validation only need to live in one place.
+  const searchButton = (
+    <JourneySearchButton
+      from={multi ? undefined : legs[0]?.from}
+      to={multi ? undefined : legs[0]?.to}
+      date={multi ? undefined : legs[0]?.date}
+      legs={multi ? legs : undefined}
+      size="lg"
+      className="w-full shrink-0 sm:w-auto"
+      label={multi ? `Search ${legs.length}-stop trip` : "Find a Way"}
+      icon={<ArrowRight size={17} />}
+      disabled={invalid && touched}
+      onBeforeNavigate={() => {
+        setTouched(true);
+        if (invalid) return false;
+      }}
+    />
+  );
 
-          <JourneySearchButton
-            from={multi ? undefined : legs[0]?.from}
-            to={multi ? undefined : legs[0]?.to}
-            date={multi ? undefined : legs[0]?.date}
-            legs={multi ? legs : undefined}
-            size="lg"
-            className="w-full shrink-0 self-stretch sm:w-auto sm:self-start"
-            label={multi ? `Search ${legs.length}-stop trip` : "Find a Way"}
-            icon={<ArrowRight size={17} />}
-            disabled={invalid && touched}
-            onBeforeNavigate={() => {
-              setTouched(true);
-              if (invalid) return false;
-            }}
+  return (
+    <div className="flex flex-col gap-2.5 max-w-[800px] sm:gap-3">
+      {/* One card: search fields + CTA, "Add a stop", and the mode switcher all live together */}
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-white/60 via-white/70 to-white/80 shadow-lg shadow-ink/10 backdrop-blur-sm">
+        <div className="p-3.5 sm:p-4 md:p-5">
+          <JourneyStopsForm
+            idPrefix="hero"
+            origin={origin}
+            onOriginChange={setOrigin}
+            stops={stops}
+            onStopsChange={setStops}
+            labelClassName={glassLabel}
+            inputClassName={glassInput}
+            captionClassName={glassCaption}
+            searchButton={searchButton}
           />
+
+          {touched && invalid && (
+            <p className="mt-2 font-sans text-[11px] text-signal-red">
+              {multi
+                ? "Check every stop has a station and a date, and no two stations in a row match."
+                : "Pick two different stations to search."}
+            </p>
+          )}
         </div>
 
-        {touched && invalid && (
-          <p className="mt-2 font-sans text-[11px] text-signal-red">
-            {multi
-              ? "Check every stop has a station and a date, and no two stations in a row match."
-              : "Pick two different stations to search."}
-          </p>
-        )}
-      </div>
-
-      {/* Mode tabs — only Trains is live today; the rest are staged for later.
-          Scrolls horizontally instead of wrapping/overflowing on narrow screens. */}
-      <div className="flex w-full items-center justify-between gap-0.5 rounded-full bg-linear-to-r from-white/60 via-white/70 to-white/80 px-1.5 py-1.5 shadow-md shadow-ink/5 backdrop-blur-sm sm:w-auto sm:justify-start sm:gap-1 sm:px-3 sm:py-2">
-        {MODES.map((m, i) => {
-          const Icon = m.icon;
-          const active = mode === m.id;
-          return (
-            <React.Fragment key={m.id}>
-              {i > 0 && <span className="hidden select-none text-ink/15 sm:inline sm:px-1.5">•</span>}
+        {/* Mode tabs — only Trains is live today; the rest are staged for later.
+            Icons stack above the label on phones, sit inline with it from `sm` up. */}
+        <div className="flex items-stretch gap-1 border-t border-ink/10 bg-white/40 px-2 py-1.5 sm:gap-1.5 sm:px-4 sm:py-2">
+          {MODES.map((m) => {
+            const Icon = m.icon;
+            const active = mode === m.id;
+            return (
               <button
+                key={m.id}
                 type="button"
                 onClick={() => m.enabled && setMode(m.id)}
                 disabled={!m.enabled}
                 title={m.enabled ? undefined : "Coming soon"}
-                className={`relative flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-1 py-1.5 font-sans text-[11px] whitespace-nowrap transition-colors sm:flex-none sm:gap-1.5 sm:px-2 sm:text-[13.5px] ${
+                className={`relative flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 font-sans text-[11px] whitespace-nowrap transition-colors sm:flex-none sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:text-[13.5px] ${
                   active
                     ? "font-semibold text-ink"
                     : m.enabled
@@ -112,22 +114,20 @@ const LandingSearch = () => {
                       : "text-ink/35 cursor-not-allowed"
                 }`}
               >
-                <Icon size={13} className={`shrink-0 sm:size-4 ${active ? "text-violet" : ""}`} />
+                <Icon size={15} className={`shrink-0 sm:size-4 ${active ? "text-violet" : ""}`} />
                 <span className="truncate">{m.label}</span>
                 {!m.enabled && (
-                  <>
-                    {/* Compact "soon" indicator on phones — just a dot, no room for a badge */}
-                    <span className="h-1 w-1 shrink-0 rounded-full bg-violet sm:hidden" />
-                    <span className="hidden shrink-0 rounded-full bg-violet-soft px-1.5 py-0.5 font-sans text-[9px] font-bold uppercase tracking-wide text-violet sm:inline-flex">
-                      Soon
-                    </span>
-                  </>
+                  <span className="hidden shrink-0 rounded-full bg-violet-soft px-1.5 py-0.5 font-sans text-[9px] font-bold uppercase tracking-wide text-violet sm:inline-flex">
+                    Soon
+                  </span>
                 )}
-                {active && <span className="absolute -bottom-1 left-1.5 right-1.5 h-0.5 rounded-full bg-violet" />}
+                {active && (
+                  <span className="absolute -bottom-0.5 left-2 right-2 h-0.5 rounded-full bg-violet sm:left-1.5 sm:right-1.5" />
+                )}
               </button>
-            </React.Fragment>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
