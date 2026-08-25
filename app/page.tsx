@@ -47,7 +47,7 @@ export default function Page() {
           <Hero />
         </div>
       </section>
-      <section>
+      <section  id="how-it-works">
         <HowWayviaThinks />
       </section>
 
