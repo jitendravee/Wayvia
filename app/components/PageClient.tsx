@@ -2,12 +2,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ModeSelector from "../components/ModeSelector";
-import SearchForm, { SearchFormValues } from "../components/SearchForm";
+import SearchForm, { ALL_SEARCH_MODES, SearchFormValues } from "../components/SearchForm";
 import { StopEntry } from "../components/JourneyStopsForm";
 import NarrativeBanner from "../components/NarrativeBanner";
 import EmptyState from "../components/EmptyState";
 import StatsStrip from "../components/StatsStrip";
 import JourneyCard from "../components/JourneyCard";
+import OverviewMap from "../components/OverviewMap";
 import PartialMatchCard from "../components/PartialMatchCard";
 import FiltersBar from "../components/FiltersBar";
 import Pagination from "../components/Pagination";
@@ -26,6 +27,7 @@ export function PageInner() {
     quota: "GN",
     maxHubs: 10,
     maxConnections: 2,
+    modes: ALL_SEARCH_MODES,
   });
   // "Add a stop" chain beyond form.to/form.date — B→C, C→D, etc. Empty means
   // this is an ordinary single-leg search.
@@ -73,6 +75,7 @@ export function PageInner() {
         maxConnections: String(effective.maxConnections),
         page: String(targetPage),
         pageSize: String(PAGE_SIZE),
+        modes: effective.modes.join(","),
       });
       const res = await fetch(`/api/search?${params}`);
       const json: SearchResponse = await res.json();
@@ -102,6 +105,7 @@ export function PageInner() {
         maxHubs: String(form.maxHubs),
         maxConnections: String(form.maxConnections),
         pageSize: String(PAGE_SIZE),
+        modes: form.modes.join(","),
       });
       const res = await fetch(`/api/search/multi?${params}`);
       const json: MultiSearchResponse = await res.json();
@@ -147,8 +151,15 @@ export function PageInner() {
     const date = searchParams.get("date");
     const cls = searchParams.get("class");
     const quota = searchParams.get("quota");
+    const modesRaw = searchParams.get("modes");
+    const modes = modesRaw
+      ? modesRaw
+          .split(",")
+          .map((m) => m.trim().toLowerCase())
+          .filter((m): m is SearchFormValues["modes"][number] => m === "train" || m === "bus" || m === "flight")
+      : null;
 
-    if (!from && !to && !date && !cls && !quota) return;
+    if (!from && !to && !date && !cls && !quota && !modes) return;
 
     const effective: SearchFormValues = {
       ...form,
@@ -157,6 +168,7 @@ export function PageInner() {
       ...(date ? { date } : {}),
       ...(cls ? { travelClass: cls.toUpperCase() } : {}),
       ...(quota ? { quota: quota.toUpperCase() } : {}),
+      ...(modes && modes.length > 0 ? { modes } : {}),
     };
     setForm(effective);
 
@@ -281,6 +293,8 @@ export function PageInner() {
           )}
 
           {!ranked && <EmptyState from={data.from} to={data.to} partialCount={data.partial?.length ?? 0} />}
+
+          {page === 1 && data.mapOverview && data.mapOverview.length > 0 && <OverviewMap entries={data.mapOverview} />}
 
           {page === 1 && data.partial && data.partial.length > 0 && (
             <section className="mb-6">

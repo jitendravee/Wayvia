@@ -1,6 +1,7 @@
 import { discoverMultimodal } from "@/lib/graph/discoverMultimodal";
 import { annotateWithAvailability, annotatePartialCoverage } from "@/lib/availability";
 import { rankJourneys, buildNarrative } from "@/lib/score";
+import { buildMapOverview } from "@/lib/mapOverview";
 import type { Mode } from "@/lib/graph/types";
 import type { SearchResponse } from "@/app/types";
 
@@ -56,6 +57,7 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
       narrative,
       suggestion,
       results: null,
+      mapOverview: [],
       partial: annotatedPartial,
     };
   }
@@ -110,6 +112,7 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
     narrative,
     suggestion,
     results: pagedResults,
+    mapOverview: buildMapOverview(ranked),
     pagination,
     partial: annotatedPartial,
   };
@@ -127,10 +130,25 @@ export function parseCommonParams(searchParams: URLSearchParams) {
     : 2;
   const pageSize = Math.min(50, Math.max(1, Number(searchParams.get("pageSize") ?? "10") || 10));
 
-  const modesRaw = searchParams.get("modes"); // comma list, e.g. "train,bus" — omitted means "search everything available"
-  const modes = modesRaw
-    ? (modesRaw.split(",").map((m) => m.trim().toLowerCase()).filter((m): m is Mode => m === "train" || m === "bus" || m === "flight"))
-    : undefined;
+  // Which mode(s) the frontend wants this search to actually query. Comma
+  // list, e.g. "train,bus". Omitted, empty, or explicitly "all" all mean
+  // the same thing: search every mode with a registered provider (see
+  // lib/providers/registry.ts) — this is how the FE's mode toggle (All /
+  // Train only / Bus only / ...) reaches the backend, distinct from
+  // app/components/ModeSelector.tsx's after-the-fetch display filter.
+  const modesRaw = (searchParams.get("modes") ?? "").trim().toLowerCase();
+  const modes: Mode[] | undefined =
+    !modesRaw || modesRaw === "all"
+      ? undefined
+      : modesRaw
+          .split(",")
+          .map((m) => m.trim())
+          .filter((m): m is Mode => m === "train" || m === "bus" || m === "flight");
 
-  return { travelClass, quota, maxHubs, maxConnections, pageSize, modes };
+  // Guard against a malformed `modes` value (e.g. "modes=foo") resolving to
+  // an empty array, which would otherwise search nothing at all and look
+  // like a bug rather than a bad request.
+  const safeModes = modes && modes.length > 0 ? modes : undefined;
+
+  return { travelClass, quota, maxHubs, maxConnections, pageSize, modes: safeModes };
 }

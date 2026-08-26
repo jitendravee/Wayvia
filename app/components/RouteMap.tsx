@@ -68,12 +68,27 @@ export default function RouteMap({ legs }: { legs: AnnotatedLeg[] }) {
     return out;
   }, [legs]);
 
+  // The backend now attaches known coordinates to every leg directly
+  // (lib/geo.ts, via lib/availability.ts's fromGeo/toGeo) — that covers
+  // every curated station, which is the vast majority of real searches.
+  // This map merges those in ahead of the static hub list and only falls
+  // back to live Nominatim geocoding (below) for the rare station code
+  // that's in neither.
+  const serverCoords = useMemo(() => {
+    const m = new Map<string, { lat: number; lon: number; name: string }>();
+    legs.forEach((leg) => {
+      if (leg.fromGeo) m.set(leg.from, leg.fromGeo);
+      if (leg.toGeo) m.set(leg.to, leg.toGeo);
+    });
+    return m;
+  }, [legs]);
+
   const [resolved, setResolved] = useState<Map<string, { lat: number; lon: number }>>(new Map());
   const [loadingGeo, setLoadingGeo] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    const missing = stops.filter((s) => !COORDS.has(s.code) && !resolved.has(s.code));
+    const missing = stops.filter((s) => !COORDS.has(s.code) && !serverCoords.has(s.code) && !resolved.has(s.code));
     if (missing.length === 0) return;
 
     setLoadingGeo(true);
@@ -98,12 +113,12 @@ export default function RouteMap({ legs }: { legs: AnnotatedLeg[] }) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stops]);
+  }, [stops, serverCoords]);
 
   const points: MapPoint[] = useMemo(() => {
     const built: MapPoint[] = [];
     for (const s of stops) {
-      const known = COORDS.get(s.code);
+      const known = COORDS.get(s.code) ?? serverCoords.get(s.code);
       const coord = known ?? resolved.get(s.code);
       if (!coord) continue;
       const name = known ? known.name : s.code;
@@ -117,7 +132,7 @@ export default function RouteMap({ legs }: { legs: AnnotatedLeg[] }) {
       });
     }
     return built;
-  }, [stops, resolved]);
+  }, [stops, serverCoords, resolved]);
 
   if (points.length < 2) {
     if (loadingGeo) {

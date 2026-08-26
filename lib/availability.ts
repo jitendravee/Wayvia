@@ -1,11 +1,30 @@
 import { buildAvlKey, fetchAvailability, toAvlDate, AvlAvailability, AvlFare } from "./erail/avl";
 import type { JourneyCandidate, Leg, Mode, PartialCoverage } from "./graph/types";
+import { getStationCoord, StationCoord } from "./geo";
 
 export interface AnnotatedLeg extends Leg {
   /** null for non-train legs — there's no erail key involved, see `precomputed` on Leg. */
   avlKey: string | null;
   availability: AvlAvailability | null; // null = no data returned for this key
   fare: number | null;
+  /** Known map coordinates for the boarding/alighting stations, when this station is in the curated directory (lib/geo.ts). Null means the frontend needs to fall back to live geocoding for this one. */
+  fromGeo: StationCoord | null;
+  toGeo: StationCoord | null;
+}
+
+/** One stop along a journey, ready to plot on a map — origin, every hub/junction change, and the final destination, each carrying whatever mode got the traveller *to* that stop. */
+export interface RouteStop {
+  code: string;
+  name: string;
+  /** Null when this station code isn't in the curated coordinate directory (lib/geo.ts) — frontend should fall back to live geocoding just for this stop. */
+  lat: number | null;
+  lon: number | null;
+  kind: "origin" | "junction" | "destination";
+  time: string;
+  /** Mode of the leg that arrives at this stop. Absent for the origin (nothing arrives there). */
+  arrivingMode?: Mode;
+  /** Service id (train no / bus id / flight no) of the leg that arrives at this stop. Absent for the origin. */
+  arrivingService?: string;
 }
 
 export interface AnnotatedJourney {
@@ -25,6 +44,39 @@ export interface AnnotatedJourney {
   gapsMin: number[];
   /** Distinct modes used across this journey's legs, in leg order (deduped) — e.g. ["train"], or ["train","bus"] for a mixed itinerary. */
   modesUsed: Mode[];
+  /** Ordered stop-by-stop map data for this exact journey (origin → every hub → destination), coordinates included wherever known. Ready to feed straight into a map component. */
+  routeStops: RouteStop[];
+}
+
+/** Builds the ordered, map-ready stop list for one journey's legs — origin, every hub, destination. */
+export function buildRouteStops(legs: Leg[]): RouteStop[] {
+  const stops: RouteStop[] = [];
+  legs.forEach((leg, i) => {
+    if (i === 0) {
+      const geo = getStationCoord(leg.from);
+      stops.push({
+        code: leg.from,
+        name: geo?.name ?? leg.from,
+        lat: geo?.lat ?? null,
+        lon: geo?.lon ?? null,
+        kind: "origin",
+        time: leg.departure,
+      });
+    }
+    const isLast = i === legs.length - 1;
+    const geo = getStationCoord(leg.to);
+    stops.push({
+      code: leg.to,
+      name: geo?.name ?? leg.to,
+      lat: geo?.lat ?? null,
+      lon: geo?.lon ?? null,
+      kind: isLast ? "destination" : "junction",
+      time: leg.arrival,
+      arrivingMode: leg.mode,
+      arrivingService: leg.trainNo,
+    });
+  });
+  return stops;
 }
 
 /**
@@ -57,18 +109,22 @@ export async function annotateWithAvailability(
 
   return candidates.map((c) => {
     const legs: AnnotatedLeg[] = c.legs.map((leg) => {
+      const fromGeo = getStationCoord(leg.from);
+      const toGeo = getStationCoord(leg.to);
       if (leg.mode !== "train") {
         return {
           ...leg,
           avlKey: null,
           availability: leg.precomputed?.availability ?? null,
           fare: leg.precomputed?.fare ?? null,
+          fromGeo,
+          toGeo,
         };
       }
       const key = buildAvlKey(leg.trainNo, leg.from, leg.to, travelClass, quota, avlDate);
       const avl = availability.get(key) ?? null;
       const fareEntry = fares.get(key) ?? null;
-      return { ...leg, avlKey: key, availability: avl, fare: fareEntry ? fareEntry.estimatedFare : null };
+      return { ...leg, avlKey: key, availability: avl, fare: fareEntry ? fareEntry.estimatedFare : null, fromGeo, toGeo };
     });
 
     const fullyConfirmed = legs.every((l) => l.availability?.category === "AVAILABLE");
@@ -91,6 +147,7 @@ export async function annotateWithAvailability(
       connections: legs.length - 1,
       gapsMin,
       modesUsed,
+      routeStops: buildRouteStops(c.legs),
     };
   });
 }
@@ -121,7 +178,14 @@ export async function annotatePartialCoverage(
     const fareEntry = fares.get(key) ?? null;
     return {
       ...p,
-      leg: { ...p.leg, avlKey: key, availability: avl, fare: fareEntry ? fareEntry.estimatedFare : null },
+      leg: {
+        ...p.leg,
+        avlKey: key,
+        availability: avl,
+        fare: fareEntry ? fareEntry.estimatedFare : null,
+        fromGeo: getStationCoord(p.leg.from),
+        toGeo: getStationCoord(p.leg.to),
+      },
     };
   });
 }

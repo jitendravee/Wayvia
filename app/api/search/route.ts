@@ -1,133 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { discoverJourneys } from "@/lib/graph/discover";
-import { annotateWithAvailability, annotatePartialCoverage } from "@/lib/availability";
-import { rankJourneys, buildNarrative } from "@/lib/score";
-import type { SearchResponse } from "@/app/types";
-
-export interface JourneySearchParams {
-  from: string;
-  to: string;
-  date: string; // 'YYYY-MM-DD'
-  travelClass: string;
-  quota: string;
-  maxHubs: number;
-  maxConnections: 1 | 2 | 3;
-  page: number;
-  pageSize: number;
-}
+import { runJourneySearch, parseCommonParams } from "@/lib/searchJourney";
 
 /**
- * Runs one point-to-point journey search end to end: structural discovery
- * (direct + hub graph, mode-agnostic, doesn't know about class/quota),
- * live availability + fare annotation (class/quota-specific), ranking, and
- * pagination. This is the entire body of a single /api/search call — pulled
- * out so a multi-city itinerary (A→B on date1, B→C on date2, ...) can reuse
- * it leg by leg instead of the multi-city route reimplementing any of it.
- */
-export async function runJourneySearch(params: JourneySearchParams): Promise<SearchResponse> {
-  const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize } = params;
-
-  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion } = await discoverJourneys(from, to, {
-    date,
-    maxHubs,
-    maxConnections,
-  });
-  const allCandidates = [...direct, ...viaHub, ...viaTwoHub, ...viaThreeHub];
-
-  if (allCandidates.length === 0) {
-    const annotatedPartial = await annotatePartialCoverage(partial, date, travelClass, quota);
-    const narrative = buildNarrative(null, 0, 0, 0, 0, annotatedPartial.length, 0, 0);
-    return {
-      from,
-      to,
-      date,
-      travelClass,
-      quota,
-      mode: "train",
-      modesAvailable: ["train"],
-      graph,
-      maxConnections,
-      candidates: { direct: 0, oneConnection: 0, twoConnection: 0, threeConnection: 0 },
-      narrative,
-      suggestion,
-      results: null,
-      partial: annotatedPartial,
-    };
-  }
-
-  const [annotated, annotatedPartial] = await Promise.all([
-    annotateWithAvailability(allCandidates, date, travelClass, quota),
-    annotatePartialCoverage(partial, date, travelClass, quota),
-  ]);
-
-  const availableOnly = annotated.filter((j) => j.fullyConfirmed);
-
-  const ranked = rankJourneys(availableOnly);
-  const narrative = buildNarrative(
-    ranked,
-    direct.length,
-    viaHub.length,
-    annotated.length,
-    availableOnly.length,
-    annotatedPartial.length,
-    viaTwoHub.length,
-    viaThreeHub.length
-  );
-
-  let pagedResults = ranked;
-  let pagination = undefined;
-  if (ranked) {
-    const total = ranked.all.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const safePage = Math.min(page, totalPages);
-    const start = (safePage - 1) * pageSize;
-    pagedResults = { ...ranked, all: ranked.all.slice(start, start + pageSize) };
-    pagination = { page: safePage, pageSize, total, totalPages };
-  }
-
-  return {
-    from,
-    to,
-    date,
-    travelClass,
-    quota,
-    mode: "train",
-    modesAvailable: ["train"],
-    graph,
-    maxConnections,
-    candidates: {
-      direct: direct.length,
-      oneConnection: viaHub.length,
-      twoConnection: viaTwoHub.length,
-      threeConnection: viaThreeHub.length,
-    },
-    fullyConfirmedCount: annotated.filter((j) => j.fullyConfirmed).length,
-    narrative,
-    suggestion,
-    results: pagedResults,
-    pagination,
-    partial: annotatedPartial,
-  };
-}
-
-/** Parses+clamps the query params shared by both /api/search and /api/search/multi. */
-export function parseCommonParams(searchParams: URLSearchParams) {
-  const travelClass = searchParams.get("class") ?? "3A";
-  const quota = searchParams.get("quota") ?? "GN";
-  const maxHubs = Math.min(100, Math.max(1, Number(searchParams.get("maxHubs") ?? "10") || 10));
-  const legacyTwoHub = searchParams.get("twoHub") === "1";
-  const maxConnectionsRaw = Number(searchParams.get("maxConnections") ?? (legacyTwoHub ? "2" : "2"));
-  const maxConnections = ([1, 2, 3] as const).includes(maxConnectionsRaw as 1 | 2 | 3)
-    ? (maxConnectionsRaw as 1 | 2 | 3)
-    : 2;
-  const pageSize = Math.min(50, Math.max(1, Number(searchParams.get("pageSize") ?? "10") || 10));
-  return { travelClass, quota, maxHubs, maxConnections, pageSize };
-}
-
-/**
- * GET /api/search — single point-to-point journey search. Reads from/to/date
- * plus the shared class/quota/maxHubs/maxConnections/page/pageSize params
- * and runs them through runJourneySearch.
+ * GET /api/search — single point-to-point journey search.
+ *
+ * This used to have its own, separate copy of the search pipeline (train
+ * only, hardcoded to `discoverJourneys` + `modesAvailable: ["train"]`),
+ * which is why bus/flight results never showed up here even after the
+ * multimodal pipeline (lib/graph/discoverMultimodal.ts) and mock bus/flight
+ * providers (lib/providers/*) were wired in for /api/search/multi. That
+ * duplication is gone now — both routes share the exact same
+ * `runJourneySearch` in lib/searchJourney.ts, so a fix or a new mode here
+ * applies everywhere at once.
+ *
+ * Query params (see lib/searchJourney.ts's parseCommonParams for the full
+ * list): from, to, date are required. `modes` is how the frontend controls
+ * *what gets searched*, not just how results are displayed afterwards —
+ * e.g. `?modes=train` searches trains only, `?modes=bus,flight` searches
+ * only those two, and omitting it (or `?modes=all`) searches every mode
+ * with a registered provider (today: train + mock bus + mock flight).
  */
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -137,7 +28,7 @@ export async function GET(req: NextRequest) {
 
   if (!from || !to || !date) {
     return NextResponse.json(
-      { error: "from, to, and date are required, e.g. /api/search?from=NDLS&to=BCT&date=2026-08-24" },
+      { error: "from, to, and date are required, e.g. /api/search?from=NDLS&to=BCT&date=2026-08-24&modes=train,bus" },
       { status: 400 }
     );
   }
@@ -145,7 +36,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "from and to can't be the same station." }, { status: 400 });
   }
 
-  const { travelClass, quota, maxHubs, maxConnections, pageSize } = parseCommonParams(searchParams);
+  const { travelClass, quota, maxHubs, maxConnections, pageSize, modes } = parseCommonParams(searchParams);
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
 
   try {
@@ -159,6 +50,7 @@ export async function GET(req: NextRequest) {
       maxConnections,
       page,
       pageSize,
+      modes,
     });
     return NextResponse.json(response);
   } catch (err) {

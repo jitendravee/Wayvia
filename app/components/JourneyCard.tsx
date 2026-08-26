@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import type { AnnotatedJourney } from "../types";
+import { Bus, Plane, TrainFront } from "lucide-react";
+import type { AnnotatedJourney, Mode } from "../types";
 import RouteStrip from "./RouteStrip";
 import { Badge, StatusBadge, TagBadge } from "./Badge";
 import { durationLabel } from "./status";
@@ -14,6 +15,12 @@ const RouteMap = dynamic(() => import("./RouteMap"), {
 });
 
 const BEST_OVERALL_TAG = "Best overall";
+
+const MODE_ICON: Record<Mode, React.ComponentType<{ size?: number; className?: string }>> = {
+  train: TrainFront,
+  bus: Bus,
+  flight: Plane,
+};
 
 export default function JourneyCard({ journey, tag }: { journey: AnnotatedJourney; tag?: string }) {
   const isBest = tag === BEST_OVERALL_TAG;
@@ -50,6 +57,20 @@ export default function JourneyCard({ journey, tag }: { journey: AnnotatedJourne
 
           {viaChain.length > 0 && <Badge>via {viaChain.join(" → ")}</Badge>}
 
+          {journey.modesUsed.length > 1 && (
+            <span className="flex items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1 font-mono text-[11.5px] text-ink-muted shadow-sm">
+              {journey.legs.map((leg, i) => {
+                const Icon = MODE_ICON[leg.mode];
+                return (
+                  <span key={i} className="flex items-center gap-1">
+                    {i > 0 && <span className="text-ink-dim">→</span>}
+                    <Icon className="h-3.5 w-3.5 text-violet" size={14} />
+                  </span>
+                );
+              })}
+            </span>
+          )}
+
           <StatusBadge fullyConfirmed={journey.fullyConfirmed} hasBlockedLeg={journey.hasBlockedLeg} />
 
           <button
@@ -67,20 +88,29 @@ export default function JourneyCard({ journey, tag }: { journey: AnnotatedJourne
         {showMap && <RouteMap legs={journey.legs} />}
 
         <div className="mt-1 divide-y divide-border-soft/70 rounded-lg border border-border-soft bg-surface-alt/40">
-          {journey.legs.map((leg, i) => (
-            <div
-              key={i}
-              className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5 px-3 py-2 font-mono text-[12px] text-ink-muted"
-            >
-              <span className="text-ink">
-                #{leg.trainNo} <span className="text-ink-muted">{leg.trainName}</span> · {leg.from} → {leg.to}
-              </span>
-              <span>
-                {leg.departure} → {leg.arrival}
-                {leg.fare !== null ? ` · ₹${leg.fare}` : ""}
-              </span>
-            </div>
-          ))}
+          {journey.legs.map((leg, i) => {
+            const Icon = MODE_ICON[leg.mode];
+            return (
+              <div
+                key={i}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5 px-3 py-2 font-mono text-[12px] text-ink-muted"
+              >
+                <span className="flex items-center gap-1.5 text-ink">
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-violet" size={14} />
+                  #{leg.trainNo} <span className="text-ink-muted">{leg.trainName}</span> · {leg.from} → {leg.to}
+                  {leg.source === "mock" && (
+                    <span className="rounded bg-surface-alt px-1 py-[1px] font-mono text-[9px] uppercase tracking-wide text-ink-dim">
+                      demo data
+                    </span>
+                  )}
+                </span>
+                <span>
+                  {leg.departure} → {leg.arrival}
+                  {leg.fare !== null ? ` · ₹${leg.fare}` : ""}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
