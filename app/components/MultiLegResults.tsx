@@ -19,6 +19,7 @@ import {
   tagFor,
 } from "./filters";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
+import { useFillHeight } from "@/lib/hooks/useFillHeight";
 
 interface Props {
   initial: MultiSearchResponse;
@@ -197,8 +198,12 @@ function LegPanel({
     (ranked.all.length > 1 ||
       (data.pagination !== undefined && data.pagination.total > 1));
 
-  const hasMap = page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
-
+  const hasMap =
+    page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
+  const { ref: rowRef, height: fillHeight } = useFillHeight<HTMLDivElement>(
+    24,
+    360,
+  );
   return (
     <section>
       {/* <StatsStrip data={data} /> */}
@@ -267,7 +272,9 @@ function LegPanel({
                 onClick={() => setMobileView("list")}
                 aria-pressed={mobileView === "list"}
                 className={`flex-1 rounded-full px-3 py-1.5 font-display text-[13px] font-semibold transition-colors ${
-                  mobileView === "list" ? "bg-white text-violet-dark shadow-sm" : "text-ink-muted"
+                  mobileView === "list"
+                    ? "bg-white text-violet-dark shadow-sm"
+                    : "text-ink-muted"
                 }`}
               >
                 List
@@ -277,7 +284,9 @@ function LegPanel({
                 onClick={() => setMobileView("map")}
                 aria-pressed={mobileView === "map"}
                 className={`flex-1 rounded-full px-3 py-1.5 font-display text-[13px] font-semibold transition-colors ${
-                  mobileView === "map" ? "bg-white text-violet-dark shadow-sm" : "text-ink-muted"
+                  mobileView === "map"
+                    ? "bg-white text-violet-dark shadow-sm"
+                    : "text-ink-muted"
                 }`}
               >
                 Map
@@ -290,9 +299,10 @@ function LegPanel({
               result list never pushes the map out of view — on smaller
               screens this is moot since only one of the two shows at a
               time via the List/Map switch above. */}
-          <div className="flex flex-col gap-4 md:flex-row md:items-start">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start ">
             <div
-              className={`md:max-h-[calc(100vh-7rem)] w-full md:overflow-y-auto md:pr-1 ${
+              style={fillHeight ? { height: fillHeight } : undefined}
+              className={`w-full md:overflow-y-auto md:pr-1 ${
                 hasMap && mobileView !== "list" ? "hidden md:block" : ""
               }`}
             >

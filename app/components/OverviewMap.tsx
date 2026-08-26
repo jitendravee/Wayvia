@@ -14,7 +14,11 @@ const OverviewMapInner = dynamic(() => import("./OverviewMapInner"), {
   ),
 });
 
-const MODE_ICON_LABEL: Record<string, string> = { train: "Train", bus: "Bus", flight: "Flight" };
+const MODE_ICON_LABEL: Record<string, string> = {
+  train: "Train",
+  bus: "Bus",
+  flight: "Flight",
+};
 
 /**
  * The "ways to get there" overview — every notable route for this search
@@ -24,16 +28,25 @@ const MODE_ICON_LABEL: Record<string, string> = { train: "Train", bus: "Bus", fl
  * (lib/mapOverview.ts + lib/geo.ts) — this component just plots whatever
  * `mapOverview` the search response already carries.
  */
-export default function OverviewMap({ entries }: { entries: MapOverviewEntry[] }) {
+export default function OverviewMap({
+  height,
+  entries,
+}: {
+  entries: MapOverviewEntry[];
+  height?: number;
+}) {
   const routes: PlottableRoute[] = useMemo(
     () =>
       entries
         .map((entry) => ({
           entry,
-          points: entry.stops.filter((s): s is typeof s & { lat: number; lon: number } => s.lat !== null && s.lon !== null),
+          points: entry.stops.filter(
+            (s): s is typeof s & { lat: number; lon: number } =>
+              s.lat !== null && s.lon !== null,
+          ),
         }))
         .filter((r) => r.points.length >= 2),
-    [entries]
+    [entries],
   );
 
   if (routes.length === 0) return null;
@@ -41,14 +54,17 @@ export default function OverviewMap({ entries }: { entries: MapOverviewEntry[] }
   return (
     <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft bg-surface-alt px-4 py-2.5">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">Ways to get there — overview</span>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">
+          Ways to get there — overview
+        </span>
         <span className="font-mono text-[10px] text-ink-dim">
           {routes.length} route{routes.length === 1 ? "" : "s"} plotted
         </span>
       </div>
 
-      <OverviewMapInner routes={routes} />
-
+      <div style={{ height: height ?? 420 }} className="w-full">
+        <OverviewMapInner routes={routes} />
+      </div>
       <div className="flex flex-wrap gap-2 border-t border-border-soft bg-surface-alt/40 px-4 py-3">
         {entries.map((e) => (
           <div
@@ -63,7 +79,8 @@ export default function OverviewMap({ entries }: { entries: MapOverviewEntry[] }
             </span>
             <span className="font-semibold text-ink">{e.label}</span>
             <span className="text-ink-dim">
-              {e.modes.map((m) => MODE_ICON_LABEL[m] ?? m).join(" + ")} · {e.connections === 0 ? "direct" : `${e.connections} conn.`}
+              {e.modes.map((m) => MODE_ICON_LABEL[m] ?? m).join(" + ")} ·{" "}
+              {e.connections === 0 ? "direct" : `${e.connections} conn.`}
               {e.totalFare !== null ? ` · ₹${e.totalFare}` : ""}
             </span>
           </div>
