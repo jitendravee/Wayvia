@@ -7,7 +7,7 @@ import { TRANSPORT_OPTIONS } from "./filters";
 const ICON: Record<TransportFilter, React.ComponentType<{ size?: number }>> = {
   any: Waypoints,
   train: TrainFront,
-  bus: Bus,
+  bus: BusFront,
   flight: Plane,
   mixed: Shuffle,
 };

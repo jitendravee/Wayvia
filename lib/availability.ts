@@ -1,4 +1,5 @@
 import { buildAvlKey, fetchAvailability, toAvlDate, AvlAvailability, AvlFare } from "./erail/avl";
+import { fetchTrainFares, getFareForClassQuota } from "./erail/fare";
 import type { JourneyCandidate, Leg, Mode, PartialCoverage } from "./graph/types";
 import { getStationCoord, StationCoord } from "./geo";
 
@@ -80,13 +81,33 @@ export function buildRouteStops(legs: Leg[]): RouteStop[] {
 }
 
 /**
- * Annotates every candidate's legs with availability + fare. Train legs get
- * this from a single batched request to s.erail.in/getvalue (same
- * funnel-then-check principle as before: narrow down structurally first,
- * then hit the live endpoint once on the survivors). Non-train legs (bus,
- * flight — currently mock, eventually real providers) skip erail entirely
- * and use whatever they already computed on `leg.precomputed`, since a
- * train-specific seat-status endpoint has nothing to say about a bus.
+ * Annotates every candidate's legs with availability + fare.
+ *
+ * Availability always comes from a single batched s.erail.in/getvalue call
+ * (same funnel-then-check principle as before: narrow down structurally
+ * first, then hit the live endpoint once on the survivors) — that endpoint
+ * remains the only source of real-time seat status.
+ *
+ * Fare now comes primarily from erail.in/train-fare/{trainNo} — a real
+ * fare-lookup page with one row per quota (General/Tatkal) and one column
+ * per class, fetched once per unique (trainNo, from, to) leg and cached
+ * (see lib/erail/fare.ts). This runs strictly AFTER availability, and only
+ * for legs whose availability came back AVAILABLE — a leg with no seats is
+ * getting excluded from `fullyConfirmed` results anyway (see
+ * runJourneySearch's `availableOnly` filter), so its fare is never shown
+ * and isn't worth an extra request for. In practice this cuts the fare
+ * fetch down to a small handful of legs even when there are thousands of
+ * candidates, since most legs on most candidates aren't AVAILABLE.
+ *
+ * The older approach of pulling a fare out of getvalue's own "_f" response
+ * is kept ONLY as a fallback for whatever AVAILABLE leg the fare page
+ * didn't return data for (network hiccup, unusual class), since that field
+ * is a positionally-guessed value from an undocumented blob rather than a
+ * real fare table.
+ *
+ * Non-train legs (bus, flight — currently mock, eventually real providers)
+ * skip both erail sources entirely and use whatever they already computed
+ * on `leg.precomputed`.
  */
 export async function annotateWithAvailability(
   candidates: JourneyCandidate[],
@@ -97,15 +118,31 @@ export async function annotateWithAvailability(
   const avlDate = toAvlDate(date);
 
   const allKeys = new Set<string>();
+  // avlKey -> which (trainNo, from, to) it belongs to, so that once
+  // availability is back we know exactly which legs are worth a fare
+  // fetch — without this we'd have no way to connect an AVL key back to
+  // the leg it came from.
+  const keyToLeg = new Map<string, { trainNo: string; from: string; to: string }>();
   for (const c of candidates) {
     for (const leg of c.legs) {
       if (leg.mode === "train") {
-        allKeys.add(buildAvlKey(leg.trainNo, leg.from, leg.to, travelClass, quota, avlDate));
+        const key = buildAvlKey(leg.trainNo, leg.from, leg.to, travelClass, quota, avlDate);
+        allKeys.add(key);
+        if (!keyToLeg.has(key)) keyToLeg.set(key, { trainNo: leg.trainNo, from: leg.from, to: leg.to });
       }
     }
   }
 
+  // Availability has to resolve first — fare fetching depends on its
+  // result now, so this can no longer run in parallel with it.
   const { availability, fares } = await fetchAvailability([...allKeys]);
+
+  const availableLegs: { trainNo: string; from: string; to: string }[] = [];
+  for (const [key, leg] of keyToLeg) {
+    if (availability.get(key)?.category === "AVAILABLE") availableLegs.push(leg);
+  }
+
+  const fareTables = await fetchTrainFares(availableLegs);
 
   return candidates.map((c) => {
     const legs: AnnotatedLeg[] = c.legs.map((leg) => {
@@ -124,7 +161,12 @@ export async function annotateWithAvailability(
       const key = buildAvlKey(leg.trainNo, leg.from, leg.to, travelClass, quota, avlDate);
       const avl = availability.get(key) ?? null;
       const fareEntry = fares.get(key) ?? null;
-      return { ...leg, avlKey: key, availability: avl, fare: fareEntry ? fareEntry.estimatedFare : null, fromGeo, toGeo };
+
+      const fareTable = fareTables.get(`${leg.trainNo}_${leg.from}_${leg.to}`);
+      const tableFare = fareTable ? getFareForClassQuota(fareTable, travelClass, quota) : null;
+      const fare = tableFare ?? (fareEntry ? fareEntry.estimatedFare : null);
+
+      return { ...leg, avlKey: key, availability: avl, fare, fromGeo, toGeo };
     });
 
     const fullyConfirmed = legs.every((l) => l.availability?.category === "AVAILABLE");
@@ -159,7 +201,8 @@ export interface AnnotatedPartialCoverage extends PartialCoverage {
 /**
  * Same live-data pass as annotateWithAvailability, but for partial-coverage
  * results (single real leg each) — so "we got you to X" also shows real
- * seat status and fare, not just a schedule.
+ * seat status and fare, not just a schedule. Fare sourcing follows the
+ * same erail.in/train-fare-first, getvalue-"_f"-fallback order.
  */
 export async function annotatePartialCoverage(
   partial: PartialCoverage[],
@@ -170,19 +213,30 @@ export async function annotatePartialCoverage(
   if (partial.length === 0) return [];
   const avlDate = toAvlDate(date);
   const keys = partial.map((p) => buildAvlKey(p.leg.trainNo, p.leg.from, p.leg.to, travelClass, quota, avlDate));
-  const { availability, fares } = await fetchAvailability(keys);
+
+  const fareLegs = partial.map((p) => ({ trainNo: p.leg.trainNo, from: p.leg.from, to: p.leg.to }));
+
+  const [{ availability, fares }, fareTables] = await Promise.all([
+    fetchAvailability(keys),
+    fetchTrainFares(fareLegs),
+  ]);
 
   return partial.map((p, i) => {
     const key = keys[i];
     const avl = availability.get(key) ?? null;
     const fareEntry = fares.get(key) ?? null;
+
+    const fareTable = fareTables.get(`${p.leg.trainNo}_${p.leg.from}_${p.leg.to}`);
+    const tableFare = fareTable ? getFareForClassQuota(fareTable, travelClass, quota) : null;
+    const fare = tableFare ?? (fareEntry ? fareEntry.estimatedFare : null);
+
     return {
       ...p,
       leg: {
         ...p.leg,
         avlKey: key,
         availability: avl,
-        fare: fareEntry ? fareEntry.estimatedFare : null,
+        fare,
         fromGeo: getStationCoord(p.leg.from),
         toGeo: getStationCoord(p.leg.to),
       },
