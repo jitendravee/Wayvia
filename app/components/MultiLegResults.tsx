@@ -285,9 +285,16 @@ function LegPanel({
             </div>
           )}
 
-          <div className="flex flex-row gap-4">
+          {/* List scrolls in its own bounded column on md+ and the map is
+              sticky beside it (offset for the fixed navbar), so a long
+              result list never pushes the map out of view — on smaller
+              screens this is moot since only one of the two shows at a
+              time via the List/Map switch above. */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-start">
             <div
-              className={` ${hasMap && mobileView !== "list" ? "hidden md:block" : ""}`}
+              className={`md:max-h-[calc(100vh-7rem)] w-full md:overflow-y-auto md:pr-1 ${
+                hasMap && mobileView !== "list" ? "hidden md:block" : ""
+              }`}
             >
               <div className="space-y-3">
                 {listItems.map((j, i) => (
@@ -319,7 +326,11 @@ function LegPanel({
             </div>
 
             {hasMap && (
-              <div className={mobileView !== "map" ? "hidden md:block" : ""}>
+              <div
+                className={`md:sticky md:top-24  ${
+                  mobileView !== "map" ? "hidden md:block" : ""
+                }`}
+              >
                 <OverviewMap entries={data.mapOverview!} />
               </div>
             )}
