@@ -1,10 +1,10 @@
-import { Bus, Plane, TrainFront } from "lucide-react";
+import {BusFront, Plane, TrainFront } from "lucide-react";
 import type { AnnotatedLeg, Mode } from "../types";
 import { signalFor, SIGNAL_DOT, SIGNAL_LINE, SIGNAL_TEXT, SIGNAL_LABEL } from "./status";
 
 const MODE_ICON: Record<Mode, React.ComponentType<{ size?: number; className?: string }>> = {
   train: TrainFront,
-  bus: Bus,
+  bus: BusFront,
   flight: Plane,
 };
 

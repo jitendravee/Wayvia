@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { Bus, Plane, TrainFront } from "lucide-react";
+import {BusFront, Plane, TrainFront } from "lucide-react";
 import type { AnnotatedJourney, Mode } from "../types";
 import RouteStrip from "./RouteStrip";
 import { Badge, StatusBadge, TagBadge } from "./Badge";
@@ -18,7 +18,7 @@ const BEST_OVERALL_TAG = "Best overall";
 
 const MODE_ICON: Record<Mode, React.ComponentType<{ size?: number; className?: string }>> = {
   train: TrainFront,
-  bus: Bus,
+  bus: BusFront,
   flight: Plane,
 };
 

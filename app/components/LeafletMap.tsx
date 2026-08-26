@@ -128,7 +128,7 @@ export default function LeafletMap({ points }: { points: MapPoint[] }) {
   const path = points.map((p) => [p.lat, p.lon]) as [number, number][];
 
   return (
-    <div className="relative h-[360px] w-full overflow-hidden">
+    <div className="relative isolate h-[360px] w-full overflow-hidden">
       <MapContainer center={center} zoom={6} scrollWheelZoom={false} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

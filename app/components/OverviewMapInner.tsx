@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Polyline,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { MapOverviewEntry, RouteStop } from "../types";
@@ -26,27 +32,42 @@ function stopIconHtml(color: string, filled: boolean) {
 function FitAllBounds({ routes }: { routes: PlottableRoute[] }) {
   const map = useMap();
   useEffect(() => {
-    const all = routes.flatMap((r) => r.points.map((p) => [p.lat, p.lon] as [number, number]));
+    const all = routes.flatMap((r) =>
+      r.points.map((p) => [p.lat, p.lon] as [number, number]),
+    );
     if (all.length < 2) return;
     map.fitBounds(L.latLngBounds(all), { padding: [40, 40], maxZoom: 8 });
   }, [routes, map]);
   return null;
 }
 
-export default function OverviewMapInner({ routes }: { routes: PlottableRoute[] }) {
+export default function OverviewMapInner({
+  routes,
+}: {
+  routes: PlottableRoute[];
+}) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const center = useMemo<[number, number]>(() => {
     const all = routes.flatMap((r) => r.points);
     if (all.length === 0) return [22.5, 79];
-    return [all.reduce((s, p) => s + p.lat, 0) / all.length, all.reduce((s, p) => s + p.lon, 0) / all.length];
+    return [
+      all.reduce((s, p) => s + p.lat, 0) / all.length,
+      all.reduce((s, p) => s + p.lon, 0) / all.length,
+    ];
   }, [routes]);
 
   if (routes.length === 0) return null;
 
   return (
-    <div className="relative h-[420px] w-full overflow-hidden">
-      <MapContainer center={center} zoom={5} scrollWheelZoom={false} className="h-full w-full">
+    <div className="relative h-full isolate w-full overflow-hidden">
+      {" "}
+      <MapContainer
+        center={center}
+        zoom={5}
+        scrollWheelZoom={false}
+        className="h-full w-full"
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -54,12 +75,19 @@ export default function OverviewMapInner({ routes }: { routes: PlottableRoute[] 
 
         {routes.map((r) => {
           const dimmed = activeId !== null && activeId !== r.entry.id;
-          const path = r.points.map((p) => [p.lat, p.lon]) as [number, number][];
+          const path = r.points.map((p) => [p.lat, p.lon]) as [
+            number,
+            number,
+          ][];
           return (
             <div key={r.entry.id} style={{ display: "contents" }}>
               <Polyline
                 positions={path}
-                pathOptions={{ color: r.entry.color, weight: activeId === r.entry.id ? 5 : 3, opacity: dimmed ? 0.18 : 0.75 }}
+                pathOptions={{
+                  color: r.entry.color,
+                  weight: activeId === r.entry.id ? 5 : 3,
+                  opacity: dimmed ? 0.18 : 0.75,
+                }}
                 eventHandlers={{
                   mouseover: () => setActiveId(r.entry.id),
                   mouseout: () => setActiveId(null),
@@ -100,7 +128,6 @@ export default function OverviewMapInner({ routes }: { routes: PlottableRoute[] 
 
         <FitAllBounds routes={routes} />
       </MapContainer>
-
       <div className="pointer-events-none absolute right-2 top-2 flex max-w-[180px] flex-col gap-1 rounded-lg border border-white/60 bg-white/95 p-2 shadow-sm backdrop-blur">
         {routes.map((r) => (
           <div key={r.entry.id} className="flex items-center gap-1.5">
@@ -110,11 +137,12 @@ export default function OverviewMapInner({ routes }: { routes: PlottableRoute[] 
             >
               {r.entry.rank}
             </span>
-            <span className="truncate font-mono text-[10px] font-medium text-ink">{r.entry.label}</span>
+            <span className="truncate font-mono text-[10px] font-medium text-ink">
+              {r.entry.label}
+            </span>
           </div>
         ))}
       </div>
-
       <style>{`
         .wv-icon-reset { background: transparent; border: none; }
         .wv-ov-pin {

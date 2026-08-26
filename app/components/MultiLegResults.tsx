@@ -5,12 +5,21 @@ import NarrativeBanner from "./NarrativeBanner";
 import EmptyState from "./EmptyState";
 import StatsStrip from "./StatsStrip";
 import JourneyCard from "./JourneyCard";
+import OverviewMap from "./OverviewMap";
 import PartialMatchCard from "./PartialMatchCard";
 import FiltersBar from "./FiltersBar";
-import ModeSelector from "./ModeSelector";
 import Pagination from "./Pagination";
-import { applyFilters, DEFAULT_FILTERS, FilterState, maxDurationInSet, maxFareInSet, tagFor } from "./filters";
+import LegTabs, { LegTabItem } from "./LegTabs";
+import {
+  applyFilters,
+  DEFAULT_FILTERS,
+  FilterState,
+  maxDurationInSet,
+  maxFareInSet,
+  tagFor,
+} from "./filters";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
+import { useFillHeight } from "@/lib/hooks/useFillHeight";
 
 interface Props {
   initial: MultiSearchResponse;
@@ -19,33 +28,68 @@ interface Props {
   pageSize: number;
 }
 
-/** One leg's worth of client-side state — mirrors what PageClient tracks for a single search. */
+/** One leg's worth of client-side state — mirrors what PageClient used to track for a single search, back when single and multi-city had separate rendering paths. */
 interface LegState {
   data: SearchResponse;
   filters: FilterState;
   loading: boolean;
 }
 
-export default function MultiLegResults({ initial, maxHubs, maxConnections, pageSize }: Props) {
+interface RefineOpts {
+  page?: number;
+  travelClass?: string;
+  quota?: string;
+  /** Bumped by the "search via N junctions" suggestion banner when a leg's direct/1-change search comes back thin. */
+  maxConnections?: 1 | 2 | 3;
+}
+
+/**
+ * Every trip's results, one leg at a time — whether that trip has 1 leg
+ * (an ordinary single search) or several (multi-city). There's no separate
+ * "single search" rendering path: a 1-leg trip is just a `MultiSearchResponse`
+ * with one entry, LegTabs renders nothing for it, and everything below
+ * behaves exactly like an ordinary search result.
+ *
+ * 2+ legs get a tab strip (LegTabs) above everything else — only the active
+ * leg's data, filters, and list render at once, so "filters apply only to
+ * the selected leg" is true by construction, not something each leg has to
+ * re-declare.
+ */
+export default function MultiLegResults({
+  initial,
+  maxHubs,
+  maxConnections,
+  pageSize,
+}: Props) {
   const [legs] = useState<TripLeg[]>(initial.legs);
   const [states, setStates] = useState<LegState[]>(
-    initial.results.map((data) => ({ data, filters: DEFAULT_FILTERS, loading: false }))
+    initial.results.map((data) => ({
+      data,
+      filters: DEFAULT_FILTERS,
+      loading: false,
+    })),
   );
+  const [activeIndex, setActiveIndex] = useState(0);
 
   function patchLeg(i: number, patch: Partial<LegState>) {
-    setStates((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+    setStates((prev) =>
+      prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)),
+    );
   }
 
   // A leg's fare/availability is class & quota-specific, same as the single
-  // search — so paginating or refining class/quota for one leg just calls
-  // the ordinary single-leg /api/search for that leg only. Other legs, and
-  // the rest of this leg's already-fetched data, are untouched.
-  async function refetchLeg(i: number, opts: { page?: number; travelClass?: string; quota?: string }) {
+  // search always was — so paginating, refining class/quota, or accepting a
+  // "search via N junctions" suggestion for one leg just calls the ordinary
+  // single-leg /api/search for that leg only. Other legs, and the rest of
+  // this leg's already-fetched data, are untouched.
+  async function refetchLeg(i: number, opts: RefineOpts) {
     const leg = legs[i];
     const current = states[i].data;
     const travelClass = opts.travelClass ?? current.travelClass ?? "3A";
     const quota = opts.quota ?? current.quota ?? "GN";
     const page = opts.page ?? 1;
+    const legMaxConnections =
+      opts.maxConnections ?? current.maxConnections ?? maxConnections;
 
     patchLeg(i, { loading: true });
     try {
@@ -56,18 +100,20 @@ export default function MultiLegResults({ initial, maxHubs, maxConnections, page
         class: travelClass,
         quota,
         maxHubs: String(maxHubs),
-        maxConnections: String(maxConnections),
+        maxConnections: String(legMaxConnections),
         page: String(page),
         pageSize: String(pageSize),
       });
       const res = await fetch(`/api/search?${params}`);
       const json: SearchResponse = await res.json();
-      if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+      if (!res.ok)
+        throw new Error(json.error || `Request failed (${res.status})`);
       patchLeg(i, {
         data: json,
         loading: false,
-        // class/quota changed the result set under the person's feet — drop
-        // any sort/connection/etc. filter they'd picked for the old set.
+        // Anything other than a plain page turn changed the underlying
+        // result set out from under the person — drop whatever sort/
+        // connection/etc. filter they'd picked for the old set.
         ...(opts.page === undefined ? { filters: DEFAULT_FILTERS } : {}),
       });
     } catch {
@@ -75,64 +121,116 @@ export default function MultiLegResults({ initial, maxHubs, maxConnections, page
     }
   }
 
+  const tabs: LegTabItem[] = legs.map((leg, i) => ({
+    key: String(i),
+    label: `Leg ${i + 1}`,
+    sublabel: `${leg.from} → ${leg.to}`,
+  }));
+
   return (
-    <div className="space-y-10">
-      {states.map((state, i) => (
-        <LegSection
-          key={`${legs[i].from}-${legs[i].to}-${legs[i].date}-${i}`}
-          index={i}
-          leg={legs[i]}
-          state={state}
-          onFiltersChange={(filters) => patchLeg(i, { filters })}
-          onRefine={(next) => refetchLeg(i, next)}
-          onPageChange={(page) => refetchLeg(i, { page })}
-        />
-      ))}
+    <div>
+      <LegTabs
+        tabs={tabs}
+        active={String(activeIndex)}
+        onChange={(k) => setActiveIndex(Number(k))}
+      />
+
+      <LegPanel
+        leg={legs[activeIndex]}
+        state={states[activeIndex]}
+        onFiltersChange={(filters) => patchLeg(activeIndex, { filters })}
+        onRefine={(next) => refetchLeg(activeIndex, next)}
+        onPageChange={(page) => refetchLeg(activeIndex, { page })}
+      />
     </div>
   );
 }
 
-function LegSection({
-  index,
+function LegPanel({
   leg,
   state,
   onFiltersChange,
   onRefine,
   onPageChange,
 }: {
-  index: number;
   leg: TripLeg;
   state: LegState;
   onFiltersChange: (f: FilterState) => void;
-  onRefine: (next: { travelClass?: string; quota?: string }) => void;
+  onRefine: (next: RefineOpts) => void;
   onPageChange: (page: number) => void;
 }) {
   const { data, filters, loading } = state;
   const ranked = data.results;
-
-  const fareCeiling = useMemo(() => (ranked ? maxFareInSet(ranked.all) : 0), [ranked]);
-  const durationCeiling = useMemo(() => (ranked ? maxDurationInSet(ranked.all) : 0), [ranked]);
-  const filtered = useMemo(() => (ranked ? applyFilters(ranked.all, filters) : []), [ranked, filters]);
-  const restOfList = useMemo(() => (ranked ? filtered.filter((j) => j !== ranked.bestOverall) : []), [filtered, ranked]);
   const page = data.pagination?.page ?? 1;
 
+  // Below `md` there isn't room to show the list and the map side by side —
+  // this toggles which one occupies that space. Ignored entirely at `md`
+  // and up, where both always show (see the `md:hidden` / `md:block`
+  // classes below).
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
+
+  const fareCeiling = useMemo(
+    () => (ranked ? maxFareInSet(ranked.all) : 0),
+    [ranked],
+  );
+  const durationCeiling = useMemo(
+    () => (ranked ? maxDurationInSet(ranked.all) : 0),
+    [ranked],
+  );
+  const filtered = useMemo(
+    () => (ranked ? applyFilters(ranked.all, filters) : []),
+    [ranked, filters],
+  );
+
+  // Best overall is just the first row of the list itself — no separate
+  // card/heading above the filters. Only pinned to the top on page 1; later
+  // pages are already a fresh slice from the backend with no "best" to pin.
+  const listItems = useMemo(() => {
+    if (!ranked || page !== 1) return filtered;
+    const rest = filtered.filter((j) => j !== ranked.bestOverall);
+    return filtered.includes(ranked.bestOverall)
+      ? [ranked.bestOverall, ...rest]
+      : filtered;
+  }, [ranked, filtered, page]);
+
+  const hasFilterableSet =
+    ranked !== null &&
+    (ranked.all.length > 1 ||
+      (data.pagination !== undefined && data.pagination.total > 1));
+
+  const hasMap =
+    page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
+  const { ref: rowRef, height: fillHeight } = useFillHeight<HTMLDivElement>(
+    24,
+    360,
+  );
   return (
     <section>
-      <div className="mb-3 flex items-center gap-2.5">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-soft font-mono text-[12px] font-bold text-violet-dark">
-          {index + 1}
-        </span>
-        <h2 className="font-display text-lg font-semibold text-ink">
-          {leg.from} → {leg.to}
-          <span className="ml-2 font-mono text-[12px] font-normal text-ink-dim">{leg.date}</span>
-        </h2>
-      </div>
+      {/* <StatsStrip data={data} /> */}
 
-      <StatsStrip data={data} />
+      {/* {data.narrative && <NarrativeBanner narrative={data.narrative} tone={ranked ? "clear" : "empty"} />}
 
-      {data.narrative && <NarrativeBanner narrative={data.narrative} tone={ranked ? "clear" : "empty"} />}
+      {page === 1 && data.suggestion && (
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-violet-ring bg-violet-soft/40 px-5 py-3.5">
+          <div className="text-[13px] leading-relaxed text-ink">{data.suggestion.message}</div>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => onRefine({ maxConnections: data.suggestion!.nextConnections })}
+            className="shrink-0 rounded-full bg-violet px-4 py-2 font-display text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-dark disabled:opacity-50"
+          >
+            Search via {data.suggestion.nextConnections} junctions
+          </button>
+        </div>
+      )} */}
 
-      {!ranked && <EmptyState from={data.from} to={data.to} partialCount={data.partial?.length ?? 0} />}
+      {!ranked && (
+        <EmptyState
+          from={data.from}
+          to={data.to}
+          partialCount={data.partial?.length ?? 0}
+        />
+      )}
 
       {page === 1 && data.partial && data.partial.length > 0 && (
         <div className="mb-6">
@@ -141,7 +239,10 @@ function LegSection({
           </div>
           <div className="space-y-3">
             {data.partial.map((p, i) => (
-              <PartialMatchCard key={`${p.type}-${p.hub}-${p.leg.trainNo}-${i}`} match={p} />
+              <PartialMatchCard
+                key={`${p.type}-${p.hub}-${p.leg.trainNo}-${i}`}
+                match={p}
+              />
             ))}
           </div>
         </div>
@@ -149,51 +250,101 @@ function LegSection({
 
       {ranked && (
         <>
-          {page === 1 && (
-            <div className="mb-6">
-              <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">Best match for this leg</div>
-              <JourneyCard journey={ranked.bestOverall} tag="Best overall" />
+          {hasFilterableSet && (
+            <FiltersBar
+              filters={filters}
+              onChange={onFiltersChange}
+              fareCeiling={fareCeiling}
+              durationCeiling={durationCeiling}
+              resultCount={filtered.length}
+              travelClass={data.travelClass ?? "3A"}
+              quota={data.quota ?? "GN"}
+              onRefine={onRefine}
+              refining={loading}
+            />
+          )}
+
+          {/* List/Map switch — mobile only. On md+ both panes below just show at once. */}
+          {hasMap && (
+            <div className="mb-3 flex gap-1 rounded-full border border-border bg-surface-alt p-1 md:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileView("list")}
+                aria-pressed={mobileView === "list"}
+                className={`flex-1 rounded-full px-3 py-1.5 font-display text-[13px] font-semibold transition-colors ${
+                  mobileView === "list"
+                    ? "bg-white text-violet-dark shadow-sm"
+                    : "text-ink-muted"
+                }`}
+              >
+                List
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileView("map")}
+                aria-pressed={mobileView === "map"}
+                className={`flex-1 rounded-full px-3 py-1.5 font-display text-[13px] font-semibold transition-colors ${
+                  mobileView === "map"
+                    ? "bg-white text-violet-dark shadow-sm"
+                    : "text-ink-muted"
+                }`}
+              >
+                Map
+              </button>
             </div>
           )}
 
-          {(ranked.all.length > 1 || (data.pagination && data.pagination.total > 1)) && (
-            <>
-              <ModeSelector value={filters.transport} onChange={(transport) => onFiltersChange({ ...filters, transport })} />
-
-              <FiltersBar
-                filters={filters}
-                onChange={onFiltersChange}
-                fareCeiling={fareCeiling}
-                durationCeiling={durationCeiling}
-                resultCount={filtered.length}
-                travelClass={data.travelClass ?? "3A"}
-                quota={data.quota ?? "GN"}
-                onRefine={onRefine}
-                refining={loading}
-              />
-
-              <div>
-                <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-                  {restOfList.length > 0 ? "Other ways to do this leg" : "No other options match these filters"}
-                </div>
-                <div className="space-y-3">
-                  {(page === 1 ? restOfList : filtered).map((j, i) => (
-                    <JourneyCard key={i} journey={j} tag={tagFor(j, ranked)} />
-                  ))}
-                </div>
+          {/* List scrolls in its own bounded column on md+ and the map is
+              sticky beside it (offset for the fixed navbar), so a long
+              result list never pushes the map out of view — on smaller
+              screens this is moot since only one of the two shows at a
+              time via the List/Map switch above. */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-start ">
+            <div
+              style={fillHeight ? { height: fillHeight } : undefined}
+              className={`w-full md:overflow-y-auto md:pr-1 ${
+                hasMap && mobileView !== "list" ? "hidden md:block" : ""
+              }`}
+            >
+              <div className="space-y-3">
+                {listItems.map((j, i) => (
+                  <JourneyCard
+                    key={i}
+                    journey={j}
+                    tag={
+                      i === 0 && page === 1 ? "Best overall" : tagFor(j, ranked)
+                    }
+                  />
+                ))}
               </div>
 
-              {data.pagination && (
+              {hasFilterableSet && data.pagination && (
                 <>
-                  <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} onChange={onPageChange} disabled={loading} />
+                  <Pagination
+                    page={data.pagination.page}
+                    totalPages={data.pagination.totalPages}
+                    onChange={onPageChange}
+                    disabled={loading}
+                  />
                   <div className="mt-2 text-center font-mono text-[11px] text-ink-dim">
-                    {data.pagination.total} total route{data.pagination.total === 1 ? "" : "s"} found · page {data.pagination.page} of{" "}
-                    {data.pagination.totalPages}
+                    {data.pagination.total} total route
+                    {data.pagination.total === 1 ? "" : "s"} found · page{" "}
+                    {data.pagination.page} of {data.pagination.totalPages}
                   </div>
                 </>
               )}
-            </>
-          )}
+            </div>
+
+            {hasMap && (
+              <div
+                className={`md:sticky md:top-24  ${
+                  mobileView !== "map" ? "hidden md:block" : ""
+                }`}
+              >
+                <OverviewMap entries={data.mapOverview!} />
+              </div>
+            )}
+          </div>
         </>
       )}
     </section>
