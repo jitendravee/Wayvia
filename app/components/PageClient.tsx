@@ -1,29 +1,14 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import ModeSelector from "../components/ModeSelector";
 import SearchForm, {
   ALL_SEARCH_MODES,
   SearchFormValues,
 } from "../components/SearchForm";
 import { StopEntry } from "../components/JourneyStopsForm";
 import NarrativeBanner from "../components/NarrativeBanner";
-import EmptyState from "../components/EmptyState";
-import StatsStrip from "../components/StatsStrip";
-import JourneyCard from "../components/JourneyCard";
-import OverviewMap from "../components/OverviewMap";
-import PartialMatchCard from "../components/PartialMatchCard";
-import FiltersBar from "../components/FiltersBar";
-import Pagination from "../components/Pagination";
 import MultiLegResults from "../components/MultiLegResults";
-import {
-  applyFilters,
-  DEFAULT_FILTERS,
-  FilterState,
-  maxDurationInSet,
-  maxFareInSet,
-  tagFor,
-} from "../components/filters";
+import { DEFAULT_FILTERS, FilterState } from "../components/filters";
 import { SearchResponse, MultiSearchResponse, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
 const PAGE_SIZE = 10;
@@ -40,44 +25,39 @@ export function PageInner() {
     modes: ALL_SEARCH_MODES,
   });
   // "Add a stop" chain beyond form.to/form.date — B→C, C→D, etc. Empty means
-  // this is an ordinary single-leg search.
+  // this is an ordinary single-leg search — which, downstream, is just a
+  // 1-leg trip, not a fundamentally different kind of result.
   const [extraStops, setExtraStops] = useState<StopEntry[]>([]);
 
-  const [loading, setLoading] = useState(false);
-  const [refining, setRefining] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<SearchResponse | null>(null);
+  // SearchForm still takes a `filters`/`onFiltersChange` pair (used inside
+  // the search bar itself, independent of the per-leg filters each
+  // MultiLegResults tab manages on its own once results exist) — kept here
+  // purely to satisfy that prop, not read anywhere else in this file.
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [page, setPage] = useState(1);
 
-  // Multi-city search results live separately from the single-leg `data`
-  // above — the two are mutually exclusive. `multiVersion` is bumped on
-  // every new multi search so MultiLegResults remounts with fresh internal
-  // per-leg state instead of carrying over the previous trip's filters/pages.
-  const [multiData, setMultiData] = useState<MultiSearchResponse | null>(null);
-  const [multiVersion, setMultiVersion] = useState(0);
-  const [multiLoading, setMultiLoading] = useState(false);
-  const [multiError, setMultiError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Every search's results — a 1-leg trip (an ordinary single search) and
+  // a multi-city trip are the exact same shape here, `MultiSearchResponse`.
+  // There's no separate single-vs-multi state or rendering path: LegTabs
+  // inside MultiLegResults simply renders nothing for a 1-leg trip, so it
+  // already looks like an ordinary search result with no extra chrome.
+  // `tripVersion` bumps on every new search so MultiLegResults remounts
+  // with fresh internal per-leg state instead of carrying over the
+  // previous trip's filters/tab/page.
+  const [tripData, setTripData] = useState<MultiSearchResponse | null>(null);
+  const [tripVersion, setTripVersion] = useState(0);
 
   const searchParams = useSearchParams();
 
-  // Core single-leg search call, decoupled from any specific form-submit
-  // event so it can be triggered by: the search form's submit, the filters
-  // bar's class/quota "ask the backend again" action, pagination, or — on
-  // first load — a from/to/date already sitting in the URL (e.g. someone
-  // arrived here via the hero search or a JourneySearchButton elsewhere on
-  // the site).
-  async function doSearch(
-    effective: SearchFormValues,
-    targetPage: number,
-    opts?: { resetFilters?: boolean; asRefine?: boolean },
-  ) {
-    setMultiData(null); // single and multi results never show at once
-    const resetFilters = opts?.resetFilters ?? true;
-    if (opts?.asRefine) setRefining(true);
-    else setLoading(true);
+  // Single-leg search — still hits the plain /api/search (simpler than the
+  // multi endpoint's array wrapping for the common case), then wraps the
+  // one result into the same MultiSearchResponse shape everything renders
+  // from.
+  async function doSearch(effective: SearchFormValues, targetPage = 1) {
+    setLoading(true);
     setError(null);
-    if (targetPage === 1 && resetFilters) setFilters(DEFAULT_FILTERS);
     try {
       const params = new URLSearchParams({
         from: effective.from,
@@ -96,13 +76,17 @@ export function PageInner() {
       const json: SearchResponse = await res.json();
       if (!res.ok)
         throw new Error(json.error || `Request failed (${res.status})`);
-      setData(json);
-      setPage(targetPage);
+      setTripData({
+        legs: [
+          { from: effective.from, to: effective.to, date: effective.date },
+        ],
+        results: [json],
+      });
+      setTripVersion((v) => v + 1);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
-      setRefining(false);
     }
   }
 
@@ -110,9 +94,8 @@ export function PageInner() {
   // chosen stop, not an auto-discovered hub, so it goes to /api/search/multi
   // which just runs the same single-leg pipeline once per leg in parallel.
   async function doMultiSearch(legs: TripLeg[]) {
-    setData(null); // single and multi results never show at once
-    setMultiLoading(true);
-    setMultiError(null);
+    setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         legs: JSON.stringify(legs),
@@ -123,17 +106,18 @@ export function PageInner() {
         pageSize: String(PAGE_SIZE),
         // modes: form.modes.join(","),
         modes: "train",
+
       });
       const res = await fetch(`/api/search/multi?${params}`);
       const json: MultiSearchResponse = await res.json();
       if (!res.ok)
         throw new Error(json.error || `Request failed (${res.status})`);
-      setMultiData(json);
-      setMultiVersion((v) => v + 1);
+      setTripData(json);
+      setTripVersion((v) => v + 1);
     } catch (err: unknown) {
-      setMultiError(err instanceof Error ? err.message : "Unknown error");
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
-      setMultiLoading(false);
+      setLoading(false);
     }
   }
 
@@ -211,55 +195,6 @@ export function PageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function runSearch(
-    e: React.FormEvent,
-    targetPage = 1,
-    overrides?: Partial<SearchFormValues>,
-  ) {
-    e.preventDefault();
-    const effective = overrides ? { ...form, ...overrides } : form;
-    if (overrides) setForm(effective);
-    doSearch(effective, targetPage);
-  }
-
-  // Class/quota live on FiltersBar, not the search form — picking a new one
-  // asks the backend again for this same from/to/date (fares and seat status
-  // are class/quota-specific), but keeps whatever sort/connections/etc. the
-  // person already picked instead of resetting them.
-  function refineByClassQuota(next: { travelClass?: string; quota?: string }) {
-    const effective = { ...form, ...next };
-    setForm(effective);
-    doSearch(effective, 1, { resetFilters: false, asRefine: true });
-  }
-
-  function goToPage(p: number) {
-    doSearch(form, p, { resetFilters: false });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  const ranked = data?.results ?? null;
-
-  const fareCeiling = useMemo(
-    () => (ranked ? maxFareInSet(ranked.all) : 0),
-    [ranked],
-  );
-  const durationCeiling = useMemo(
-    () => (ranked ? maxDurationInSet(ranked.all) : 0),
-    [ranked],
-  );
-
-  const filtered = useMemo(() => {
-    if (!ranked) return [];
-    return applyFilters(ranked.all, filters);
-  }, [ranked, filters]);
-
-  const restOfList = useMemo(() => {
-    if (!ranked) return [];
-    return filtered.filter((j) => j !== ranked.bestOverall);
-  }, [filtered, ranked]);
-
-  const anyLoading = loading || multiLoading;
-
   return (
     <main className="mx-auto md:mx-10 px-5 pb-24 pt-10 sm:px-6">
       <SearchForm
@@ -271,22 +206,21 @@ export function PageInner() {
         onExtraStopsChange={setExtraStops}
         onSubmit={() => doSearch(form, 1)}
         onSubmitMulti={(legs) => doMultiSearch(legs)}
-        loading={anyLoading}
+        loading={loading}
       />
 
-
-      {(error || multiError) && (
+      {error && (
         <div className="mb-5 rounded-lg border border-signal-red/30 border-l-4 border-l-signal-red bg-signal-red-soft/60 px-5 py-4">
           <div className="font-display text-[15px] font-semibold text-ink">
             That search hit a snag — no worries, it&rsquo;s not you.
           </div>
           <div className="mt-1 text-[13px] leading-relaxed text-ink-muted">
-            {error || multiError}
+            {error}
           </div>
         </div>
       )}
 
-      {loading && !data && !error && (
+      {loading && !tripData && !error && (
         <NarrativeBanner
           tone="info"
           narrative={{
@@ -298,159 +232,14 @@ export function PageInner() {
         />
       )}
 
-      {multiLoading && !multiData && !multiError && (
-        <NarrativeBanner
-          tone="info"
-          narrative={{
-            headline: "Searching every leg of this trip at the same time…",
-            detail:
-              "Each stop is checked independently — direct trains and junction connections together — so the whole itinerary comes back at once.",
-          }}
-        />
-      )}
-
-      {multiData && !multiError && (
+      {tripData && !error && (
         <MultiLegResults
-          key={multiVersion}
-          initial={multiData}
+          key={tripVersion}
+          initial={tripData}
           maxHubs={form.maxHubs}
           maxConnections={form.maxConnections}
           pageSize={PAGE_SIZE}
         />
-      )}
-
-      {data && !error && (
-        <>
-          <StatsStrip data={data} />
-
-          {data.narrative && (
-            <NarrativeBanner
-              narrative={data.narrative}
-              tone={ranked ? "clear" : "empty"}
-            />
-          )}
-
-          {data.suggestion && (
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-violet-ring bg-violet-soft/40 px-5 py-3.5">
-              <div className="text-[13px] leading-relaxed text-ink">
-                {data.suggestion.message}
-              </div>
-              <button
-                type="button"
-                disabled={loading}
-                onClick={() =>
-                  runSearch({ preventDefault() {} } as React.FormEvent, 1, {
-                    maxConnections: data.suggestion!.nextConnections,
-                  })
-                }
-                className="shrink-0 rounded-full bg-violet px-4 py-2 font-display text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-dark disabled:opacity-50"
-              >
-                Search via {data.suggestion.nextConnections} junctions
-              </button>
-            </div>
-          )}
-
-          {!ranked && (
-            <EmptyState
-              from={data.from}
-              to={data.to}
-              partialCount={data.partial?.length ?? 0}
-            />
-          )}
-
-          {page === 1 && data.mapOverview && data.mapOverview.length > 0 && (
-            <OverviewMap entries={data.mapOverview} />
-          )}
-
-          {page === 1 && data.partial && data.partial.length > 0 && (
-            <section className="mb-6">
-              <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-                Partway-there matches — real trains covering part of this route
-              </div>
-              <div className="space-y-3">
-                {data.partial.map((p, i) => (
-                  <PartialMatchCard
-                    key={`${p.type}-${p.hub}-${p.leg.trainNo}-${i}`}
-                    match={p}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {ranked && (
-            <>
-              {page === 1 && (
-                <section className="mb-6">
-                  <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-                    Your best match
-                  </div>
-                  <JourneyCard
-                    journey={ranked.bestOverall}
-                    tag="Best overall"
-                  />
-                </section>
-              )}
-
-              {(ranked.all.length > 1 ||
-                (data.pagination && data.pagination.total > 1)) && (
-                <>
-                  <ModeSelector
-                    value={filters.transport}
-                    onChange={(transport) =>
-                      setFilters({ ...filters, transport })
-                    }
-                  />
-
-                  <FiltersBar
-                    filters={filters}
-                    onChange={setFilters}
-                    fareCeiling={fareCeiling}
-                    durationCeiling={durationCeiling}
-                    resultCount={filtered.length}
-                    travelClass={form.travelClass}
-                    quota={form.quota}
-                    onRefine={refineByClassQuota}
-                    refining={refining}
-                  />
-
-                  <section>
-                    <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-                      {restOfList.length > 0
-                        ? "Other ways to get there"
-                        : "No other options match these filters"}
-                    </div>
-                    <div className="space-y-3">
-                      {(page === 1 ? restOfList : filtered).map((j, i) => (
-                        <JourneyCard
-                          key={i}
-                          journey={j}
-                          tag={tagFor(j, ranked)}
-                        />
-                      ))}
-                    </div>
-                  </section>
-
-                  {data.pagination && (
-                    <>
-                      <Pagination
-                        page={data.pagination.page}
-                        totalPages={data.pagination.totalPages}
-                        onChange={goToPage}
-                        disabled={loading}
-                      />
-                      <div className="mt-2 text-center font-mono text-[11px] text-ink-dim">
-                        {data.pagination.total} total route
-                        {data.pagination.total === 1 ? "" : "s"} found · page{" "}
-                        {data.pagination.page} of {data.pagination.totalPages}
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </>
       )}
 
       <p className="mt-10 border-t border-border pt-5 text-[12px] leading-relaxed text-ink-dim">

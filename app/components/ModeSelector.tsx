@@ -1,6 +1,6 @@
 "use client";
 
-import { Bus, Plane, Shuffle, TrainFront, Waypoints } from "lucide-react";
+import {BusFront, Plane, Shuffle, TrainFront, Waypoints } from "lucide-react";
 import type { TransportFilter } from "./filters";
 import { TRANSPORT_OPTIONS } from "./filters";
 

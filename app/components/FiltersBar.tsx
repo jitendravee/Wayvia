@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Bus, LayoutGrid, Plane, RotateCcw, Shuffle, SlidersHorizontal, Sparkles, TrainFront } from "lucide-react";
+import {BusFront, LayoutGrid, Plane, RotateCcw, Shuffle, SlidersHorizontal, Sparkles, TrainFront } from "lucide-react";
 import {
   ConnectionFilter,
   DEFAULT_FILTERS,
@@ -64,7 +64,7 @@ const ARRIVAL_OPTIONS = DEPARTURE_OPTIONS;
 const TRANSPORT_ICON: Record<TransportFilter, typeof TrainFront> = {
   any: LayoutGrid,
   train: TrainFront,
-  bus: Bus,
+  bus: BusFront,
   flight: Plane,
   mixed: Shuffle,
 };

@@ -45,7 +45,7 @@ export default function OverviewMapInner({ routes }: { routes: PlottableRoute[] 
   if (routes.length === 0) return null;
 
   return (
-    <div className="relative h-[420px] w-full overflow-hidden">
+    <div className="relative h-[420px] isolate w-full overflow-hidden">
       <MapContainer center={center} zoom={5} scrollWheelZoom={false} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
