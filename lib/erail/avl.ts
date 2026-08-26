@@ -114,8 +114,8 @@ export function parseAvlResponse(rawDataField: string): AvlParsedResponse {
 
     if (key.endsWith("_f")) {
       const baseKey = key.slice(0, -2);
-      const fields = value1.split("_");
-      const estimatedFare = fields.length > 8 && !Number.isNaN(Number(fields[8])) ? Number(fields[8]) : null;
+     const fields = value1.split("_");
+const estimatedFare = fields.length > 8 && !Number.isNaN(Number(fields[8])) ? Number(fields[8]) : null;
       fares.set(baseKey, { key: baseKey, estimatedFare, raw: fields });
     } else {
       const { category, count } = classifyStatus(value1);
