@@ -12,7 +12,7 @@ import PartialMatchCard from "../components/PartialMatchCard";
 import FiltersBar from "../components/FiltersBar";
 import Pagination from "../components/Pagination";
 import MultiLegResults from "../components/MultiLegResults";
-import { applyFilters, DEFAULT_FILTERS, FilterState, maxFareInSet, tagFor } from "../components/filters";
+import { applyFilters, DEFAULT_FILTERS, FilterState, maxDurationInSet, maxFareInSet, tagFor } from "../components/filters";
 import { SearchResponse, MultiSearchResponse, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
 const PAGE_SIZE = 10;
@@ -90,25 +90,17 @@ export function PageInner() {
   // Multi-city: A→B on date1, B→C on date2, ... — every leg is a person-
   // chosen stop, not an auto-discovered hub, so it goes to /api/search/multi
   // which just runs the same single-leg pipeline once per leg in parallel.
-  // Accepts explicit overrides rather than always trusting the `form`
-  // closure — right after a setForm() call (e.g. syncing class/quota from
-  // the URL on mount), `form` here would still be the pre-update value
-  // since state updates don't apply mid-function, so a same-tick call
-  // needs the fresh values passed in directly instead.
-  async function doMultiSearch(
-    legs: TripLeg[],
-    overrides?: { travelClass?: string; quota?: string; maxHubs?: number; maxConnections?: 1 | 2 | 3 }
-  ) {
+  async function doMultiSearch(legs: TripLeg[]) {
     setData(null); // single and multi results never show at once
     setMultiLoading(true);
     setMultiError(null);
     try {
       const params = new URLSearchParams({
         legs: JSON.stringify(legs),
-        class: overrides?.travelClass ?? form.travelClass,
-        quota: overrides?.quota ?? form.quota,
-        maxHubs: String(overrides?.maxHubs ?? form.maxHubs),
-        maxConnections: String(overrides?.maxConnections ?? form.maxConnections),
+        class: form.travelClass,
+        quota: form.quota,
+        maxHubs: String(form.maxHubs),
+        maxConnections: String(form.maxConnections),
         pageSize: String(PAGE_SIZE),
       });
       const res = await fetch(`/api/search/multi?${params}`);
@@ -138,25 +130,11 @@ export function PageInner() {
         if (Array.isArray(parsed) && parsed.length >= 2 && parsed.every((l) => l.from && l.to && l.date)) {
           const cls = searchParams.get("class");
           const quota = searchParams.get("quota");
-          // The first leg's from/to/date drive the base SearchForm fields —
-          // without this, form.from/form.to stay at their initial defaults
-          // and any later reconstruction of the leg chain (e.g. resubmitting
-          // from the form) silently searches the wrong stations instead of
-          // the ones that arrived in the URL.
-          const firstLeg = parsed[0];
-          setForm((f) => ({
-            ...f,
-            from: firstLeg.from,
-            to: firstLeg.to,
-            date: firstLeg.date,
-            ...(cls ? { travelClass: cls.toUpperCase() } : {}),
-            ...(quota ? { quota: quota.toUpperCase() } : {}),
-          }));
+          if (cls || quota) {
+            setForm((f) => ({ ...f, ...(cls ? { travelClass: cls.toUpperCase() } : {}), ...(quota ? { quota: quota.toUpperCase() } : {}) }));
+          }
           setExtraStops(parsed.slice(1).map((l, i) => ({ id: `url-${i}`, to: l.to, date: l.date })));
-          doMultiSearch(parsed, {
-            ...(cls ? { travelClass: cls.toUpperCase() } : {}),
-            ...(quota ? { quota: quota.toUpperCase() } : {}),
-          });
+          doMultiSearch(parsed);
           return;
         }
       } catch {
@@ -213,6 +191,7 @@ export function PageInner() {
   const ranked = data?.results ?? null;
 
   const fareCeiling = useMemo(() => (ranked ? maxFareInSet(ranked.all) : 0), [ranked]);
+  const durationCeiling = useMemo(() => (ranked ? maxDurationInSet(ranked.all) : 0), [ranked]);
 
   const filtered = useMemo(() => {
     if (!ranked) return [];
@@ -239,8 +218,6 @@ export function PageInner() {
           multi-city trip, searched leg by leg.
         </p>
       </header>
-
-      <ModeSelector />
 
       <SearchForm
         values={form}
@@ -329,10 +306,13 @@ export function PageInner() {
 
               {(ranked.all.length > 1 || (data.pagination && data.pagination.total > 1)) && (
                 <>
+                  <ModeSelector value={filters.transport} onChange={(transport) => setFilters({ ...filters, transport })} />
+
                   <FiltersBar
                     filters={filters}
                     onChange={setFilters}
                     fareCeiling={fareCeiling}
+                    durationCeiling={durationCeiling}
                     resultCount={filtered.length}
                     travelClass={form.travelClass}
                     quota={form.quota}

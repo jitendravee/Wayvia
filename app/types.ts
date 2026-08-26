@@ -1,3 +1,5 @@
+export type Mode = "train" | "bus" | "flight";
+
 export type AvlStatusCategory = "AVAILABLE" | "WAITLIST" | "RAC" | "NOT_AVAILABLE" | "REGRET" | "UNKNOWN";
 
 export interface AvlAvailability {
@@ -9,6 +11,9 @@ export interface AvlAvailability {
 }
 
 export interface AnnotatedLeg {
+  /** Which mode of transport this leg is — train, bus, or flight. */
+  mode: Mode;
+  /** Generic service id, reused across modes: train number / bus service id / flight number. */
   trainNo: string;
   trainName: string;
   from: string;
@@ -19,7 +24,10 @@ export interface AnnotatedLeg {
   runningDays: string;
   depAbsMin: number;
   arrAbsMin: number;
-  avlKey: string;
+  /** "live" = real data. "mock" = placeholder bus/flight data until a real API is wired in. */
+  source?: "live" | "mock";
+  /** null for non-train legs — there's no erail key involved for bus/flight (mock or real). */
+  avlKey: string | null;
   availability: AvlAvailability | null;
   fare: number | null;
 }
@@ -35,6 +43,10 @@ export interface AnnotatedJourney {
   totalFare: number | null;
   totalDurationMin: number;
   connections: number;
+  /** Waiting time between consecutive legs, in minutes — length is always legs.length - 1. */
+  gapsMin: number[];
+  /** Distinct modes used across this journey's legs, in leg order (deduped). */
+  modesUsed: Mode[];
 }
 
 export interface PartialCoverage {
@@ -90,7 +102,8 @@ export interface SearchResponse {
   travelClass?: string;
   quota?: string;
   mode?: "train";
-  modesAvailable?: string[];
+  /** Every mode this search actually queried — e.g. ["train","bus","flight"] once those providers are wired in. */
+  modesAvailable?: Mode[];
   graph?: GraphStats;
   maxConnections?: 1 | 2 | 3;
   candidates?: { direct: number; oneConnection: number; twoConnection: number; threeConnection: number };

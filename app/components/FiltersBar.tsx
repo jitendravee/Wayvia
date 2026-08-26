@@ -9,11 +9,13 @@ import {
   SortKey,
   TRAVEL_CLASS_OPTIONS,
 } from "./filters";
+import { durationLabel } from "./status";
 
 interface Props {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   fareCeiling: number;
+  durationCeiling: number;
   resultCount: number;
   /** Currently active class/quota — these came from the last /api/search call, not client-side filtering. */
   travelClass: string;
@@ -47,11 +49,13 @@ const DEPARTURE_OPTIONS: { key: DepartureWindow; label: string }[] = (
   ["any", "morning", "afternoon", "evening", "night"] as DepartureWindow[]
 ).map((key) => ({ key, label: DEPARTURE_WINDOW_LABEL[key] }));
 
+const ARRIVAL_OPTIONS = DEPARTURE_OPTIONS;
+
 const chipBase = "rounded-full border px-3 py-1 font-mono text-[11px] transition-colors disabled:cursor-wait disabled:opacity-60";
 const chipOn = "border-violet bg-violet-soft text-violet-dark";
 const chipOff = "border-border bg-white text-ink-muted hover:border-violet-ring hover:text-ink";
 
-export default function FiltersBar({ filters, onChange, fareCeiling, resultCount, travelClass, quota, onRefine, refining }: Props) {
+export default function FiltersBar({ filters, onChange, fareCeiling, durationCeiling, resultCount, travelClass, quota, onRefine, refining }: Props) {
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) => onChange({ ...filters, [key]: val });
 
   return (
@@ -127,6 +131,19 @@ export default function FiltersBar({ filters, onChange, fareCeiling, resultCount
           ))}
         </FilterRow>
 
+        <FilterRow label="Arrives">
+          {ARRIVAL_OPTIONS.map((o) => (
+            <button
+              key={o.key}
+              type="button"
+              onClick={() => set("arrival", o.key)}
+              className={`${chipBase} ${filters.arrival === o.key ? chipOn : chipOff}`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </FilterRow>
+
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <label className="flex cursor-pointer items-center gap-2 font-mono text-[11px] text-ink-muted">
             <input
@@ -140,7 +157,7 @@ export default function FiltersBar({ filters, onChange, fareCeiling, resultCount
 
           {fareCeiling > 0 && (
             <label className="flex min-w-[180px] flex-1 items-center gap-2 font-mono text-[11px] text-ink-muted">
-              Max fare
+              Budget
               <input
                 type="range"
                 min={0}
@@ -152,6 +169,24 @@ export default function FiltersBar({ filters, onChange, fareCeiling, resultCount
               />
               <span className="w-16 shrink-0 text-right text-ink">
                 {filters.maxFare === null ? `₹${fareCeiling}` : `₹${filters.maxFare}`}
+              </span>
+            </label>
+          )}
+
+          {durationCeiling > 0 && (
+            <label className="flex min-w-[180px] flex-1 items-center gap-2 font-mono text-[11px] text-ink-muted">
+              Duration
+              <input
+                type="range"
+                min={0}
+                max={durationCeiling}
+                step={Math.max(1, Math.round(durationCeiling / 50))}
+                value={filters.maxDuration ?? durationCeiling}
+                onChange={(e) => set("maxDuration", Number(e.target.value))}
+                className="flex-1 accent-violet"
+              />
+              <span className="w-20 shrink-0 text-right text-ink">
+                {durationLabel(filters.maxDuration ?? durationCeiling)}
               </span>
             </label>
           )}

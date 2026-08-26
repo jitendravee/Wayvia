@@ -1,15 +1,37 @@
+export type Mode = "train" | "bus" | "flight";
+
 export interface Leg {
+  /** Which mode of transport this leg is — the thing that lets journeys mix train+bus+flight legs. */
+  mode: Mode;
+  /**
+   * Generic service identifier, reused across modes: train number for
+   * train, a bus service id for bus, a flight number for flight. Kept as
+   * `trainNo`/`trainName` (not renamed to something mode-neutral) so the
+   * existing train pipeline and every FE component that already reads
+   * these fields keeps working unmodified as new modes get added.
+   */
   trainNo: string;
   trainName: string;
   from: string;
   to: string;
-  departure: string; // 'HH:MM' as returned by erail (normalized)
+  departure: string; // 'HH:MM' as returned by erail (normalized) — non-train providers use the same 'HH.MM' style
   arrival: string;
   travelTime: string; // 'HH:MM'
   runningDays: string; // e.g. '1111111', indexed via Prettify.getDayOnDate
   /** Minutes since the search date's midnight (day 0). Can exceed 1440 for overnight legs. */
   depAbsMin: number;
   arrAbsMin: number;
+  /** "live" = real data (erail today). "mock" = placeholder data standing in until a real bus/flight API is wired up. Omitted defaults to "live". */
+  source?: "live" | "mock";
+  /**
+   * Only set on legs built by a non-train ModeProvider (see lib/providers).
+   * Since those providers generate their own price/seat data instead of
+   * looking it up on erail, annotateWithAvailability uses this as-is
+   * rather than trying to build an erail avl key for it. A real bus/flight
+   * API integration can keep using this same field, or extend
+   * annotateWithAvailability with its own lookup branch — either works.
+   */
+  precomputed?: { availability: import("../erail/avl").AvlAvailability | null; fare: number | null };
 }
 
 export interface JourneyCandidate {

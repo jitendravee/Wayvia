@@ -7,8 +7,9 @@ import StatsStrip from "./StatsStrip";
 import JourneyCard from "./JourneyCard";
 import PartialMatchCard from "./PartialMatchCard";
 import FiltersBar from "./FiltersBar";
+import ModeSelector from "./ModeSelector";
 import Pagination from "./Pagination";
-import { applyFilters, DEFAULT_FILTERS, FilterState, maxFareInSet, tagFor } from "./filters";
+import { applyFilters, DEFAULT_FILTERS, FilterState, maxDurationInSet, maxFareInSet, tagFor } from "./filters";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
 
 interface Props {
@@ -110,6 +111,7 @@ function LegSection({
   const ranked = data.results;
 
   const fareCeiling = useMemo(() => (ranked ? maxFareInSet(ranked.all) : 0), [ranked]);
+  const durationCeiling = useMemo(() => (ranked ? maxDurationInSet(ranked.all) : 0), [ranked]);
   const filtered = useMemo(() => (ranked ? applyFilters(ranked.all, filters) : []), [ranked, filters]);
   const restOfList = useMemo(() => (ranked ? filtered.filter((j) => j !== ranked.bestOverall) : []), [filtered, ranked]);
   const page = data.pagination?.page ?? 1;
@@ -156,10 +158,13 @@ function LegSection({
 
           {(ranked.all.length > 1 || (data.pagination && data.pagination.total > 1)) && (
             <>
+              <ModeSelector value={filters.transport} onChange={(transport) => onFiltersChange({ ...filters, transport })} />
+
               <FiltersBar
                 filters={filters}
                 onChange={onFiltersChange}
                 fareCeiling={fareCeiling}
+                durationCeiling={durationCeiling}
                 resultCount={filtered.length}
                 travelClass={data.travelClass ?? "3A"}
                 quota={data.quota ?? "GN"}

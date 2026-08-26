@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { runJourneySearch, parseCommonParams } from "@/lib/searchJourney";
 import type { TripLeg, MultiSearchResponse } from "@/app/types";
-import { parseCommonParams, runJourneySearch } from "../route";
 
 const MAX_LEGS = 6;
 
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const { travelClass, quota, maxHubs, maxConnections, pageSize } = parseCommonParams(req.nextUrl.searchParams);
+  const { travelClass, quota, maxHubs, maxConnections, pageSize, modes } = parseCommonParams(req.nextUrl.searchParams);
 
   // Optional per-leg page numbers, e.g. pages=1,2 — used when the person
   // paginates one leg's results without needing to re-search every other
@@ -82,6 +82,7 @@ export async function GET(req: NextRequest) {
           maxConnections,
           page: pages[i] ?? 1,
           pageSize,
+          modes,
         })
       )
     );

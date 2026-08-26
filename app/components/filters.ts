@@ -1,15 +1,23 @@
-import type { AnnotatedJourney, RankedResults } from "../types";
+import type { AnnotatedJourney, Mode, RankedResults } from "../types";
 
 export type SortKey = "best" | "cheapest" | "fastest" | "fewestChanges";
 export type ConnectionFilter = "any" | "direct" | "oneChange" | "twoChanges" | "threeChanges";
 export type DepartureWindow = "any" | "morning" | "afternoon" | "evening" | "night";
+/** "mixed" = journeys that genuinely combine 2+ modes (e.g. train + bus), not just "any of train/bus/flight". */
+export type TransportFilter = "any" | Mode | "mixed";
 
 export interface FilterState {
   sort: SortKey;
   connections: ConnectionFilter;
   confirmedOnly: boolean;
   departure: DepartureWindow;
+  /** Arrival-time window, same buckets as `departure` but checked against the last leg's arrival. */
+  arrival: DepartureWindow;
   maxFare: number | null; // null = no cap
+  /** Total door-to-door duration cap, in minutes. null = no cap. */
+  maxDuration: number | null;
+  /** Which mode(s) a journey must use to show up — client-side only, since the backend already searched every mode. */
+  transport: TransportFilter;
 }
 
 export const DEFAULT_FILTERS: FilterState = {
@@ -17,7 +25,10 @@ export const DEFAULT_FILTERS: FilterState = {
   connections: "any",
   confirmedOnly: false,
   departure: "any",
+  arrival: "any",
   maxFare: null,
+  maxDuration: null,
+  transport: "any",
 };
 
 // Class/quota aren't part of FilterState on purpose: unlike the filters below,
@@ -41,6 +52,14 @@ export const QUOTA_OPTIONS: { value: string; label: string }[] = [
   { value: "LD", label: "Ladies" },
 ];
 
+export const TRANSPORT_OPTIONS: { value: TransportFilter; label: string }[] = [
+  { value: "any", label: "All modes" },
+  { value: "train", label: "Train" },
+  { value: "bus", label: "Bus" },
+  { value: "flight", label: "Flight" },
+  { value: "mixed", label: "Mix (multimodal)" },
+];
+
 export const DEPARTURE_WINDOW_LABEL: Record<DepartureWindow, string> = {
   any: "Any time",
   morning: "Morning · 6am–12pm",
@@ -51,6 +70,11 @@ export const DEPARTURE_WINDOW_LABEL: Record<DepartureWindow, string> = {
 
 function departureHour(journey: AnnotatedJourney): number {
   return Math.floor((journey.legs[0].depAbsMin % 1440) / 60);
+}
+
+function arrivalHour(journey: AnnotatedJourney): number {
+  const lastLeg = journey.legs[journey.legs.length - 1];
+  return Math.floor((lastLeg.arrAbsMin % 1440) / 60);
 }
 
 function inWindow(hour: number, window: DepartureWindow): boolean {
@@ -68,6 +92,12 @@ function inWindow(hour: number, window: DepartureWindow): boolean {
   }
 }
 
+function matchesTransport(journey: AnnotatedJourney, transport: TransportFilter): boolean {
+  if (transport === "any") return true;
+  if (transport === "mixed") return journey.modesUsed.length > 1;
+  return journey.modesUsed.length === 1 && journey.modesUsed[0] === transport;
+}
+
 export function applyFilters(journeys: AnnotatedJourney[], filters: FilterState): AnnotatedJourney[] {
   let out = journeys.filter((j) => {
     if (filters.connections === "direct" && j.connections !== 0) return false;
@@ -76,7 +106,10 @@ export function applyFilters(journeys: AnnotatedJourney[], filters: FilterState)
     if (filters.connections === "threeChanges" && j.connections > 3) return false;
     if (filters.confirmedOnly && !j.fullyConfirmed) return false;
     if (filters.departure !== "any" && !inWindow(departureHour(j), filters.departure)) return false;
+    if (filters.arrival !== "any" && !inWindow(arrivalHour(j), filters.arrival)) return false;
     if (filters.maxFare !== null && j.totalFare !== null && j.totalFare > filters.maxFare) return false;
+    if (filters.maxDuration !== null && j.totalDurationMin > filters.maxDuration) return false;
+    if (!matchesTransport(j, filters.transport)) return false;
     return true;
   });
 
@@ -101,6 +134,10 @@ export function applyFilters(journeys: AnnotatedJourney[], filters: FilterState)
 export function maxFareInSet(journeys: AnnotatedJourney[]): number {
   const fares = journeys.map((j) => j.totalFare).filter((f): f is number => f !== null);
   return fares.length > 0 ? Math.max(...fares) : 0;
+}
+
+export function maxDurationInSet(journeys: AnnotatedJourney[]): number {
+  return journeys.length > 0 ? Math.max(...journeys.map((j) => j.totalDurationMin)) : 0;
 }
 
 /** Which badge (if any) a journey card should show, relative to the rest of its result set. */

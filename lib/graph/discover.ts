@@ -53,6 +53,8 @@ function toMinutes(time: string): number {
 function entryToLeg(entry: BetweenStationEntry): Omit<Leg, "depAbsMin" | "arrAbsMin"> {
   const t = entry.train_base;
   return {
+    mode: "train",
+    source: "live",
     trainNo: t.train_no,
     trainName: t.train_name,
     from: t.from_stn_code,
