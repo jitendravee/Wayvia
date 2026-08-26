@@ -182,7 +182,8 @@ export default function JourneyStopsForm({
 
       {/* Same CTA, full-width, its own row — mobile only */}
       {searchButton && <div className="sm:hidden">{searchButton}</div>}
-
+      {(stops.length > 1 || showAddStopHint ) && <div className="self-stretch h-[0.5px] w-full bg-ink-dim/30"></div>
+}
       {/* Rows 1+ — chained stops, one growable list appended by the row below */}
       {stops.slice(1).map((stop, idx) => {
         const i = idx + 1;
@@ -205,11 +206,11 @@ export default function JourneyStopsForm({
       })}
 
       {stops.length < MAX_STOPS && showAddStopHint && (
-        <div className="flex items-center gap-2 rounded-xl">
+        <div className="flex items-center gap-2 rounded-xl ">
           <button
             type="button"
             onClick={addStop}
-            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-1 text-left transition-colors hover:bg-surface-alt/50"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-xl py-1 text-left transition-colors hover:bg-surface-alt/50 "
           >
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-soft text-violet-dark">
               <Plus size={16} />

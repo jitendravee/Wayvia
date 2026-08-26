@@ -1,5 +1,14 @@
-import type { AnnotatedLeg } from "../types";
+import { Bus, Plane, TrainFront } from "lucide-react";
+import type { AnnotatedLeg, Mode } from "../types";
 import { signalFor, SIGNAL_DOT, SIGNAL_LINE, SIGNAL_TEXT, SIGNAL_LABEL } from "./status";
+
+const MODE_ICON: Record<Mode, React.ComponentType<{ size?: number; className?: string }>> = {
+  train: TrainFront,
+  bus: Bus,
+  flight: Plane,
+};
+
+const MODE_LABEL: Record<Mode, string> = { train: "Train", bus: "Bus", flight: "Flight" };
 
 export default function RouteStrip({ legs }: { legs: AnnotatedLeg[] }) {
   const nodes: { code: string; time: string }[] = [];
@@ -37,9 +46,13 @@ export default function RouteStrip({ legs }: { legs: AnnotatedLeg[] }) {
 
             {i < legs.length && (
               <div className="flex min-w-[92px] flex-1 flex-col items-center pt-[5px]">
-                <div className={`h-[3px] w-full rounded-full ${SIGNAL_LINE[signal]}`} />
+                <div className="flex w-full items-center justify-center gap-1">
+                  <div className={`h-[3px] flex-1 rounded-full ${SIGNAL_LINE[signal]}`} />
+                  <ModeChip mode={leg.mode} mock={leg.source === "mock"} />
+                  <div className={`h-[3px] flex-1 rounded-full ${SIGNAL_LINE[signal]}`} />
+                </div>
                 <div className={`mt-1.5 whitespace-nowrap text-center font-mono text-[10px] font-medium ${SIGNAL_TEXT[signal]}`}>
-                  #{leg.trainNo} · {SIGNAL_LABEL[leg.availability?.category ?? "UNKNOWN"]}
+                  {MODE_LABEL[leg.mode]} #{leg.trainNo} · {SIGNAL_LABEL[leg.availability?.category ?? "UNKNOWN"]}
                   {leg.availability?.count != null ? ` (${leg.availability.count})` : ""}
                 </div>
               </div>
@@ -47,6 +60,22 @@ export default function RouteStrip({ legs }: { legs: AnnotatedLeg[] }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** Small circular mode badge (train/bus/flight) that sits on the connecting line between two stops — flags at a glance which leg of a journey is which mode, and whether it's demo (mock) data. */
+function ModeChip({ mode, mock }: { mode: Mode; mock: boolean }) {
+  const Icon = MODE_ICON[mode];
+  return (
+    <div
+      title={mock ? `${MODE_LABEL[mode]} · demo data` : MODE_LABEL[mode]}
+      className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-white shadow-sm ${
+        mode === "train" ? "bg-violet" : mode === "bus" ? "bg-amber-500" : "bg-sky-500"
+      }`}
+    >
+      <Icon size={12} className="text-white" />
+      {mock && <span className="absolute -bottom-1 -right-1 h-2 w-2 rounded-full border border-white bg-ink-dim" />}
     </div>
   );
 }

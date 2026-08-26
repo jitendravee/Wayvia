@@ -1,3 +1,5 @@
+export type Mode = "train" | "bus" | "flight";
+
 export type AvlStatusCategory = "AVAILABLE" | "WAITLIST" | "RAC" | "NOT_AVAILABLE" | "REGRET" | "UNKNOWN";
 
 export interface AvlAvailability {
@@ -8,7 +10,18 @@ export interface AvlAvailability {
   rawNums: string;
 }
 
+/** Known map coordinates for a station, when it's in the curated directory (lib/geo.ts). */
+export interface StationCoord {
+  code: string;
+  name: string;
+  lat: number;
+  lon: number;
+}
+
 export interface AnnotatedLeg {
+  /** Which mode of transport this leg is — train, bus, or flight. */
+  mode: Mode;
+  /** Generic service id, reused across modes: train number / bus service id / flight number. */
   trainNo: string;
   trainName: string;
   from: string;
@@ -19,9 +32,29 @@ export interface AnnotatedLeg {
   runningDays: string;
   depAbsMin: number;
   arrAbsMin: number;
-  avlKey: string;
+  /** "live" = real data. "mock" = placeholder bus/flight data until a real API is wired in. */
+  source?: "live" | "mock";
+  /** null for non-train legs — there's no erail key involved for bus/flight (mock or real). */
+  avlKey: string | null;
   availability: AvlAvailability | null;
   fare: number | null;
+  /** Coordinates for the boarding/alighting stations, when known server-side. Null means the frontend should fall back to live geocoding for that one stop. */
+  fromGeo: StationCoord | null;
+  toGeo: StationCoord | null;
+}
+
+/** One stop along a journey, ready to plot on a map — origin, every hub/junction change, and the final destination. */
+export interface RouteStop {
+  code: string;
+  name: string;
+  lat: number | null;
+  lon: number | null;
+  kind: "origin" | "junction" | "destination";
+  time: string;
+  /** Mode of the leg that arrives at this stop. Absent for the origin. */
+  arrivingMode?: Mode;
+  /** Service id (train no / bus id / flight no) of the leg that arrives at this stop. Absent for the origin. */
+  arrivingService?: string;
 }
 
 export interface AnnotatedJourney {
@@ -35,6 +68,29 @@ export interface AnnotatedJourney {
   totalFare: number | null;
   totalDurationMin: number;
   connections: number;
+  /** Waiting time between consecutive legs, in minutes — length is always legs.length - 1. */
+  gapsMin: number[];
+  /** Distinct modes used across this journey's legs, in leg order (deduped). */
+  modesUsed: Mode[];
+  /** Ordered stop-by-stop map data for this journey — origin, every hub, destination — ready to plot. */
+  routeStops: RouteStop[];
+}
+
+/** One labeled, colored route on the "ways to get there" overview map — the big multi-route picture, not a single journey's own path. */
+export interface MapOverviewEntry {
+  id: string;
+  /** Numbered position on the map (1, 2, 3, ...). */
+  rank: number;
+  /** Badge text, e.g. "BEST MATCH", "CHEAPEST", "FASTEST", "GOOD VALUE", "MULTIMODAL". */
+  label: string;
+  /** Hex color this route's line/pins should use — stable per label. */
+  color: string;
+  totalFare: number | null;
+  totalDurationMin: number;
+  connections: number;
+  fullyConfirmed: boolean;
+  modes: Mode[];
+  stops: RouteStop[];
 }
 
 export interface PartialCoverage {
@@ -90,7 +146,8 @@ export interface SearchResponse {
   travelClass?: string;
   quota?: string;
   mode?: "train";
-  modesAvailable?: string[];
+  /** Every mode this search actually queried — e.g. ["train","bus","flight"] once those providers are wired in. */
+  modesAvailable?: Mode[];
   graph?: GraphStats;
   maxConnections?: 1 | 2 | 3;
   candidates?: { direct: number; oneConnection: number; twoConnection: number; threeConnection: number };
@@ -98,6 +155,8 @@ export interface SearchResponse {
   narrative?: Narrative;
   suggestion?: ConnectionSuggestion | null;
   results: RankedResults | null;
+  /** Labeled, deduplicated set (≤6) of the best routes for this search, each with its full stop list — the data source for the "ways to get there" overview map showing every option at once, numbered and colored. Empty when there are no results. */
+  mapOverview?: MapOverviewEntry[];
   pagination?: PaginationMeta;
   partial?: PartialCoverage[];
   error?: string;
