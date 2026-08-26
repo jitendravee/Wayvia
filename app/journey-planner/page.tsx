@@ -7,7 +7,10 @@ export default async function Page() {
   await connection();
   return (
     <Suspense fallback={null}>
+      <div className="mt-20">
       <PageInner />
+
+      </div>
     </Suspense>
   );
 }

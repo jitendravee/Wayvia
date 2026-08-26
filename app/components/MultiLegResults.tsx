@@ -5,7 +5,6 @@ import NarrativeBanner from "./NarrativeBanner";
 import EmptyState from "./EmptyState";
 import StatsStrip from "./StatsStrip";
 import JourneyCard from "./JourneyCard";
-import OverviewMap from "./OverviewMap";
 import PartialMatchCard from "./PartialMatchCard";
 import FiltersBar from "./FiltersBar";
 import ModeSelector from "./ModeSelector";
@@ -60,10 +59,6 @@ export default function MultiLegResults({ initial, maxHubs, maxConnections, page
         maxConnections: String(maxConnections),
         page: String(page),
         pageSize: String(pageSize),
-        // Keep whatever mode restriction the original multi-city search used
-        // for this leg (e.g. "train,bus") so paginating/refining doesn't
-        // silently widen the search back to every mode.
-        modes: (current.modesAvailable ?? []).join(","),
       });
       const res = await fetch(`/api/search?${params}`);
       const json: SearchResponse = await res.json();
@@ -138,8 +133,6 @@ function LegSection({
       {data.narrative && <NarrativeBanner narrative={data.narrative} tone={ranked ? "clear" : "empty"} />}
 
       {!ranked && <EmptyState from={data.from} to={data.to} partialCount={data.partial?.length ?? 0} />}
-
-      {page === 1 && data.mapOverview && data.mapOverview.length > 0 && <OverviewMap entries={data.mapOverview} />}
 
       {page === 1 && data.partial && data.partial.length > 0 && (
         <div className="mb-6">

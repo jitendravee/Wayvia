@@ -1,5 +1,6 @@
 "use client";
 
+
 import React, { useMemo, useState } from "react";
 import { ArrowRight, BusFront, MoreHorizontal, Plane, TrainFront } from "lucide-react";
 import JourneySearchButton from "../../JourneySearchButton";
@@ -132,5 +133,6 @@ const LandingSearch = () => {
     </div>
   );
 };
+
 
 export default LandingSearch;

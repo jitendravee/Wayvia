@@ -75,7 +75,8 @@ export function PageInner() {
         maxConnections: String(effective.maxConnections),
         page: String(targetPage),
         pageSize: String(PAGE_SIZE),
-        modes: effective.modes.join(","),
+        // modes: effective.modes.join(","),
+        modes:"train"
       });
       const res = await fetch(`/api/search?${params}`);
       const json: SearchResponse = await res.json();
@@ -105,7 +106,9 @@ export function PageInner() {
         maxHubs: String(form.maxHubs),
         maxConnections: String(form.maxConnections),
         pageSize: String(PAGE_SIZE),
-        modes: form.modes.join(","),
+        // modes: form.modes.join(","),
+                modes:"train"
+
       });
       const res = await fetch(`/api/search/multi?${params}`);
       const json: MultiSearchResponse = await res.json();
@@ -218,28 +221,18 @@ export function PageInner() {
   const anyLoading = loading || multiLoading;
 
   return (
-    <main className="mx-auto max-w-4xl px-5 pb-24 pt-10 sm:px-6">
-      <header className="mb-6 border-b border-border pb-6">
-        <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">Wayvia · journey discovery</div>
-        <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-          You tell us where. We find the best way there.
-        </h1>
-        <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-muted">
-          Not just the direct train — we explore connecting routes through nearby junctions too, check live seat
-          availability, and rank every real option by price, time, and reliability. Adding a stop turns this into a
-          multi-city trip, searched leg by leg.
-        </p>
-      </header>
-
-      <SearchForm
-        values={form}
-        onChange={setForm}
-        extraStops={extraStops}
-        onExtraStopsChange={setExtraStops}
-        onSubmit={() => doSearch(form, 1)}
-        onSubmitMulti={(legs) => doMultiSearch(legs)}
-        loading={anyLoading}
-      />
+    <main className="mx-auto max-w-7xl px-5 pb-24 pt-10 sm:px-6">
+ <SearchForm
+  values={form}
+  onChange={setForm}
+  filters={filters}
+  onFiltersChange={setFilters}
+  extraStops={extraStops}
+  onExtraStopsChange={setExtraStops}
+  onSubmit={() => doSearch(form, 1)}
+  onSubmitMulti={(legs) => doMultiSearch(legs)}
+  loading={anyLoading}
+/>
 
       {(error || multiError) && (
         <div className="mb-5 rounded-lg border border-signal-red/30 border-l-4 border-l-signal-red bg-signal-red-soft/60 px-5 py-4">
