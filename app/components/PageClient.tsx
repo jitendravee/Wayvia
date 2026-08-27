@@ -69,8 +69,8 @@ export function PageInner() {
         maxConnections: String(effective.maxConnections),
         page: String(targetPage),
         pageSize: String(PAGE_SIZE),
-        // modes: effective.modes.join(","),
-        modes: "train",
+        modes: effective.modes.join(","),
+        // modes: "train",
       });
       const res = await fetch(`/api/search?${params}`);
       const json: SearchResponse = await res.json();
@@ -104,8 +104,8 @@ export function PageInner() {
         maxHubs: String(form.maxHubs),
         maxConnections: String(form.maxConnections),
         pageSize: String(PAGE_SIZE),
-        // modes: form.modes.join(","),
-        modes: "train",
+        modes: form.modes.join(","),
+        // modes: "train",
 
       });
       const res = await fetch(`/api/search/multi?${params}`);

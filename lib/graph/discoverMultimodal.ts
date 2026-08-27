@@ -102,6 +102,6 @@ export async function discoverMultimodal(
     ...trainResult,
     direct: [...trainResult.direct, ...directOther],
     viaHub: [...trainResult.viaHub, ...mixedCandidates],
-    modesAvailable: ["train", ...otherModes],
+    modesAvailable: ["train"],
   };
 }
