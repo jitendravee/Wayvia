@@ -36,13 +36,20 @@ interface Props {
   /** Currently active class/quota — these came from the last /api/search call, not client-side filtering. */
   travelClass: string;
   quota: string;
+  /** Currently active search-breadth knobs — same deal as class/quota: these came from the last /api/search call, not client-side filtering. */
+  maxHubs: number;
+  maxConnections: 1 | 2 | 3;
   /**
-   * Unlike every other filter here, class & quota change what fare/seat data
-   * even exists — so picking a new one re-queries the backend for this same
-   * route+date instead of just re-slicing the results already on screen.
+   * Unlike every other filter here, class/quota/maxHubs/maxConnections
+   * change what the backend actually searched — so picking a new one
+   * re-queries the backend for this same route+date instead of just
+   * re-slicing the results already on screen. This is also, deliberately,
+   * the only way to retry a search that came back with zero results:
+   * FiltersBar stays visible even then specifically so these controls are
+   * reachable.
    */
-  onRefine: (next: { travelClass?: string; quota?: string }) => void;
-  /** True while a class/quota refine request is in flight. */
+  onRefine: (next: { travelClass?: string; quota?: string; maxHubs?: number; maxConnections?: 1 | 2 | 3 }) => void;
+  /** True while a refine request (class/quota/maxHubs/maxConnections) is in flight. */
   refining?: boolean;
 }
 
@@ -66,6 +73,15 @@ const DEPARTURE_OPTIONS: { key: DepartureWindow; label: string }[] = (
 ).map((key) => ({ key, label: DEPARTURE_WINDOW_LABEL[key] }));
 
 const ARRIVAL_OPTIONS = DEPARTURE_OPTIONS;
+
+const CONNECTIONS_ALLOWED: { value: 1 | 2 | 3; label: string }[] = [
+  { value: 1, label: "1 junction" },
+  { value: 2, label: "2 junctions" },
+  { value: 3, label: "3 junctions" },
+];
+
+const MAX_HUBS_MIN = 3;
+const MAX_HUBS_MAX = 60;
 
 // filters.transport is a single-select TransportFilter ("any" | Mode |
 // "mixed"), not a multi-select list — this icon map is display-only, laid
@@ -138,6 +154,58 @@ function SheetSection({ label, right, children }: { label: string; right?: React
         {right}
       </div>
       {children}
+    </div>
+  );
+}
+
+/**
+ * "Junctions to explore" (maxHubs) is a backend-search-breadth knob, not a
+ * client filter — dragging it live would fire a network request per tick,
+ * so this tracks a local draft value for smooth dragging and only calls
+ * onRefine once the drag/keypress is released. Resyncs its draft whenever
+ * the committed value changes from outside (e.g. switching legs).
+ */
+function HubsSlider({
+  value,
+  disabled,
+  onCommit,
+}: {
+  value: number;
+  disabled?: boolean;
+  onCommit: (next: number) => void;
+}) {
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  function commitIfChanged() {
+    if (draft !== value) onCommit(draft);
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">Junctions to explore</span>
+        <span className="rounded-full bg-violet px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white">{draft}</span>
+      </div>
+      <input
+        type="range"
+        min={MAX_HUBS_MIN}
+        max={MAX_HUBS_MAX}
+        step={1}
+        value={draft}
+        disabled={disabled}
+        onChange={(e) => setDraft(Number(e.target.value))}
+        onMouseUp={commitIfChanged}
+        onTouchEnd={commitIfChanged}
+        onKeyUp={commitIfChanged}
+        className="w-full accent-violet disabled:opacity-60"
+      />
+      <p className="font-mono text-[10.5px] leading-relaxed text-ink-dim">
+        More stations checked as possible interchange points — raise this if a route seems to be missing.
+      </p>
     </div>
   );
 }
@@ -221,10 +289,18 @@ export default function FiltersBar({
   resultCount,
   travelClass,
   quota,
+  maxHubs,
+  maxConnections,
   onRefine,
   refining,
 }: Props) {
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) => onChange({ ...filters, [key]: val });
+
+  // Guard against a 0-0 range when there are no results yet (fareCeiling/
+  // durationCeiling come from the current result set, so they're 0 right
+  // when FiltersBar is most useful — retrying a zero-result search).
+  const fareSliderMax = Math.max(1, fareCeiling);
+  const durationSliderMax = Math.max(1, durationCeiling);
 
   const budgetPresets = useMemo(() => {
     const raw = [1500, 2500, 5000, fareCeiling].filter((p) => p <= fareCeiling && p > 0);
@@ -287,8 +363,8 @@ export default function FiltersBar({
             <input
               type="range"
               min={0}
-              max={fareCeiling}
-              step={Math.max(1, Math.round(fareCeiling / 50))}
+              max={fareSliderMax}
+              step={Math.max(1, Math.round(fareSliderMax / 50))}
               value={filters.maxFare ?? fareCeiling}
               onChange={(e) => set("maxFare", Number(e.target.value))}
               className="w-full accent-violet"
@@ -356,8 +432,8 @@ export default function FiltersBar({
             <input
               type="range"
               min={0}
-              max={durationCeiling}
-              step={Math.max(1, Math.round(durationCeiling / 50))}
+              max={durationSliderMax}
+              step={Math.max(1, Math.round(durationSliderMax / 50))}
               value={filters.maxDuration ?? durationCeiling}
               onChange={(e) => set("maxDuration", Number(e.target.value))}
               className="w-full accent-violet"
@@ -415,7 +491,7 @@ export default function FiltersBar({
           </div>
         </FilterDropdown>
 
-        {/* More filters: class, quota, confirmed-only */}
+        {/* More filters: class, quota, junctions/hubs, confirmed-only */}
         <FilterDropdown
           label="More filters"
           valueLabel=""
@@ -445,7 +521,7 @@ export default function FiltersBar({
               <div>
                 <div className="mb-1.5 flex items-center gap-2">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">Class</span>
-                  {refining && <span className="font-mono text-[10.5px] text-violet">Refreshing fares…</span>}
+                  {refining && <span className="font-mono text-[10.5px] text-violet">Re-searching…</span>}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {TRAVEL_CLASS_OPTIONS.map((o) => (
@@ -483,6 +559,34 @@ export default function FiltersBar({
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Search breadth — the two knobs that actually widen or narrow
+                what got searched in the first place. Kept in the same
+                panel as class/quota since all four trigger the same kind
+                of re-search, and this is the one place someone stuck with
+                zero results can go to try again. */}
+            <div className="flex flex-col gap-3 border-t border-border-soft pt-3">
+              <div>
+                <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-ink-dim">Via-junctions allowed</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {CONNECTIONS_ALLOWED.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      disabled={refining}
+                      onClick={() => maxConnections !== o.value && onRefine({ maxConnections: o.value })}
+                      className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
+                        maxConnections === o.value ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <HubsSlider value={maxHubs} disabled={refining} onCommit={(next) => onRefine({ maxHubs: next })} />
             </div>
           </div>
         </FilterDropdown>
@@ -595,8 +699,8 @@ export default function FiltersBar({
           <input
             type="range"
             min={0}
-            max={fareCeiling}
-            step={Math.max(1, Math.round(fareCeiling / 50))}
+            max={fareSliderMax}
+            step={Math.max(1, Math.round(fareSliderMax / 50))}
             value={filters.maxFare ?? fareCeiling}
             onChange={(e) => set("maxFare", Number(e.target.value))}
             className="w-full accent-violet"
@@ -644,8 +748,8 @@ export default function FiltersBar({
           <input
             type="range"
             min={0}
-            max={durationCeiling}
-            step={Math.max(1, Math.round(durationCeiling / 50))}
+            max={durationSliderMax}
+            step={Math.max(1, Math.round(durationSliderMax / 50))}
             value={filters.maxDuration ?? durationCeiling}
             onChange={(e) => set("maxDuration", Number(e.target.value))}
             className="w-full accent-violet"
@@ -695,7 +799,7 @@ export default function FiltersBar({
           </button>
         </SheetSection>
 
-        <SheetSection label="Class" right={refining && <span className="font-mono text-[10.5px] text-violet">Refreshing fares…</span>}>
+        <SheetSection label="Class" right={refining && <span className="font-mono text-[10.5px] text-violet">Re-searching…</span>}>
           <div className="flex flex-wrap gap-1.5">
             {TRAVEL_CLASS_OPTIONS.map((o) => (
               <Chip
@@ -721,6 +825,24 @@ export default function FiltersBar({
               />
             ))}
           </div>
+        </SheetSection>
+
+        <SheetSection label="Via-junctions allowed">
+          <div className="flex flex-wrap gap-1.5">
+            {CONNECTIONS_ALLOWED.map((o) => (
+              <Chip
+                key={o.value}
+                active={maxConnections === o.value}
+                label={o.label}
+                disabled={refining}
+                onClick={() => maxConnections !== o.value && onRefine({ maxConnections: o.value })}
+              />
+            ))}
+          </div>
+        </SheetSection>
+
+        <SheetSection label="Junctions to explore">
+          <HubsSlider value={maxHubs} disabled={refining} onCommit={(next) => onRefine({ maxHubs: next })} />
         </SheetSection>
       </MobileSheet>
     </>

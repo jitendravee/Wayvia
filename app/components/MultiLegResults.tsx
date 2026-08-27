@@ -33,14 +33,23 @@ interface LegState {
   data: SearchResponse;
   filters: FilterState;
   loading: boolean;
+  /**
+   * The "junctions to explore" breadth this leg was last searched with.
+   * Unlike travelClass/quota/maxConnections, the backend doesn't echo this
+   * back on SearchResponse, so it has to be tracked here explicitly to
+   * survive later refetches (pagination, class change, etc.) on this leg.
+   */
+  maxHubs: number;
 }
 
 interface RefineOpts {
   page?: number;
   travelClass?: string;
   quota?: string;
-  /** Bumped by the "search via N junctions" suggestion banner when a leg's direct/1-change search comes back thin. */
+  /** Bumped by the "search via N junctions" suggestion when a leg's direct/1-change search comes back thin. */
   maxConnections?: 1 | 2 | 3;
+  /** Bumped from the "Junctions to explore" control in FiltersBar's More filters panel. */
+  maxHubs?: number;
 }
 
 /**
@@ -67,6 +76,7 @@ export default function MultiLegResults({
       data,
       filters: DEFAULT_FILTERS,
       loading: false,
+      maxHubs,
     })),
   );
   const [activeIndex, setActiveIndex] = useState(0);
@@ -78,18 +88,22 @@ export default function MultiLegResults({
   }
 
   // A leg's fare/availability is class & quota-specific, same as the single
-  // search always was — so paginating, refining class/quota, or accepting a
-  // "search via N junctions" suggestion for one leg just calls the ordinary
-  // single-leg /api/search for that leg only. Other legs, and the rest of
-  // this leg's already-fetched data, are untouched.
+  // search always was — so paginating, refining class/quota/maxHubs, or
+  // accepting a "search via N junctions" suggestion for one leg just calls
+  // the ordinary single-leg /api/search for that leg only. Other legs, and
+  // the rest of this leg's already-fetched data, are untouched. This is
+  // also the only way to retry a leg that came back with zero results —
+  // FiltersBar (and NoResultsState's own widen-search button) both call
+  // through here regardless of whether `ranked` exists.
   async function refetchLeg(i: number, opts: RefineOpts) {
     const leg = legs[i];
-    const current = states[i].data;
-    const travelClass = opts.travelClass ?? current.travelClass ?? "3A";
-    const quota = opts.quota ?? current.quota ?? "GN";
+    const current = states[i];
+    const travelClass = opts.travelClass ?? current.data.travelClass ?? "3A";
+    const quota = opts.quota ?? current.data.quota ?? "GN";
     const page = opts.page ?? 1;
     const legMaxConnections =
-      opts.maxConnections ?? current.maxConnections ?? maxConnections;
+      opts.maxConnections ?? current.data.maxConnections ?? maxConnections;
+    const legMaxHubs = opts.maxHubs ?? current.maxHubs ?? maxHubs;
     // Preserve whichever mode(s) this leg was actually searched with —
     // `modesAvailable` on the leg's own last response is the source of
     // truth for that, the same way the single-search flow always resends
@@ -98,8 +112,8 @@ export default function MultiLegResults({
     // on EVERY refine action (class, quota, page, connections — not just
     // class), not only the one that happened to surface it.
     const modes =
-      current.modesAvailable && current.modesAvailable.length > 0
-        ? current.modesAvailable.join(",")
+      current.data.modesAvailable && current.data.modesAvailable.length > 0
+        ? current.data.modesAvailable.join(",")
         : "train";
 
     patchLeg(i, { loading: true });
@@ -110,7 +124,7 @@ export default function MultiLegResults({
         date: leg.date,
         class: travelClass,
         quota,
-        maxHubs: String(maxHubs),
+        maxHubs: String(legMaxHubs),
         maxConnections: String(legMaxConnections),
         page: String(page),
         pageSize: String(pageSize),
@@ -123,6 +137,7 @@ export default function MultiLegResults({
       patchLeg(i, {
         data: json,
         loading: false,
+        maxHubs: legMaxHubs,
         // Anything other than a plain page turn changed the underlying
         // result set out from under the person — drop whatever sort/
         // connection/etc. filter they'd picked for the old set.
@@ -171,7 +186,7 @@ function LegPanel({
   onRefine: (next: RefineOpts) => void;
   onPageChange: (page: number) => void;
 }) {
-  const { data, filters, loading } = state;
+  const { data, filters, loading, maxHubs } = state;
   const ranked = data.results;
   const page = data.pagination?.page ?? 1;
 
@@ -212,7 +227,7 @@ function LegPanel({
 
   const hasMap =
     page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
-  const { ref: rowRef, height: fillHeight } = useFillHeight<HTMLDivElement>(
+  const { ref: mapRef, height: fillHeight } = useFillHeight<HTMLDivElement>(
     24,
     360,
   );
@@ -230,22 +245,7 @@ function LegPanel({
     <section>
       {/* <StatsStrip data={data} /> */}
 
-      {!ranked && (
-        <NoResultsState
-          from={data.from}
-          to={data.to}
-          date={leg.date}
-          partialCount={data.partial?.length ?? 0}
-          partialAnchorId="partial-matches"
-          suggestion={suggestion}
-          onWidenSearch={
-            suggestion
-              ? () => onRefine({ maxConnections: suggestion.nextConnections })
-              : undefined
-          }
-          loading={loading}
-        />
-      )}
+   
 
       {page === 1 && data.partial && data.partial.length > 0 && (
         <div id="partial-matches" className="mb-6 scroll-mt-24">
@@ -263,22 +263,41 @@ function LegPanel({
         </div>
       )}
 
+      {/* FiltersBar is deliberately NOT gated behind `ranked` — a leg with
+          zero results is exactly when class/quota/junctions need to be
+          reachable, since they're the way to retry with different search
+          parameters. Only the results list + map below stay gated. */}
+      <FiltersBar
+        filters={filters}
+        onChange={onFiltersChange}
+        fareCeiling={fareCeiling}
+        durationCeiling={durationCeiling}
+        resultCount={filtered.length}
+        travelClass={data.travelClass ?? "3A"}
+        quota={data.quota ?? "GN"}
+        maxHubs={maxHubs}
+        maxConnections={data.maxConnections ?? 2}
+        onRefine={onRefine}
+        refining={loading}
+      />
+   {!ranked && (
+        <NoResultsState
+          from={data.from}
+          to={data.to}
+          date={leg.date}
+          partialCount={data.partial?.length ?? 0}
+          partialAnchorId="partial-matches"
+          suggestion={suggestion}
+          onWidenSearch={
+            suggestion
+              ? () => onRefine({ maxConnections: suggestion.nextConnections })
+              : undefined
+          }
+          loading={loading}
+        />
+      )}
       {ranked && (
         <>
-          {hasFilterableSet && (
-            <FiltersBar
-              filters={filters}
-              onChange={onFiltersChange}
-              fareCeiling={fareCeiling}
-              durationCeiling={durationCeiling}
-              resultCount={filtered.length}
-              travelClass={data.travelClass ?? "3A"}
-              quota={data.quota ?? "GN"}
-              onRefine={onRefine}
-              refining={loading}
-            />
-          )}
-
           {/* List/Map switch — mobile only. On md+ both panes below just show at once. */}
           {hasMap && (
             <div className="mb-3 flex gap-1 rounded-full border border-border bg-surface-alt p-1 md:hidden">
@@ -352,6 +371,7 @@ function LegPanel({
 
             {hasMap && (
               <div
+                ref={mapRef}
                 className={`md:sticky md:top-24   ${
                   mobileView !== "map" ? "hidden md:block" : ""
                 }`}
