@@ -1,7 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
-import {BusFront, LayoutGrid, Plane, RotateCcw, Shuffle, SlidersHorizontal, Sparkles, TrainFront } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  BusFront,
+  LayoutGrid,
+  Plane,
+  RotateCcw,
+  Shuffle,
+  SlidersHorizontal,
+  Sparkles,
+  TrainFront,
+  X,
+} from "lucide-react";
 import {
   ConnectionFilter,
   DEFAULT_FILTERS,
@@ -90,6 +100,119 @@ function OptionRow({ active, label, onClick }: { active: boolean; label: string;
   );
 }
 
+/** A labeled chip toggle — used throughout the mobile filter sheet for any
+ *  single-select group (departure window, changes, transport, class, quota). */
+function Chip({
+  active,
+  label,
+  icon,
+  disabled,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  icon?: React.ReactNode;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[12px] font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
+        active ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function SheetSection({ label, right, children }: { label: string; right?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">{label}</span>
+        {right}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile bottom sheet — generic shell shared by the Sort and Filters   */
+/* triggers. Locks background scroll while open and closes on backdrop  */
+/* tap, Escape, or its own close button.                                */
+/* ------------------------------------------------------------------ */
+
+function MobileSheet({
+  open,
+  onClose,
+  title,
+  children,
+  footer,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setEntered(false);
+      return;
+    }
+    const raf = requestAnimationFrame(() => setEntered(true));
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:hidden" role="dialog" aria-modal="true">
+      <div
+        className={`absolute inset-0 bg-ink/40 transition-opacity duration-200 ${entered ? "opacity-100" : "opacity-0"}`}
+        onClick={onClose}
+      />
+      <div
+        className={`relative flex max-h-[85vh] flex-col rounded-t-2xl bg-white shadow-xl transition-transform duration-200 ease-out ${
+          entered ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-border-soft px-4 py-3.5">
+          <span className="font-display text-[15px] font-semibold text-ink">{title}</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 text-ink-muted transition hover:bg-surface-alt hover:text-ink"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 py-4">
+          <div className="flex flex-col gap-5">{children}</div>
+        </div>
+        {footer && <div className="shrink-0 border-t border-border-soft bg-white px-4 py-3">{footer}</div>}
+      </div>
+    </div>
+  );
+}
+
 export default function FiltersBar({
   filters,
   onChange,
@@ -108,38 +231,367 @@ export default function FiltersBar({
     return Array.from(new Set(raw)).sort((a, b) => a - b);
   }, [fareCeiling]);
 
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const activeFilterCount = useMemo(() => {
+    let n = 0;
+    if (filters.maxFare !== null) n++;
+    if (filters.departure !== "any") n++;
+    if (filters.arrival !== "any") n++;
+    if (filters.maxDuration !== null) n++;
+    if (filters.connections !== "any") n++;
+    if (filters.transport !== "any") n++;
+    if (filters.confirmedOnly) n++;
+    return n;
+  }, [filters]);
+
+  const sortLabel = SORT_OPTIONS.find((s) => s.key === filters.sort)?.label ?? "Best match";
+
   return (
-    <div className="mb-5 flex items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-white px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
-      {/* Best match / sort */}
-      <FilterDropdown
-        label="Best match"
-        valueLabel={SORT_OPTIONS.find((s) => s.key === filters.sort)?.label ?? "Best match"}
-        variant="pill"
-        icon={<Sparkles size={14} />}
-        title="Sort by"
-      >
+    <>
+      {/* ---------------------------------------------------------------- */}
+      {/* Desktop / tablet — unchanged from before, just hidden below sm.   */}
+      {/* ---------------------------------------------------------------- */}
+      <div className="mb-5 hidden items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-white px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+        {/* Best match / sort */}
+        <FilterDropdown
+          label="Best match"
+          valueLabel={sortLabel}
+          variant="pill"
+          icon={<Sparkles size={14} />}
+          title="Sort by"
+        >
+          <div className="flex flex-col gap-1">
+            {SORT_OPTIONS.map((o) => (
+              <OptionRow key={o.key} active={filters.sort === o.key} label={o.label} onClick={() => set("sort", o.key)} />
+            ))}
+          </div>
+        </FilterDropdown>
+
+        <div className="mx-1 hidden h-6 w-px shrink-0 bg-border-soft sm:block" />
+
+        {/* Budget */}
+        <FilterDropdown
+          label="Budget"
+          valueLabel={formatBudgetLabel(filters.maxFare, fareCeiling)}
+          active={filters.maxFare !== null}
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">Maximum fare</span>
+              <span className="rounded-full bg-violet px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white">
+                {formatBudgetLabel(filters.maxFare, fareCeiling)}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={fareCeiling}
+              step={Math.max(1, Math.round(fareCeiling / 50))}
+              value={filters.maxFare ?? fareCeiling}
+              onChange={(e) => set("maxFare", Number(e.target.value))}
+              className="w-full accent-violet"
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {budgetPresets.map((p) => {
+                const isCeiling = p === fareCeiling;
+                const active = isCeiling ? filters.maxFare === null : filters.maxFare === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => set("maxFare", isCeiling ? null : p)}
+                    className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition ${
+                      active ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
+                    }`}
+                  >
+                    {isCeiling ? "No limit" : `₹${p.toLocaleString("en-IN")}`}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </FilterDropdown>
+
+        {/* Departure */}
+        <FilterDropdown
+          label="Departure"
+          valueLabel={DEPARTURE_WINDOW_LABEL[filters.departure]}
+          active={filters.departure !== "any"}
+        >
+          <div className="flex flex-col gap-1">
+            {DEPARTURE_OPTIONS.map((o) => (
+              <OptionRow key={o.key} active={filters.departure === o.key} label={o.label} onClick={() => set("departure", o.key)} />
+            ))}
+          </div>
+        </FilterDropdown>
+
+        {/* Arrival */}
+        <FilterDropdown
+          label="Arrival"
+          valueLabel={DEPARTURE_WINDOW_LABEL[filters.arrival]}
+          active={filters.arrival !== "any"}
+        >
+          <div className="flex flex-col gap-1">
+            {ARRIVAL_OPTIONS.map((o) => (
+              <OptionRow key={o.key} active={filters.arrival === o.key} label={o.label} onClick={() => set("arrival", o.key)} />
+            ))}
+          </div>
+        </FilterDropdown>
+
+        {/* Duration */}
+        <FilterDropdown
+          label="Duration"
+          valueLabel={formatDurationLabel(filters.maxDuration, durationCeiling)}
+          active={filters.maxDuration !== null}
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">Maximum duration</span>
+              <span className="rounded-full bg-violet px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white">
+                {formatDurationLabel(filters.maxDuration, durationCeiling)}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={durationCeiling}
+              step={Math.max(1, Math.round(durationCeiling / 50))}
+              value={filters.maxDuration ?? durationCeiling}
+              onChange={(e) => set("maxDuration", Number(e.target.value))}
+              className="w-full accent-violet"
+            />
+            <button
+              type="button"
+              onClick={() => set("maxDuration", null)}
+              className={`self-start rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition ${
+                filters.maxDuration === null ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
+              }`}
+            >
+              Any duration
+            </button>
+          </div>
+        </FilterDropdown>
+
+        {/* Changes / connections */}
+        <FilterDropdown
+          label="Changes"
+          valueLabel={CONNECTION_OPTIONS.find((o) => o.key === filters.connections)?.label ?? "Any"}
+          active={filters.connections !== "any"}
+        >
+          <div className="flex flex-col gap-1">
+            {CONNECTION_OPTIONS.map((o) => (
+              <OptionRow key={o.key} active={filters.connections === o.key} label={o.label} onClick={() => set("connections", o.key)} />
+            ))}
+          </div>
+        </FilterDropdown>
+
+        {/* Transport — single-select: any / train / bus / flight / mixed */}
+        <FilterDropdown
+          label="Transport"
+          valueLabel={TRANSPORT_OPTIONS.find((o) => o.value === filters.transport)?.label ?? "All modes"}
+          active={filters.transport !== "any"}
+          panelClassName="w-64"
+        >
+          <div className="flex flex-col gap-1">
+            {TRANSPORT_OPTIONS.map(({ value, label }) => {
+              const Icon = TRANSPORT_ICON[value];
+              const active = filters.transport === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => set("transport", value)}
+                  className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition ${
+                    active ? "bg-violet-soft text-violet-dark" : "text-ink hover:bg-surface-alt"
+                  }`}
+                >
+                  <Icon size={15} />
+                  <span className="font-display text-[13.5px] font-medium">{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </FilterDropdown>
+
+        {/* More filters: class, quota, confirmed-only */}
+        <FilterDropdown
+          label="More filters"
+          valueLabel=""
+          variant="pill"
+          icon={<SlidersHorizontal size={14} />}
+          align="right"
+          panelClassName="w-80"
+          title="More filters"
+        >
+          <div className="flex flex-col gap-4">
+            <button
+              type="button"
+              onClick={() => set("confirmedOnly", !filters.confirmedOnly)}
+              className="flex w-full items-center justify-between rounded-xl px-1 py-1 text-left"
+            >
+              <span className="font-display text-[13.5px] font-medium text-ink">Fully confirmed only</span>
+              <span className={`relative h-5 w-9 shrink-0 rounded-full transition ${filters.confirmedOnly ? "bg-violet" : "bg-border"}`}>
+                <span
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                    filters.confirmedOnly ? "translate-x-4" : "translate-x-0.5"
+                  }`}
+                />
+              </span>
+            </button>
+
+            <div className="flex flex-col gap-3 border-t border-border-soft pt-3">
+              <div>
+                <div className="mb-1.5 flex items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">Class</span>
+                  {refining && <span className="font-mono text-[10.5px] text-violet">Refreshing fares…</span>}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {TRAVEL_CLASS_OPTIONS.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      disabled={refining}
+                      title={o.label}
+                      onClick={() => travelClass !== o.value && onRefine({ travelClass: o.value })}
+                      className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
+                        travelClass === o.value ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
+                      }`}
+                    >
+                      {o.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-ink-dim">Quota</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {QUOTA_OPTIONS.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      disabled={refining}
+                      onClick={() => quota !== o.value && onRefine({ quota: o.value })}
+                      className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
+                        quota === o.value ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </FilterDropdown>
+
+        <span className="ml-auto hidden shrink-0 font-mono text-[11px] text-ink-dim sm:inline">
+          {resultCount} match{resultCount === 1 ? "" : "es"}
+        </span>
+
+        {/* Clear all */}
+        <button
+          type="button"
+          onClick={() => onChange(DEFAULT_FILTERS)}
+          className="ml-2 flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 py-2 font-display text-[12.5px] font-semibold text-ink-muted transition hover:border-violet hover:text-violet sm:ml-0"
+        >
+          <RotateCcw size={13} />
+          Clear all
+        </button>
+      </div>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Mobile — three fixed controls, no horizontal scrolling: Sort,     */}
+      {/* Filters (opens a bottom sheet with everything else), Clear all.   */}
+      {/* ---------------------------------------------------------------- */}
+      <div className="mb-5 flex items-center gap-2 sm:hidden">
+        <button
+          type="button"
+          onClick={() => setSortOpen(true)}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-border bg-white px-3 py-2.5 font-display text-[13px] font-semibold text-ink shadow-sm"
+        >
+          <Sparkles size={14} className="text-violet" />
+          <span className="truncate">{sortLabel}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFiltersOpen(true)}
+          className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full border px-3 py-2.5 font-display text-[13px] font-semibold shadow-sm ${
+            activeFilterCount > 0 ? "border-violet bg-violet-soft text-violet-dark" : "border-border bg-white text-ink"
+          }`}
+        >
+          <SlidersHorizontal size={14} className={activeFilterCount > 0 ? "text-violet" : "text-violet"} />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-violet px-1 font-mono text-[10px] font-bold text-white">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onChange(DEFAULT_FILTERS)}
+          aria-label="Clear all filters"
+          className="flex shrink-0 items-center justify-center rounded-full border border-border bg-white p-2.5 text-ink-muted shadow-sm transition hover:border-violet hover:text-violet"
+        >
+          <RotateCcw size={15} />
+        </button>
+      </div>
+
+      {/* Sort sheet */}
+      <MobileSheet open={sortOpen} onClose={() => setSortOpen(false)} title="Sort by">
         <div className="flex flex-col gap-1">
           {SORT_OPTIONS.map((o) => (
-            <OptionRow key={o.key} active={filters.sort === o.key} label={o.label} onClick={() => set("sort", o.key)} />
+            <OptionRow
+              key={o.key}
+              active={filters.sort === o.key}
+              label={o.label}
+              onClick={() => {
+                set("sort", o.key);
+                setSortOpen(false);
+              }}
+            />
           ))}
         </div>
-      </FilterDropdown>
+      </MobileSheet>
 
-      <div className="mx-1 hidden h-6 w-px shrink-0 bg-border-soft sm:block" />
-
-      {/* Budget */}
-      <FilterDropdown
-        label="Budget"
-        valueLabel={formatBudgetLabel(filters.maxFare, fareCeiling)}
-        active={filters.maxFare !== null}
+      {/* Filters sheet — everything except sort, in one scrollable stack */}
+      <MobileSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        title="Filters"
+        footer={
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onChange(DEFAULT_FILTERS)}
+              className="flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2.5 font-display text-[13px] font-semibold text-ink-muted transition hover:border-violet hover:text-violet"
+            >
+              <RotateCcw size={13} />
+              Clear all
+            </button>
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(false)}
+              className="flex flex-1 items-center justify-center rounded-full bg-violet px-4 py-2.5 font-display text-[13px] font-semibold text-white transition hover:bg-violet-dark"
+            >
+              Show {resultCount} match{resultCount === 1 ? "" : "es"}
+            </button>
+          </div>
+        }
       >
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">Maximum fare</span>
+        <SheetSection
+          label="Maximum fare"
+          right={
             <span className="rounded-full bg-violet px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white">
               {formatBudgetLabel(filters.maxFare, fareCeiling)}
             </span>
-          </div>
+          }
+        >
           <input
             type="range"
             min={0}
@@ -154,61 +606,41 @@ export default function FiltersBar({
               const isCeiling = p === fareCeiling;
               const active = isCeiling ? filters.maxFare === null : filters.maxFare === p;
               return (
-                <button
+                <Chip
                   key={p}
-                  type="button"
+                  active={active}
+                  label={isCeiling ? "No limit" : `₹${p.toLocaleString("en-IN")}`}
                   onClick={() => set("maxFare", isCeiling ? null : p)}
-                  className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition ${
-                    active ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
-                  }`}
-                >
-                  {isCeiling ? "No limit" : `₹${p.toLocaleString("en-IN")}`}
-                </button>
+                />
               );
             })}
           </div>
-        </div>
-      </FilterDropdown>
+        </SheetSection>
 
-      {/* Departure */}
-      <FilterDropdown
-        label="Departure"
-        valueLabel={DEPARTURE_WINDOW_LABEL[filters.departure]}
-        active={filters.departure !== "any"}
-      >
-        <div className="flex flex-col gap-1">
-          {DEPARTURE_OPTIONS.map((o) => (
-            <OptionRow key={o.key} active={filters.departure === o.key} label={o.label} onClick={() => set("departure", o.key)} />
-          ))}
-        </div>
-      </FilterDropdown>
+        <SheetSection label="Departure">
+          <div className="flex flex-wrap gap-1.5">
+            {DEPARTURE_OPTIONS.map((o) => (
+              <Chip key={o.key} active={filters.departure === o.key} label={o.label} onClick={() => set("departure", o.key)} />
+            ))}
+          </div>
+        </SheetSection>
 
-      {/* Arrival */}
-      <FilterDropdown
-        label="Arrival"
-        valueLabel={DEPARTURE_WINDOW_LABEL[filters.arrival]}
-        active={filters.arrival !== "any"}
-      >
-        <div className="flex flex-col gap-1">
-          {ARRIVAL_OPTIONS.map((o) => (
-            <OptionRow key={o.key} active={filters.arrival === o.key} label={o.label} onClick={() => set("arrival", o.key)} />
-          ))}
-        </div>
-      </FilterDropdown>
+        <SheetSection label="Arrival">
+          <div className="flex flex-wrap gap-1.5">
+            {ARRIVAL_OPTIONS.map((o) => (
+              <Chip key={o.key} active={filters.arrival === o.key} label={o.label} onClick={() => set("arrival", o.key)} />
+            ))}
+          </div>
+        </SheetSection>
 
-      {/* Duration */}
-      <FilterDropdown
-        label="Duration"
-        valueLabel={formatDurationLabel(filters.maxDuration, durationCeiling)}
-        active={filters.maxDuration !== null}
-      >
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">Maximum duration</span>
+        <SheetSection
+          label="Maximum duration"
+          right={
             <span className="rounded-full bg-violet px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white">
               {formatDurationLabel(filters.maxDuration, durationCeiling)}
             </span>
-          </div>
+          }
+        >
           <input
             type="range"
             min={0}
@@ -218,74 +650,39 @@ export default function FiltersBar({
             onChange={(e) => set("maxDuration", Number(e.target.value))}
             className="w-full accent-violet"
           />
-          <button
-            type="button"
-            onClick={() => set("maxDuration", null)}
-            className={`self-start rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition ${
-              filters.maxDuration === null ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
-            }`}
-          >
-            Any duration
-          </button>
-        </div>
-      </FilterDropdown>
+          <Chip active={filters.maxDuration === null} label="Any duration" onClick={() => set("maxDuration", null)} />
+        </SheetSection>
 
-      {/* Changes / connections */}
-      <FilterDropdown
-        label="Changes"
-        valueLabel={CONNECTION_OPTIONS.find((o) => o.key === filters.connections)?.label ?? "Any"}
-        active={filters.connections !== "any"}
-      >
-        <div className="flex flex-col gap-1">
-          {CONNECTION_OPTIONS.map((o) => (
-            <OptionRow key={o.key} active={filters.connections === o.key} label={o.label} onClick={() => set("connections", o.key)} />
-          ))}
-        </div>
-      </FilterDropdown>
+        <SheetSection label="Changes">
+          <div className="flex flex-wrap gap-1.5">
+            {CONNECTION_OPTIONS.map((o) => (
+              <Chip key={o.key} active={filters.connections === o.key} label={o.label} onClick={() => set("connections", o.key)} />
+            ))}
+          </div>
+        </SheetSection>
 
-      {/* Transport — single-select: any / train / bus / flight / mixed */}
-      <FilterDropdown
-        label="Transport"
-        valueLabel={TRANSPORT_OPTIONS.find((o) => o.value === filters.transport)?.label ?? "All modes"}
-        active={filters.transport !== "any"}
-        panelClassName="w-64"
-      >
-        <div className="flex flex-col gap-1">
-          {TRANSPORT_OPTIONS.map(({ value, label }) => {
-            const Icon = TRANSPORT_ICON[value];
-            const active = filters.transport === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => set("transport", value)}
-                className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition ${
-                  active ? "bg-violet-soft text-violet-dark" : "text-ink hover:bg-surface-alt"
-                }`}
-              >
-                <Icon size={15} />
-                <span className="font-display text-[13.5px] font-medium">{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </FilterDropdown>
+        <SheetSection label="Transport">
+          <div className="flex flex-wrap gap-1.5">
+            {TRANSPORT_OPTIONS.map(({ value, label }) => {
+              const Icon = TRANSPORT_ICON[value];
+              return (
+                <Chip
+                  key={value}
+                  active={filters.transport === value}
+                  label={label}
+                  icon={<Icon size={13} />}
+                  onClick={() => set("transport", value)}
+                />
+              );
+            })}
+          </div>
+        </SheetSection>
 
-      {/* More filters: class, quota, confirmed-only */}
-      <FilterDropdown
-        label="More filters"
-        valueLabel=""
-        variant="pill"
-        icon={<SlidersHorizontal size={14} />}
-        align="right"
-        panelClassName="w-80"
-        title="More filters"
-      >
-        <div className="flex flex-col gap-4">
+        <SheetSection label="Confirmation">
           <button
             type="button"
             onClick={() => set("confirmedOnly", !filters.confirmedOnly)}
-            className="flex w-full items-center justify-between rounded-xl px-1 py-1 text-left"
+            className="flex w-full items-center justify-between rounded-xl border border-border-soft px-3 py-2.5 text-left"
           >
             <span className="font-display text-[13.5px] font-medium text-ink">Fully confirmed only</span>
             <span className={`relative h-5 w-9 shrink-0 rounded-full transition ${filters.confirmedOnly ? "bg-violet" : "bg-border"}`}>
@@ -296,66 +693,36 @@ export default function FiltersBar({
               />
             </span>
           </button>
+        </SheetSection>
 
-          <div className="flex flex-col gap-3 border-t border-border-soft pt-3">
-            <div>
-              <div className="mb-1.5 flex items-center gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">Class</span>
-                {refining && <span className="font-mono text-[10.5px] text-violet">Refreshing fares…</span>}
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {TRAVEL_CLASS_OPTIONS.map((o) => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    disabled={refining}
-                    title={o.label}
-                    onClick={() => travelClass !== o.value && onRefine({ travelClass: o.value })}
-                    className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
-                      travelClass === o.value ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
-                    }`}
-                  >
-                    {o.value}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-ink-dim">Quota</span>
-              <div className="flex flex-wrap gap-1.5">
-                {QUOTA_OPTIONS.map((o) => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    disabled={refining}
-                    onClick={() => quota !== o.value && onRefine({ quota: o.value })}
-                    className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
-                      quota === o.value ? "border-violet bg-violet text-white" : "border-border text-ink-muted hover:border-violet-ring"
-                    }`}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <SheetSection label="Class" right={refining && <span className="font-mono text-[10.5px] text-violet">Refreshing fares…</span>}>
+          <div className="flex flex-wrap gap-1.5">
+            {TRAVEL_CLASS_OPTIONS.map((o) => (
+              <Chip
+                key={o.value}
+                active={travelClass === o.value}
+                label={o.value}
+                disabled={refining}
+                onClick={() => travelClass !== o.value && onRefine({ travelClass: o.value })}
+              />
+            ))}
           </div>
-        </div>
-      </FilterDropdown>
+        </SheetSection>
 
-      <span className="ml-auto hidden shrink-0 font-mono text-[11px] text-ink-dim sm:inline">
-        {resultCount} match{resultCount === 1 ? "" : "es"}
-      </span>
-
-      {/* Clear all */}
-      <button
-        type="button"
-        onClick={() => onChange(DEFAULT_FILTERS)}
-        className="ml-2 flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 py-2 font-display text-[12.5px] font-semibold text-ink-muted transition hover:border-violet hover:text-violet sm:ml-0"
-      >
-        <RotateCcw size={13} />
-        Clear all
-      </button>
-    </div>
+        <SheetSection label="Quota">
+          <div className="flex flex-wrap gap-1.5">
+            {QUOTA_OPTIONS.map((o) => (
+              <Chip
+                key={o.value}
+                active={quota === o.value}
+                label={o.label}
+                disabled={refining}
+                onClick={() => quota !== o.value && onRefine({ quota: o.value })}
+              />
+            ))}
+          </div>
+        </SheetSection>
+      </MobileSheet>
+    </>
   );
 }
