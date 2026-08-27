@@ -90,6 +90,17 @@ export default function MultiLegResults({
     const page = opts.page ?? 1;
     const legMaxConnections =
       opts.maxConnections ?? current.maxConnections ?? maxConnections;
+    // Preserve whichever mode(s) this leg was actually searched with —
+    // `modesAvailable` on the leg's own last response is the source of
+    // truth for that, the same way the single-search flow always resends
+    // its own selected modes on every refine. Hardcoding "train" here
+    // would silently drop bus/flight from a leg that originally had them
+    // on EVERY refine action (class, quota, page, connections — not just
+    // class), not only the one that happened to surface it.
+    const modes =
+      current.modesAvailable && current.modesAvailable.length > 0
+        ? current.modesAvailable.join(",")
+        : "train";
 
     patchLeg(i, { loading: true });
     try {
@@ -103,6 +114,7 @@ export default function MultiLegResults({
         maxConnections: String(legMaxConnections),
         page: String(page),
         pageSize: String(pageSize),
+        modes,
       });
       const res = await fetch(`/api/search?${params}`);
       const json: SearchResponse = await res.json();

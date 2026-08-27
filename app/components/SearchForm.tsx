@@ -649,7 +649,7 @@ export interface SearchFormValues {
   modes: Mode[];
 }
 
-export const ALL_SEARCH_MODES: Mode[] = ["train", "bus", "flight"];
+export const ALL_SEARCH_MODES: Mode[] = ["train"];
 
 /* ------------------------------------------------------------------ */
 /* Mode chips – unchanged                                             */
