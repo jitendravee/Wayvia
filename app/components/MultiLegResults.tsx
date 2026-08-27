@@ -349,7 +349,7 @@ function LegPanel({
 
             {hasMap && (
               <div
-                className={`md:sticky md:top-24  ${
+                className={`md:sticky md:top-24   ${
                   mobileView !== "map" ? "hidden md:block" : ""
                 }`}
               >

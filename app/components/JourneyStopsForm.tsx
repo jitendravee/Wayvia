@@ -26,6 +26,15 @@ interface Props {
   onOriginChange: (code: string) => void;
   stops: StopEntry[];
   onStopsChange: (stops: StopEntry[]) => void;
+  /**
+   * Swaps origin and stops[0].to as ONE atomic update. Optional — if the
+   * parent doesn't pass it, the component falls back to calling
+   * onOriginChange + onStopsChange separately (fine for a parent that
+   * derives from plain useState, but see the note on swapFirstLeg below
+   * for why that fallback can misbehave for a parent that derives both
+   * fields from one shared "values" object).
+   */
+  onSwapFirstLeg?: (newOrigin: string, newTo: string) => void;
   /** Visual context — pass the glass-hero classes on the landing page, omit for the default form look. */
   labelClassName?: string;
   inputClassName?: string;
@@ -118,6 +127,7 @@ export default function JourneyStopsForm({
   onOriginChange,
   stops,
   onStopsChange,
+  onSwapFirstLeg,
   labelClassName,
   inputClassName,
   captionClassName,
@@ -137,8 +147,25 @@ export default function JourneyStopsForm({
     onStopsChange(stops.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   }
 
+  /**
+   * Swapping origin and stops[0].to touches BOTH fields at once. If a parent
+   * keeps them in one combined object (as SearchForm's `values` does) and
+   * exposes onOriginChange/onStopsChange as two independent setters, firing
+   * both here — even synchronously, back to back — means each one computes
+   * its update from the same pre-swap snapshot of that object. Whichever
+   * call's setState the parent applies last "wins" and silently discards the
+   * other field's change, e.g. PUNE→ADI swaps to PUNE→PUNE instead of
+   * ADI→PUNE. Prefer the atomic `onSwapFirstLeg` when the parent provides
+   * it; only fall back to the two-call version for parents (like the
+   * landing-page hero) that hold origin/stops as fully independent state,
+   * where that race doesn't apply.
+   */
   function swapFirstLeg() {
     const first = stops[0];
+    if (onSwapFirstLeg) {
+      onSwapFirstLeg(first.to, origin);
+      return;
+    }
     onOriginChange(first.to);
     setStop(0, { to: origin });
   }
@@ -422,12 +449,7 @@ function StopRow({
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl py-4 sm:flex-nowrap sm:gap-x-4">
-      {/* <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-soft font-sans text-[11px] font-semibold text-violet-dark">
-        {stopNumber}
-      </span> */}
-
       <div className="flex min-w-0 shrink-0 items-start gap-1.5">
-        {/* <MapPin size={14} className="mt-[3px] shrink-0 text-ink-dim" /> */}
         <div className="flex min-w-0 flex-col leading-none">
           <span className="truncate font-semibold text-ink text-[13.5px] sm:text-[14px]">
             {from || "—"}
@@ -443,8 +465,6 @@ function StopRow({
         <ArrowRight size={16} className="self-center-safe" />
       </div>
       <div className="flex min-w-[140px] flex-1 items-start gap-1.5 basis-full sm:basis-auto sm:min-w-0">
-        {/* <MapPin size={14} className="mt-[20px] shrink-0 text-violet" /> */}
-
         <StationInput
           id={`${idPrefix}-to`}
           label="To"
