@@ -38,14 +38,14 @@ export default function Navbar() {
       `}
     >
       <div className="mx-auto flex items-center justify-between px-5 py-3.5 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-1">
           <img
             src="/logo.png"
             alt="Wayvia"
-            className="h-12 w-12 rounded-lg object-contain"
+            className="h-10 w-10 rounded-lg object-contain"
           />
 
-          <span className="mt-2 font-display text-lg font-semibold text-ink">
+          <span className=" font-display text-lg font-semibold text-ink">
             Wayvia
           </span>
         </Link>
