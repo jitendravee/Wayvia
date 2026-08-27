@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import NarrativeBanner from "./NarrativeBanner";
-import EmptyState from "./EmptyState";
 import StatsStrip from "./StatsStrip";
 import JourneyCard from "./JourneyCard";
 import OverviewMap from "./OverviewMap";
@@ -20,6 +19,7 @@ import {
 } from "./filters";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
 import { useFillHeight } from "@/lib/hooks/useFillHeight";
+import NoResultsState from "./Noresultsstate";
 
 interface Props {
   initial: MultiSearchResponse;
@@ -216,36 +216,39 @@ function LegPanel({
     24,
     360,
   );
+
+  // The backend's own "you searched too narrowly" hint, when present.
+  // Cast defensively — `suggestion` may not exist on every SearchResponse
+  // shape in your types.ts yet; add it there once and this cast can go.
+  const suggestion = (
+    data as unknown as {
+      suggestion?: { message: string; nextConnections: 1 | 2 | 3 };
+    }
+  ).suggestion;
+
   return (
     <section>
       {/* <StatsStrip data={data} /> */}
 
-      {/* {data.narrative && <NarrativeBanner narrative={data.narrative} tone={ranked ? "clear" : "empty"} />}
-
-      {page === 1 && data.suggestion && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-violet-ring bg-violet-soft/40 px-5 py-3.5">
-          <div className="text-[13px] leading-relaxed text-ink">{data.suggestion.message}</div>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => onRefine({ maxConnections: data.suggestion!.nextConnections })}
-            className="shrink-0 rounded-full bg-violet px-4 py-2 font-display text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-dark disabled:opacity-50"
-          >
-            Search via {data.suggestion.nextConnections} junctions
-          </button>
-        </div>
-      )} */}
-
       {!ranked && (
-        <EmptyState
+        <NoResultsState
           from={data.from}
           to={data.to}
+          date={leg.date}
           partialCount={data.partial?.length ?? 0}
+          partialAnchorId="partial-matches"
+          suggestion={suggestion}
+          onWidenSearch={
+            suggestion
+              ? () => onRefine({ maxConnections: suggestion.nextConnections })
+              : undefined
+          }
+          loading={loading}
         />
       )}
 
       {page === 1 && data.partial && data.partial.length > 0 && (
-        <div className="mb-6">
+        <div id="partial-matches" className="mb-6 scroll-mt-24">
           <div className="mb-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
             Partway-there matches — real trains covering part of this leg
           </div>
