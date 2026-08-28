@@ -52,7 +52,7 @@ export default function OverviewMap({
   if (routes.length === 0) return null;
 
   return (
-    <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+    <div className="mb-6  overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft bg-surface-alt px-4 py-2.5">
         <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">
           Ways to get there — overview
