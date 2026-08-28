@@ -1,12 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { TrainFront, Bus, Plane } from "lucide-react";
+import type { Mode } from "@/lib/graph/types";
 
 export interface StationSuggestion {
   code: string;
   name: string;
   state?: string;
+  /** Which modes this place is actually searchable by — absent (older /api/stations shape) is treated as train-only. */
+  modes?: Mode[];
 }
+
+const MODE_ICON: Record<Mode, typeof TrainFront> = {
+  train: TrainFront,
+  bus: Bus,
+  flight: Plane,
+};
 
 interface Props {
   id: string;
@@ -22,7 +32,7 @@ interface Props {
    * Shows the resolved station name under the code (e.g. "NDLS" / "New Delhi"),
    * like the two-line station display on the landing hero. When `value` is a
    * bare code that hasn't been resolved yet (e.g. set from outside via swap,
-   * or an initial default), this looks it up against /api/stations.
+   * or an initial default), this looks it up against /api/places.
    */
   showStationName?: boolean;
   /** Classes for the resolved-name caption. Only used when showStationName is true. */
@@ -76,7 +86,7 @@ export default function StationInput({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/stations?q=${encodeURIComponent(code)}&limit=8`);
+        const res = await fetch(`/api/places?q=${encodeURIComponent(code)}&limit=8`);
         const json = await res.json();
         const match: StationSuggestion | undefined = (json.results ?? []).find(
           (r: StationSuggestion) => r.code.toUpperCase() === code
@@ -117,7 +127,7 @@ export default function StationInput({
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/stations?q=${encodeURIComponent(text)}&limit=8`);
+        const res = await fetch(`/api/places?q=${encodeURIComponent(text)}&limit=8`);
         const json = await res.json();
         setSuggestions(json.results ?? []);
         setOpen(true);
@@ -205,8 +215,14 @@ export default function StationInput({
                 {s.name}
                 {s.state ? <span className="text-ink-dim"> · {s.state}</span> : null}
               </span>
-              <span className="shrink-0 rounded-md bg-surface-alt px-1.5 py-0.5 font-mono text-[11px] text-ink-muted">
-                {s.code}
+              <span className="flex shrink-0 items-center gap-1.5">
+                {(s.modes ?? ["train"]).map((m) => {
+                  const Icon = MODE_ICON[m];
+                  return <Icon key={m} className="h-3 w-3 text-ink-dim" aria-label={m} />;
+                })}
+                <span className="rounded-md bg-surface-alt px-1.5 py-0.5 font-mono text-[11px] text-ink-muted">
+                  {s.code}
+                </span>
               </span>
             </li>
           ))}

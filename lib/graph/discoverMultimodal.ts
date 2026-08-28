@@ -3,8 +3,18 @@ import type { JourneyCandidate, Leg, Mode } from "./types";
 import { MODE_PROVIDERS, ALL_MODES } from "../providers/registry";
 
 export interface MultimodalDiscoveryResult extends GraphDiscoveryResult {
-  /** Every mode this search actually queried — reflects what the backend can search today (mock bus/flight included), not just what came back with results. */
+  /** Every mode this search actually queried — reflects what was requested + has a registered provider, not just what came back with results. */
   modesAvailable: Mode[];
+  /**
+   * DEBUG: how many raw legs each mode actually contributed before
+   * availability filtering (direct + every hub-crossing leg combined) —
+   * *not* how many ended up in `results`, since that also requires
+   * fullyConfirmed. Exists purely so you can tell "ixigo returned 0 legs"
+   * apart from "ixigo returned legs but none had seats" from the API
+   * response itself, without digging through server logs. Safe to drop
+   * once the ixigo integration is confirmed working end to end.
+   */
+  candidatesByMode: Partial<Record<Mode, number>>;
 }
 
 /** How many of the train search's own top-scored hubs to also try mode-crossing through (train→bus, bus→train, etc.). Kept small — each one costs a couple of extra provider calls per non-train mode. */
@@ -54,12 +64,20 @@ export async function discoverMultimodal(
 
   const directOther: JourneyCandidate[] = [];
   const mixedCandidates: JourneyCandidate[] = [];
+  // DEBUG counters — see candidatesByMode on the return value below.
+  const modeCounts: Partial<Record<Mode, number>> = {};
+  const bump = (mode: Mode, by: number) => {
+    if (by <= 0) return;
+    modeCounts[mode] = (modeCounts[mode] ?? 0) + by;
+  };
 
   if (otherModes.length > 0) {
     // Direct bus/flight, same origin→destination.
     await Promise.all(
       otherModes.map(async (mode) => {
         const legs = await MODE_PROVIDERS[mode]!.search(from, to, opts.date);
+        console.log(`[discoverMultimodal] direct ${mode} ${from}->${to}: ${legs.length} leg(s)`);
+        bump(mode, legs.length);
         for (const leg of legs) directOther.push({ legs: [leg] });
       })
     );
@@ -76,6 +94,7 @@ export async function discoverMultimodal(
             const provider = MODE_PROVIDERS[mode]!;
 
             const [trainToHub, otherFromHub] = await Promise.all([directSearch(from, hub, opts), provider.search(hub, to, opts.date)]);
+            bump(mode, otherFromHub.length);
             for (const c1 of trainToHub) {
               const leg1 = { ...c1.legs[0], mode: "train" as const, source: "live" as const };
               for (const leg2 of otherFromHub) {
@@ -85,6 +104,7 @@ export async function discoverMultimodal(
             }
 
             const [otherToHub, trainFromHub] = await Promise.all([provider.search(from, hub, opts.date), directSearch(hub, to, opts)]);
+            bump(mode, otherToHub.length);
             for (const leg1 of otherToHub) {
               for (const c2 of trainFromHub) {
                 const leg2 = { ...c2.legs[0], mode: "train" as const, source: "live" as const };
@@ -96,12 +116,20 @@ export async function discoverMultimodal(
         );
       })
     );
+
+    for (const mode of otherModes) {
+      console.log(`[discoverMultimodal] ${mode} total legs contributed (direct + hub-crossing): ${modeCounts[mode] ?? 0}`);
+    }
   }
+
+  const modesAvailable: Mode[] = [...(requestedModes.includes("train") ? (["train"] as Mode[]) : []), ...otherModes];
+  if (requestedModes.includes("train")) modeCounts.train = trainResult.direct.length + trainResult.viaHub.length + trainResult.viaTwoHub.length + trainResult.viaThreeHub.length;
 
   return {
     ...trainResult,
     direct: [...trainResult.direct, ...directOther],
     viaHub: [...trainResult.viaHub, ...mixedCandidates],
-    modesAvailable: ["train"],
+    modesAvailable,
+    candidatesByMode: modeCounts,
   };
 }

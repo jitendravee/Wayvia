@@ -28,7 +28,7 @@ export interface SearchFormValues {
   modes: Mode[];
 }
 
-export const ALL_SEARCH_MODES: Mode[] = ["train"];
+export const ALL_SEARCH_MODES: Mode[] = ["train","bus"];
 
 /* ------------------------------------------------------------------ */
 /* Mode chips – unchanged                                             */
@@ -226,7 +226,7 @@ export default function SearchForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm shadow-violet-soft/40"
+      className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm shadow-violet-soft/40 overflow-visible"
     >
       {/* The route input – now using the full JourneyStopsForm */}
       <div className="px-4 py-4 sm:px-5">

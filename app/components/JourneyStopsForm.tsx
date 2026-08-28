@@ -88,7 +88,7 @@ function useResolvedStationName(code: string) {
     (async () => {
       try {
         const res = await fetch(
-          `/api/stations?q=${encodeURIComponent(c)}&limit=8`,
+          `/api/places?q=${encodeURIComponent(c)}&limit=8`,
         );
         const json = await res.json();
         const match = (json.results ?? []).find(

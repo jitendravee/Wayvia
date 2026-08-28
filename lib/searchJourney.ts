@@ -32,7 +32,7 @@ export interface JourneySearchParams {
 export async function runJourneySearch(params: JourneySearchParams): Promise<SearchResponse> {
   const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes } = params;
 
-  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable } = await discoverMultimodal(from, to, {
+  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable, candidatesByMode } = await discoverMultimodal(from, to, {
     date,
     maxHubs,
     maxConnections,
@@ -51,6 +51,7 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
       quota,
       mode: "train",
       modesAvailable,
+      candidatesByMode,
       graph,
       maxConnections,
       candidates: { direct: 0, oneConnection: 0, twoConnection: 0, threeConnection: 0 },
@@ -100,6 +101,7 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
     quota,
     mode: "train",
     modesAvailable,
+    candidatesByMode,
     graph,
     maxConnections,
     candidates: {
