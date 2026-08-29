@@ -12,7 +12,7 @@ const PRODUCT_LINKS = [
 //   { label: "Instagram", href: "https://instagram.com/wayvia", icon: Instagram },
 //   { label: "LinkedIn", href: "https://linkedin.com/company/wayvia", icon: Linkedin },
 // ];
-const COMPANY_LINKS = [ { label: "Blog", href: "/blog" }, ];
+const COMPANY_LINKS = [ { label: "Blog", href: "/blog" }, { label: "Privacy Policy", href: "/privacy-policy" }, { label: "Terms Of Service", href: "/terms-of-service" }, ];
 export default function Footer() {
   const year = new Date().getFullYear();
 
