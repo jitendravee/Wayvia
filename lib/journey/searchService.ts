@@ -1,8 +1,9 @@
 import { getOrCreatePlace } from "../places/repository";
-import { getHubCandidates, DiscoverOptions, GraphDiscoveryResult } from "../graph/discover";
+import { getHubCandidates, DiscoverOptions, GraphDiscoveryResult, PartialCoverage } from "../graph/discover";
 import { ScoredHub } from "../graph/hubs";
 import { ALL_MODES } from "../transport/registry";
 import { multimodalGraphSearch } from "./graphSearch";
+import { trainMultiHopSearch } from "../transport/train";
 import type { SearchFilters } from "./filters";
 import { DEFAULT_TRANSFER_BUFFER_MIN } from "./filters";
 import type { JourneyCandidate, Mode } from "../graph/types";
@@ -35,6 +36,8 @@ export async function searchJourneyPlaceFirst(
   opts: DiscoverOptions & { modes?: Mode[] }
 ): Promise<MultimodalDiscoveryResult> {
   const requestedModes = opts.modes ?? ALL_MODES;
+  const hasTrain = requestedModes.includes("train");
+  const nonTrainModes = requestedModes.filter(mode => mode !== "train");
 
   const [origin, destination] = await Promise.all([getOrCreatePlace(fromQuery), getOrCreatePlace(toQuery)]);
 
@@ -43,23 +46,62 @@ export async function searchJourneyPlaceFirst(
     if (by > 0) modeCounts[mode] = (modeCounts[mode] ?? 0) + by;
   };
 
-  // --- Unified Place-graph search for all requested modes ---
+  // Initialize result arrays
   const direct: JourneyCandidate[] = [];
   const viaHub: JourneyCandidate[] = [];
   const viaTwoHub: JourneyCandidate[] = [];
   const viaThreeHub: JourneyCandidate[] = [];
   let hubsExplored: { code: string; name: string; relevance: number; source: string }[] = [];
+  let partial: PartialCoverage[] = [];
 
   if (origin && destination) {
-    const filters: SearchFilters = {
-      modes: requestedModes,
+    // --- Train's own multi-hop engine (if train is requested) ---
+    if (hasTrain) {
+      const trainOpts: DiscoverOptions = {
+        date: opts.date,
+        maxHubs: opts.maxHubs,
+        transferBufferMin: opts.transferBufferMin,
+        maxTransferMin: opts.maxTransferMin,
+        maxConnections: opts.maxConnections,
+        forceTwoHub: opts.forceTwoHub,
+      };
+
+      const trainResult = await trainMultiHopSearch(origin, destination, trainOpts);
+      if (trainResult) {
+        // Merge train results
+        direct.push(...trainResult.direct);
+        viaHub.push(...trainResult.viaHub);
+        viaTwoHub.push(...trainResult.viaTwoHub);
+        viaThreeHub.push(...trainResult.viaThreeHub);
+        partial.push(...trainResult.partial);
+
+        // Count modes from train results
+        for (const leg of [...trainResult.direct, ...trainResult.viaHub, ...trainResult.viaTwoHub, ...trainResult.viaThreeHub].flatMap(c => c.legs)) {
+          bump(leg.mode, 1);
+        }
+
+        // For graph debug view - include train's hub exploration
+        hubsExplored = [...hubsExplored, ...trainResult.graph.hubsExplored.map(h => ({
+          code: h.code,
+          name: h.name,
+          relevance: h.relevance,
+          source: h.source
+        }))];
+      }
+    }
+
+    // --- Generic bounded Place-graph search for non-train modes and cross-mode chains ---
+    // We always run the generic search to catch cross-mode journeys (e.g., bus->train, train->bus)
+    // and to handle non-train modes
+    const genericFilters: SearchFilters = {
+      modes: requestedModes, // Include all modes to allow cross-mode chains
       maxConnections: opts.maxConnections ?? 2,
       transferBufferMin: opts.transferBufferMin ?? DEFAULT_TRANSFER_BUFFER_MIN,
     };
 
-    const paths = await multimodalGraphSearch(origin, destination, opts.date, filters);
+    const genericPaths = await multimodalGraphSearch(origin, destination, opts.date, genericFilters);
 
-    for (const path of paths) {
+    for (const path of genericPaths) {
       // Count modes for modesAvailable and candidatesByMode
       for (const leg of path.legs) {
         bump(leg.mode, 1);
@@ -79,17 +121,28 @@ export async function searchJourneyPlaceFirst(
     // For the graph debug view (GraphStats) — the candidate places this search
     // actually considered, regardless of whether they produced a usable edge.
     // Get hub candidates using station codes if available, otherwise use empty array for debug view.
-    let hubs: ScoredHub[] = [];
+    let genericHubs: ScoredHub[] = [];
     if (origin.railway?.stations?.length && destination.railway?.stations?.length) {
       // Use the first station from each place for hub candidate generation
-      hubs = await getHubCandidates(
+      genericHubs = await getHubCandidates(
         origin.railway.stations[0].code,
         destination.railway.stations[0].code,
         5
       );
     }
-    hubsExplored = hubs.map((h) => ({ code: h.code, name: h.name, relevance: h.relevance, source: "static/live" }));
+    const genericHubsExplored = genericHubs.map((h) => ({ code: h.code, name: h.name, relevance: h.relevance, source: "static/live" }));
+
+    // Merge generic hubs explored (avoiding duplicates)
+    const genericHubCodes = new Set(genericHubsExplored.map(h => h.code));
+    hubsExplored = [...hubsExplored, ...genericHubsExplored.filter(h => !genericHubCodes.has(h.code))];
   }
+
+  // Deduplicate results to avoid combining train and generic results for the same journeys
+  // We'll do a simple deduplication based on leg sequences
+  const allDirect = dedupeJourneyCandidates(direct);
+  const allViaHub = dedupeJourneyCandidates(viaHub);
+  const allViaTwoHub = dedupeJourneyCandidates(viaTwoHub);
+  const allViaThreeHub = dedupeJourneyCandidates(viaThreeHub);
 
   const modesAvailable: Mode[] = requestedModes.filter((m) => {
     // For all modes, check if we got any candidates for this mode
@@ -98,25 +151,45 @@ export async function searchJourneyPlaceFirst(
 
   const graph = {
     nodesDiscovered: hubsExplored.length + 2,
-    edgesDiscovered: [...direct, ...viaHub, ...viaTwoHub, ...viaThreeHub].reduce((n, c) => n + c.legs.length, 0),
-    layers: viaThreeHub.length > 0 ? 4 : viaTwoHub.length > 0 ? 3 : viaHub.length > 0 ? 2 : 1,
+    edgesDiscovered: [...allDirect, ...allViaHub, ...allViaTwoHub, ...allViaThreeHub].reduce((n, c) => n + c.legs.length, 0),
+    layers: allViaThreeHub.length > 0 ? 4 : allViaTwoHub.length > 0 ? 3 : allViaHub.length > 0 ? 2 : 1,
     hubsExplored,
     dynamicHubsUsed: false, // TODO: Implement dynamic hubs detection
-    twoHubUsed: viaTwoHub.length > 0,
-    threeHubUsed: viaThreeHub.length > 0,
+    twoHubUsed: allViaTwoHub.length > 0,
+    threeHubUsed: allViaThreeHub.length > 0,
   };
 
   return {
-    direct,
-    viaHub,
-    viaTwoHub,
-    viaThreeHub,
-    partial: [], // TODO: Implement partial coverage tracking
+    direct: allDirect,
+    viaHub: allViaHub,
+    viaTwoHub: allViaTwoHub,
+    viaThreeHub: allViaThreeHub,
+    partial,
     graph,
     suggestion: null, // TODO: Implement suggestions
     modesAvailable,
     candidatesByMode: modeCounts,
   };
+}
+
+// Helper function to deduplicate journey candidates based on their leg sequences
+function dedupeJourneyCandidates(candidates: JourneyCandidate[]): JourneyCandidate[] {
+  const seen = new Set<string>();
+  const result: JourneyCandidate[] = [];
+
+  for (const candidate of candidates) {
+    // Create a unique key based on the sequence of legs
+    const key = candidate.legs.map(leg =>
+      `${leg.mode}:${leg.trainNo || 'unknown'}:${leg.from}:${leg.to}:${leg.departure}:${leg.arrival}`
+    ).join('|');
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(candidate);
+    }
+  }
+
+  return result;
 }
 
 function tagLegs(c: JourneyCandidate, mode: Mode): JourneyCandidate {

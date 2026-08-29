@@ -553,6 +553,9 @@ export interface GraphDiscoveryResult {
   suggestion: ConnectionSuggestion | null;
 }
 
+// Export PartialCoverage for use in other modules
+export type { PartialCoverage };
+
 /**
  * Runs direct search AND hub-graph expansion together, every time.
  * Availability never gates structural discovery — the graph is built
