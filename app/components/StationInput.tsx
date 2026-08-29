@@ -1,41 +1,37 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TrainFront, Bus, Plane } from "lucide-react";
-import type { Mode } from "@/lib/graph/types";
+import { MapPin } from "lucide-react";
+import type { Place } from "@/lib/places/model";
+import { usePlaceSearch } from "@/lib/query/places";
 
-export interface StationSuggestion {
-  code: string;
+export interface PlaceSuggestion {
+  id: string;
   name: string;
   state?: string;
-  /** Which modes this place is actually searchable by — absent (older /api/stations shape) is treated as train-only. */
-  modes?: Mode[];
+  country?: string;
+  latitude?: number;
+  longitude?: number;
 }
-
-const MODE_ICON: Record<Mode, typeof TrainFront> = {
-  train: TrainFront,
-  bus: Bus,
-  flight: Plane,
-};
 
 interface Props {
   id: string;
   label: string;
-  value: string; // always a station code, e.g. "NDLS"
-  onChange: (code: string) => void;
+  value: string; // Place ID, e.g. "pune" or "place:IN:pune"
+  onChange: (placeId: string) => void;
   placeholder?: string;
   /** Override the label's classes — lets callers (e.g. the hero search) match a different visual context. */
   labelClassName?: string;
   /** Override the input's classes — lets callers (e.g. the hero search) match a different visual context. */
   inputClassName?: string;
   /**
-   * Shows the resolved station name under the code (e.g. "NDLS" / "New Delhi"),
-   * like the two-line station display on the landing hero. When `value` is a
-   * bare code that hasn't been resolved yet (e.g. set from outside via swap,
-   * or an initial default), this looks it up against /api/places.
+   * Shows the resolved place name under the input (e.g. "pune" / "Pune, Maharashtra").
+   * When `value` is a Place ID that hasn't been resolved yet, this looks it up against /api/places.
    */
+  showPlaceName?: boolean;
+  /** Backward compatibility alias for showPlaceName */
   showStationName?: boolean;
-  /** Classes for the resolved-name caption. Only used when showStationName is true. */
+  /** Classes for the resolved-place caption. Only used when showPlaceName is true. */
   subLabelClassName?: string;
 }
 
@@ -52,100 +48,45 @@ export default function StationInput({
   placeholder,
   labelClassName,
   inputClassName,
-  showStationName = false,
+  showPlaceName = false,
+  showStationName, // Backward compatibility
   subLabelClassName,
 }: Props) {
+  // Handle backward compatibility: showStationName overrides showPlaceName if provided
+  const shouldShowPlaceName = showStationName ?? showPlaceName;
+
   const [query, setQuery] = useState(value);
-  const [suggestions, setSuggestions] = useState<StationSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [resolvedCode, setResolvedCode] = useState("");
-  const [resolvedName, setResolvedName] = useState("");
   const wrapRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { data: suggestions = [], isLoading, error } = usePlaceSearch(query, 8);
 
   // Keep the visible text in sync if the value changes from outside (e.g. swap button).
   useEffect(() => {
     setQuery(value);
   }, [value]);
 
-  // When we only have a bare code (e.g. the initial default, or a value set
-  // via swap) look its name up so the two-line "NDLS / New Delhi" display
-  // can render. Skipped once we already know the name for this exact code.
-  useEffect(() => {
-    if (!showStationName) return;
-    const code = value.trim().toUpperCase();
-    if (!code) {
-      setResolvedCode("");
-      setResolvedName("");
-      return;
-    }
-    if (code === resolvedCode && resolvedName) return;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/places?q=${encodeURIComponent(code)}&limit=8`);
-        const json = await res.json();
-        const match: StationSuggestion | undefined = (json.results ?? []).find(
-          (r: StationSuggestion) => r.code.toUpperCase() === code
-        );
-        if (cancelled) return;
-        if (match) {
-          setResolvedCode(match.code.toUpperCase());
-          setResolvedName(match.name);
-        } else {
-          setResolvedCode("");
-          setResolvedName("");
-        }
-      } catch {
-        if (!cancelled) {
-          setResolvedCode("");
-          setResolvedName("");
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, showStationName]);
-
   function handleType(text: string) {
-    setQuery(text.toUpperCase());
-    onChange(text.toUpperCase()); // the raw typed text is still sent to the search API as the code,
-    // so typing a known code directly (without picking a suggestion) keeps working.
+    setQuery(text);
+    onChange(text); // the typed text is sent to the search API as the query,
+    // which gets resolved to a Place ID by the backend
     setHighlight(0);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (text.trim().length === 0) {
-      setSuggestions([]);
       setOpen(false);
       return;
     }
-    setLoading(true);
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/places?q=${encodeURIComponent(text)}&limit=8`);
-        const json = await res.json();
-        setSuggestions(json.results ?? []);
-        setOpen(true);
-      } catch {
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 150);
+    // Loading state is handled by usePlaceSearch
   }
 
-  function pick(s: StationSuggestion) {
-    setQuery(s.code);
-    onChange(s.code); // the station CODE is what gets sent to the journey-search API
-    setResolvedCode(s.code.toUpperCase());
-    setResolvedName(s.name);
+  function pick(s: PlaceSuggestion) {
+    setQuery(s.id);
+    onChange(s.id); // the Place ID is what gets sent to the journey-search API
     setOpen(false);
-    setSuggestions([]);
+    setHighlight(0);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -164,8 +105,46 @@ export default function StationInput({
     }
   }
 
+  // For showing the resolved place name under the input
+  const [resolvedId, setResolvedId] = useState("");
+  const [resolvedName, setResolvedName] = useState("");
+
+  useEffect(() => {
+    if (!shouldShowPlaceName) return;
+    const placeId = value.trim();
+    if (!placeId) {
+      setResolvedId("");
+      setResolvedName("");
+      return;
+    }
+    if (placeId === resolvedId && resolvedName) return;
+
+    // Fetch the resolved place details
+    const fetchResolvedPlace = async () => {
+      try {
+        const res = await fetch(`/api/places?q=${encodeURIComponent(placeId)}&limit=8`);
+        const json = await res.json();
+        const match: PlaceSuggestion | undefined = (json.results ?? []).find(
+          (r: PlaceSuggestion) => r.id === placeId
+        );
+        if (match) {
+          setResolvedId(match.id);
+          setResolvedName(match.name);
+        } else {
+          setResolvedId("");
+          setResolvedName("");
+        }
+      } catch {
+        setResolvedId("");
+        setResolvedName("");
+      }
+    };
+
+    fetchResolvedPlace();
+  }, [value, shouldShowPlaceName]);
+
   const showCaption =
-    showStationName && !open && !!resolvedName && query.trim().toUpperCase() === resolvedCode;
+    shouldShowPlaceName && !open && !!resolvedName && query.trim() === resolvedId;
 
   return (
     <div ref={wrapRef} className="relative flex flex-col gap-1">
@@ -177,7 +156,7 @@ export default function StationInput({
         autoComplete="off"
         value={query}
         onChange={(e) => handleType(e.target.value)}
-        onFocus={() => query.trim().length > 0 && suggestions.length > 0 && setOpen(true)}
+        onFocus={() => suggestions.length > 0 && setOpen(true)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         role="combobox"
@@ -188,18 +167,18 @@ export default function StationInput({
       />
       {showCaption && <span className={subLabelClassName ?? DEFAULT_SUBLABEL_CLASS}>{resolvedName}</span>}
 
-      {open && (suggestions.length > 0 || loading) && (
+      {open && (suggestions.length > 0 || isLoading) && (
         <ul
           id={`${id}-listbox`}
           role="listbox"
           className="absolute top-full z-40 mt-1.5 max-h-64 w-full min-w-[220px] overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg"
         >
-          {loading && suggestions.length === 0 && (
+          {isLoading && suggestions.length === 0 && (
             <li className="px-3 py-2 font-mono text-[11px] text-ink-dim">Searching…</li>
           )}
           {suggestions.map((s, i) => (
             <li
-              key={s.code}
+              key={s.id}
               role="option"
               aria-selected={i === highlight}
               onMouseDown={(e) => {
@@ -213,16 +192,10 @@ export default function StationInput({
             >
               <span className="truncate">
                 {s.name}
-                {s.state ? <span className="text-ink-dim"> · {s.state}</span> : null}
+                {s.state && s.country ? <span className="text-ink-dim"> · {s.state}, {s.country}</span> : s.state ? <span className="text-ink-dim"> · {s.state}</span> : null}
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
-                {(s.modes ?? ["train"]).map((m) => {
-                  const Icon = MODE_ICON[m];
-                  return <Icon key={m} className="h-3 w-3 text-ink-dim" aria-label={m} />;
-                })}
-                <span className="rounded-md bg-surface-alt px-1.5 py-0.5 font-mono text-[11px] text-ink-muted">
-                  {s.code}
-                </span>
+                <MapPin className="h-3 w-3 text-ink-dim" />
               </span>
             </li>
           ))}

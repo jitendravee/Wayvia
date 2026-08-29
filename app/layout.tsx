@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { QueryClientProviderWrapper } from "./query-client-provider";
 
 const geist = Geist({
   variable: "--font-geist",
@@ -109,9 +110,11 @@ export default function RootLayout({
       </head>
 
       <body className="flex min-h-screen flex-col  antialiased">
-        <Navbar />
-        <div className="flex-1">{children}</div>
-        <Footer />
+        <QueryClientProviderWrapper>
+          <Navbar />
+          <div className="flex-1">{children}</div>
+          <Footer />
+        </QueryClientProviderWrapper>
       </body>
     </html>
   );

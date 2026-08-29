@@ -145,7 +145,7 @@ export interface SearchResponse {
   date: string;
   travelClass?: string;
   quota?: string;
-  mode?: "train";
+  mode?: Mode;
   /** Every mode this search actually queried — e.g. ["train","bus","flight"] once those providers are wired in. */
   modesAvailable?: Mode[];
   /**

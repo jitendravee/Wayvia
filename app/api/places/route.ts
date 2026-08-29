@@ -1,25 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchPlaces } from "@/lib/places";
+import { getOrCreatePlace } from "@/lib/places/repository";
 
 /**
- * GET /api/places?q=Adi&limit=8
+ * GET /api/places?q=Pune&limit=8
  *
- * The frontend's search box should call THIS, not /api/stations. This is
- * the "global search" that suggests every place the multimodal pipeline
- * can actually search from — train stations AND bus-only cities — each
- * tagged with which modes it supports, so /api/stations (train-only) can
- * stay around unchanged for anything that specifically wants just that.
+ * Returns canonical Place objects for global city/place discovery.
+ * Primary source: countries.dev API
+ * Falls back to existing station/bus resolution if needed.
  *
- * The heavy lifting of actually combining train + bus (and, later, flight)
- * results for a route already happens server-side in
- * lib/graph/discoverMultimodal.ts once a search is submitted — this route
- * only has to make sure a place the person wants is *suggestable* in the
- * first place.
+ * The frontend's search box should call THIS for place discovery.
+ * Transport-location specific search (e.g. "Pune Junction") should
+ * use dedicated endpoints if needed.
  */
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q") ?? "";
   const limit = Math.min(20, Number(req.nextUrl.searchParams.get("limit") ?? "8") || 8);
 
-  const results = await searchPlaces(q, limit);
-  return NextResponse.json({ query: q, results });
+  if (!q.trim()) {
+    return NextResponse.json({ query: q, results: [] });
+  }
+
+  // Get or create the place (this will use countries.dev as primary source)
+  const place = await getOrCreatePlace(q);
+
+  if (!place) {
+    return NextResponse.json({ query: q, results: [] });
+  }
+
+  // Return Place-first response - focus on canonical Place information
+  // Transport-specific details are available internally but not exposed as primary identity
+  const result = {
+    id: place.id,
+    name: place.name,
+    state: place.state,
+    country: place.country,
+    latitude: place.latitude,
+    longitude: place.longitude
+  };
+
+  return NextResponse.json({
+    query: q,
+    results: [result]
+  });
 }

@@ -1,4 +1,4 @@
-import { discoverMultimodal } from "@/lib/graph/discoverMultimodal";
+import { searchJourneyPlaceFirst } from "@/lib/journey/searchService";
 import { annotateWithAvailability, annotatePartialCoverage } from "@/lib/availability";
 import { rankJourneys, buildNarrative } from "@/lib/score";
 import { buildMapOverview } from "@/lib/mapOverview";
@@ -32,7 +32,7 @@ export interface JourneySearchParams {
 export async function runJourneySearch(params: JourneySearchParams): Promise<SearchResponse> {
   const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes } = params;
 
-  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable, candidatesByMode } = await discoverMultimodal(from, to, {
+  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable, candidatesByMode } = await searchJourneyPlaceFirst(from, to, {
     date,
     maxHubs,
     maxConnections,
@@ -93,13 +93,30 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
     pagination = { page: safePage, pageSize, total, totalPages };
   }
 
+  // Determine the primary mode for the response
+  let primaryMode: Mode = "train"; // default fallback
+  if (modesAvailable.length === 1) {
+    // Single mode available - use that mode
+    primaryMode = modesAvailable[0];
+  } else if (modesAvailable.length > 1) {
+    // Multiple modes available - use the mode with the most candidates
+    let maxCount = 0;
+    for (const mode of modesAvailable) {
+      const count = candidatesByMode[mode] ?? 0;
+      if (count > maxCount) {
+        maxCount = count;
+        primaryMode = mode;
+      }
+    }
+  }
+
   return {
     from,
     to,
     date,
     travelClass,
     quota,
-    mode: "train",
+    mode: primaryMode,
     modesAvailable,
     candidatesByMode,
     graph,

@@ -1,12 +1,12 @@
 "use client";
 
-
 import React, { useMemo, useState } from "react";
 import { ArrowRight, BusFront, MoreHorizontal, Plane, TrainFront } from "lucide-react";
 import JourneySearchButton from "../../JourneySearchButton";
 import JourneyStopsForm, { StopEntry } from "../../JourneyStopsForm";
 import { todayIso } from "@/lib/date";
 import type { TripLeg } from "@/app/types";
+import { useResolvedPlace } from "@/lib/query/resolvedPlace";
 
 // The hero only ever asks for the three things every trip needs — where
 // from, where to, and when — plus an optional chain of further stops.
@@ -28,10 +28,15 @@ const MODES: { id: Mode; label: string; icon: React.ElementType; enabled: boolea
 ];
 
 const LandingSearch = () => {
-  const [origin, setOrigin] = useState("NDLS");
-  const [stops, setStops] = useState<StopEntry[]>([{ id: "hero-leg-0", to: "BCT", date: todayIso() }]);
+  // Default values as place IDs
+  const [origin, setOrigin] = useState("ndls"); // New Delhi
+  const [stops, setStops] = useState<StopEntry[]>([{ id: "hero-leg-0", to: "bct", date: todayIso() }]); // Mumbai
   const [touched, setTouched] = useState(false);
   const [mode, setMode] = useState<Mode>("train");
+
+  // Resolve place names for display
+  const { data: originPlace } = useResolvedPlace(origin);
+  const { data: destinationPlace } = useResolvedPlace(stops[0]?.to ?? "");
 
   const multi = stops.length > 1;
 
@@ -44,7 +49,7 @@ const LandingSearch = () => {
   }, [origin, stops]);
 
   const invalid = legs.some(
-    (l) => !l.from.trim() || !l.to.trim() || !l.date.trim() || l.from.trim().toUpperCase() === l.to.trim().toUpperCase()
+    (l) => !l.from || !l.to || !l.date || l.from === l.to
   );
 
   // Rendered twice by JourneyStopsForm (inline on desktop, its own full-width

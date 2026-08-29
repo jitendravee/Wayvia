@@ -11,6 +11,7 @@ import {
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import StationInput from "./StationInput";
 import { formatDatePretty } from "@/lib/date";
+import { useResolvedPlace } from "@/lib/query/resolvedPlace";
 
 export interface StopEntry {
   /** Stable id for React keys — not sent anywhere, just survives add/remove/reorder. */
@@ -74,54 +75,12 @@ function dayName(date: string) {
   return d.toLocaleDateString("en-US", { weekday: "long" });
 }
 
-/** Looks up a bare station code's full name for read-only display (the chained-stop "from" chip). */
-function useResolvedStationName(code: string) {
-  const [name, setName] = useState("");
-
-  useEffect(() => {
-    const c = code.trim().toUpperCase();
-    if (!c) {
-      setName("");
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(
-          `/api/places?q=${encodeURIComponent(c)}&limit=8`,
-        );
-        const json = await res.json();
-        const match = (json.results ?? []).find(
-          (r: { code: string; name: string }) => r.code.toUpperCase() === c,
-        );
-        if (!cancelled) setName(match?.name ?? "");
-      } catch {
-        if (!cancelled) setName("");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [code]);
-
-  return name;
+/** Looks up a bare place ID's full name for read-only display (the chained-stop "from" chip). */
+function useResolvedPlaceName(placeId: string) {
+  const { data: place } = useResolvedPlace(placeId);
+  return place?.name ?? "";
 }
 
-/**
- * Row 0 (origin → stops[0].to, on stops[0].date) is an ordinary single
- * search, laid out as one compact pill: From | swap | To | divider | Date.
- * On narrow screens the same three fields stack into a vertical card with
- * hairline dividers between them (From / To / Date), each with a small
- * action icon top-right (swap, pin, calendar) — matching the mobile mock.
- * On wide screens they sit in a single row split by one vertical divider
- * before the Date block, with `searchButton` (if provided) inline at the
- * very end of that row.
- *
- * A single "Add a stop" / "Add another stop" row sits below, and appends
- * stops[1..] as chained rows — each one chains from the previous stop's
- * destination: A→B on date1 (row 0), B→C on date2 (row 1), etc.
- * Removing a stop (X) just shortens the list again.
- */
 export default function JourneyStopsForm({
   origin,
   onOriginChange,
@@ -154,7 +113,7 @@ export default function JourneyStopsForm({
    * both here — even synchronously, back to back — means each one computes
    * its update from the same pre-swap snapshot of that object. Whichever
    * call's setState the parent applies last "wins" and silently discards the
-   * other field's change, e.g. PUNE→ADI swaps to PUNE→PUNE instead of
+   * other field's change, e.g. PUNE→ADI produced PUNE→PUNE instead of
    * ADI→PUNE. Prefer the atomic `onSwapFirstLeg` when the parent provides
    * it; only fall back to the two-call version for parents (like the
    * landing-page hero) that hold origin/stops as fully independent state,
@@ -301,6 +260,7 @@ function PrimaryRow({
   captionClassName: string;
 }) {
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const fromName = useResolvedPlaceName(from);
 
   function openDatePicker() {
     const el = dateInputRef.current;
@@ -429,7 +389,7 @@ function StopRow({
   captionClassName: string;
 }) {
   const dateInputRef = useRef<HTMLInputElement>(null);
-  const fromName = useResolvedStationName(from);
+  const fromName = useResolvedPlaceName(from);
 
   function openDatePicker() {
     const el = dateInputRef.current;

@@ -7,7 +7,7 @@ import { runJourneySearch, parseCommonParams } from "@/lib/searchJourney";
  * This used to have its own, separate copy of the search pipeline (train
  * only, hardcoded to `discoverJourneys` + `modesAvailable: ["train"]`),
  * which is why bus/flight results never showed up here even after the
- * multimodal pipeline (lib/graph/discoverMultimodal.ts) and mock bus/flight
+ * multimodal pipeline (lib/journey/searchService.ts) and mock bus/flight
  * providers (lib/providers/*) were wired in for /api/search/multi. That
  * duplication is gone now — both routes share the exact same
  * `runJourneySearch` in lib/searchJourney.ts, so a fix or a new mode here
@@ -22,18 +22,18 @@ import { runJourneySearch, parseCommonParams } from "@/lib/searchJourney";
  */
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
-  const from = (searchParams.get("from") ?? "").trim().toUpperCase();
-  const to = (searchParams.get("to") ?? "").trim().toUpperCase();
+  const from = (searchParams.get("from") ?? "").trim();
+  const to = (searchParams.get("to") ?? "").trim();
   const date = (searchParams.get("date") ?? "").trim();
 
   if (!from || !to || !date) {
     return NextResponse.json(
-      { error: "from, to, and date are required, e.g. /api/search?from=NDLS&to=BCT&date=2026-08-24&modes=train,bus" },
+      { error: "from, to, and date are required, e.g. /api/search?from=pune&to=mumbai&date=2026-08-29&modes=train,bus" },
       { status: 400 }
     );
   }
-  if (from === to) {
-    return NextResponse.json({ error: "from and to can't be the same station." }, { status: 400 });
+  if (from.toLowerCase() === to.toLowerCase()) {
+    return NextResponse.json({ error: "from and to can't be the same place." }, { status: 400 });
   }
 
   const { travelClass, quota, maxHubs, maxConnections, pageSize, modes } = parseCommonParams(searchParams);

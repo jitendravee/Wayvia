@@ -21,14 +21,15 @@ function isoToDDMMYYYY(iso: string): string {
  * that needs to change; nothing else in the pipeline does.
  */
 function buildBusListRequest(src: IxigoCityMatch, dst: IxigoCityMatch, date: string) {
-  const doj = isoToDDMMYYYY(date);
   return {
-    sourceId: src.id,
-    destinationId: dst.id,
     source: src.label,
+    sourceid: src.id,
     destination: dst.label,
-    doj,
-    date: doj,
+    destinationid: dst.id,
+    jdate: date,
+    prd: "mobile",
+    filters: 1,
+    isReturnJourney: "0",
   };
 }
 
@@ -37,7 +38,7 @@ function buildBusListRequest(src: IxigoCityMatch, dst: IxigoCityMatch, date: str
  * ModeProvider contract as every other mode (see lib/providers/types.ts):
  * given two station codes and a date, return whatever direct bus legs
  * exist — no via-junction reasoning here, that's what
- * lib/graph/discoverMultimodal.ts's hub-crossing layer is for.
+ * lib/journey/graphSearch.ts.s multimodal hub-crossing layer is for.
  *
  * Fails soft everywhere: an unresolvable city, an ixigo outage, or a
  * malformed response all just mean "no buses found for this pair" ([]),

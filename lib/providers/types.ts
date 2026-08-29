@@ -7,7 +7,7 @@ import type { Leg, Mode } from "../graph/types";
  * every other mode plugs in here as a direct-only lookup, which matches
  * how most real bus/flight search APIs actually work (they don't reason
  * about via-junctions themselves; that's what the multimodal hub-crossing
- * in lib/graph/discoverMultimodal.ts is for).
+ * in lib/journey/graphSearch.ts is for).
  *
  * TO WIRE IN A REAL API: implement `search` against the real provider,
  * returning Legs with `source: "live"`. Either keep filling `precomputed`

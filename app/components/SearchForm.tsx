@@ -15,6 +15,7 @@ import JourneyStopsForm from "./JourneyStopsForm";
 import type { Mode, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
 import ModeSelector from "./ModeSelector";
+import { useResolvedPlace } from '@/lib/query/resolvedPlace';
 import { FilterState } from "./filters";
 
 export interface SearchFormValues {
@@ -76,30 +77,38 @@ export default function SearchForm({
   onSubmitMulti,
   loading,
 }: Props) {
+  // Resolved place data for origin and destination
+  const { data: originPlace, isLoading: originLoading } = useResolvedPlace(values.from);
+  const { data: destinationPlace, isLoading: destinationLoading } = useResolvedPlace(values.to);
+
+  const originPlaceId = originPlace?.id ?? "";
+  const destinationPlaceId = destinationPlace?.id ?? "";
+
   // We'll manage the entire route state through JourneyStopsForm.
   // Keep a local copy that mirrors the values we need.
-  const [origin, setOrigin] = useState(values.from);
+  const [origin, setOrigin] = useState(originPlaceId);
   const [stops, setStops] = useState<StopEntry[]>(() => {
     // Build the full stops array: first stop is the main destination,
     // followed by any extra stops.
     return [
-      { id: "base", to: values.to, date: values.date },
+      { id: "base", to: destinationPlaceId, date: values.date },
       ...extraStops.map((s) => ({ ...s })), // preserve ids
     ];
   });
 
   // Sync local state when external values change (e.g., URL params).
   useEffect(() => {
-    setOrigin(values.from);
+    setOrigin(originPlaceId);
     setStops([
-      { id: "base", to: values.to, date: values.date },
+      { id: "base", to: destinationPlaceId, date: values.date },
       ...extraStops.map((s) => ({ ...s })),
     ]);
-  }, [values.from, values.to, values.date, extraStops]);
+  }, [originPlaceId, destinationPlaceId, values.date, extraStops]);
 
   // Whenever the route changes inside JourneyStopsForm, update the parent.
   const handleOriginChange = (newOrigin: string) => {
     setOrigin(newOrigin);
+    // Pass the original input value so the parent can re-resolve it if needed
     onChange({
       ...values,
       from: newOrigin,
@@ -158,10 +167,10 @@ export default function SearchForm({
   const multi = stops.length > 1;
   const invalid = legs.some(
     (l) =>
-      !l.from.trim() ||
-      !l.to.trim() ||
-      !l.date.trim() ||
-      l.from.trim().toUpperCase() === l.to.trim().toUpperCase(),
+      !l.from ||
+      !l.to ||
+      !l.date ||
+      l.from === l.to,
   );
 
   // Mode chip state.
@@ -204,10 +213,10 @@ export default function SearchForm({
   const searchButton = (
     <button
       type="submit"
-      disabled={loading || invalid}
+      disabled={(loading || originLoading || destinationLoading) || invalid}
       className="flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-violet to-violet-dark px-5 font-display text-sm font-semibold text-white shadow-sm shadow-violet-soft transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 sm:flex-none"
     >
-      {loading ? (
+      {(loading || originLoading || destinationLoading) ? (
         <>
           <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
           Searching…
@@ -226,7 +235,7 @@ export default function SearchForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm shadow-violet-soft/40 overflow-visible"
+      className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm shadow-violet-soft/40"
     >
       {/* The route input – now using the full JourneyStopsForm */}
       <div className="px-4 py-4 sm:px-5">
