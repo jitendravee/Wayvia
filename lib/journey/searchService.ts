@@ -69,11 +69,25 @@ export async function searchJourneyPlaceFirst(
       const trainResult = await trainMultiHopSearch(origin, destination, trainOpts);
       if (trainResult) {
         // Merge train results
-        direct.push(...trainResult.direct);
-        viaHub.push(...trainResult.viaHub);
-        viaTwoHub.push(...trainResult.viaTwoHub);
-        viaThreeHub.push(...trainResult.viaThreeHub);
-        partial.push(...trainResult.partial);
+    for (const candidate of trainResult.direct ?? []) {
+  direct.push(candidate);
+}
+
+for (const candidate of trainResult.viaHub ?? []) {
+  viaHub.push(candidate);
+}
+
+for (const candidate of trainResult.viaTwoHub ?? []) {
+  viaTwoHub.push(candidate);
+}
+
+for (const candidate of trainResult.viaThreeHub ?? []) {
+  viaThreeHub.push(candidate);
+}
+
+for (const item of trainResult.partial ?? []) {
+  partial.push(item);
+}
 
         // Count modes from train results
         for (const leg of [...trainResult.direct, ...trainResult.viaHub, ...trainResult.viaTwoHub, ...trainResult.viaThreeHub].flatMap(c => c.legs)) {
@@ -99,7 +113,20 @@ export async function searchJourneyPlaceFirst(
       transferBufferMin: opts.transferBufferMin ?? DEFAULT_TRANSFER_BUFFER_MIN,
     };
 
-    const genericPaths = await multimodalGraphSearch(origin, destination, opts.date, genericFilters);
+    // Local counter for tracking the initial discovery request
+let initialRequestCounter = 0;
+initialRequestCounter++;
+console.log(`[IXIGO REQUEST #${initialRequestCounter}]`);
+console.log(`from: ${origin.name || origin.id}`);
+console.log(`to: ${destination.name || destination.id}`);
+console.log(`date: ${opts.date}`);
+console.log(`purpose: initial-discovery`);
+console.log(`graphDepth: 0`);
+console.log(`currentPlace: ${origin.name || origin.id}`);
+console.log(`targetPlace: ${destination.name || destination.id}`);
+console.log(`---`);
+
+const genericPaths = await multimodalGraphSearch(origin, destination, opts.date, genericFilters);
 
     for (const path of genericPaths) {
       // Count modes for modesAvailable and candidatesByMode

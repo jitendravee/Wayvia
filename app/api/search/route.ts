@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "from and to can't be the same place." }, { status: 400 });
   }
 
-  const { travelClass, quota, maxHubs, maxConnections, pageSize, modes } = parseCommonParams(searchParams);
+  const { travelClass, quota, maxHubs, maxConnections, pageSize, modes, sort, connections, confirmedOnly, departure, arrival, maxFare, maxDuration, transport } = parseCommonParams(searchParams);
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
 
   try {
@@ -51,6 +51,14 @@ export async function GET(req: NextRequest) {
       page,
       pageSize,
       modes,
+      sort,
+      connections,
+      confirmedOnly,
+      departure,
+      arrival,
+      maxFare,
+      maxDuration,
+      transport,
     });
     return NextResponse.json(response);
   } catch (err) {

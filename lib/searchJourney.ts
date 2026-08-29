@@ -4,6 +4,8 @@ import { rankJourneys, buildNarrative } from "@/lib/score";
 import { buildMapOverview } from "@/lib/mapOverview";
 import type { Mode } from "@/lib/graph/types";
 import type { SearchResponse } from "@/app/types";
+import type { SortKey, ConnectionFilter, DepartureWindow, TransportFilter } from "@/app/components/filters";
+import { applyFilters } from "@/app/components/filters";
 
 export interface JourneySearchParams {
   from: string;
@@ -17,6 +19,15 @@ export interface JourneySearchParams {
   pageSize: number;
   /** Which modes to search — defaults to every mode with a registered provider (train + whatever's in lib/providers/registry.ts). */
   modes?: Mode[];
+  /** Filters to apply to results before pagination */
+  sort?: SortKey;
+  connections?: ConnectionFilter;
+  confirmedOnly?: boolean;
+  departure?: DepartureWindow;
+  arrival?: DepartureWindow;
+  maxFare?: number | null;
+  maxDuration?: number | null;
+  transport?: TransportFilter;
 }
 
 /**
@@ -30,7 +41,7 @@ export interface JourneySearchParams {
  * multi-city route reimplementing any of it.
  */
 export async function runJourneySearch(params: JourneySearchParams): Promise<SearchResponse> {
-  const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes } = params;
+  const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes, sort, connections, confirmedOnly, departure, arrival, maxFare, maxDuration, transport } = params;
 
   const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable, candidatesByMode } = await searchJourneyPlaceFirst(from, to, {
     date,
@@ -91,16 +102,60 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
 
   const availableOnly = annotated.filter((j) => j.fullyConfirmed);
 
-  const ranked = rankJourneys(availableOnly);
+  // Apply filters FIRST, then rank
+  const frontendFilters = {
+    sort: sort ?? "best",
+    connections: connections ?? "any",
+    confirmedOnly: confirmedOnly ?? false,
+    departure: departure ?? "any",
+    arrival: arrival ?? "any",
+    maxFare: maxFare ?? null,
+    maxDuration: maxDuration ?? null,
+    transport: transport ?? "any",
+  };
+  const filteredJourneys = applyFilters(availableOnly, frontendFilters);
+  const ranked = rankJourneys(filteredJourneys);
+
+  // Compute counts from filtered results for the narrative
+  const directCount = filteredJourneys.filter(j => j.connections === 0).length;
+  const viaHubCount = filteredJourneys.filter(j => j.connections === 1).length;
+  const structuralCount = availableOnly.length; // Structurally feasible before availability check
+  const availableCount = filteredJourneys.length; // After filtering and ranking
+  const partialCount = annotatedPartial.length;
+  const viaTwoHubCount = filteredJourneys.filter(j => j.connections === 2).length;
+  const viaThreeHubCount = filteredJourneys.filter(j => j.connections === 3).length;
+
+  // Compute filtered modesAvailable and candidatesByMode for the response
+  const filteredModeCounts: Record<Mode, number> = { train: 0, bus: 0, flight: 0 };
+  for (const journey of filteredJourneys) {
+    for (const leg of journey.legs) {
+      const mode = leg.mode;
+      filteredModeCounts[mode] = (filteredModeCounts[mode] ?? 0) + 1;
+    }
+  }
+  // Remove zero counts
+  const nonZeroFilteredModeCounts: Partial<Record<Mode, number>> = {};
+  for (const mode in filteredModeCounts) {
+    if (filteredModeCounts[mode as Mode] > 0) {
+      nonZeroFilteredModeCounts[mode as Mode] = filteredModeCounts[mode as Mode];
+    }
+  }
+  const filteredModesAvailable: Mode[] = Object.keys(nonZeroFilteredModeCounts)
+    .map(mode => mode as Mode);
+  const filteredCandidatesByMode: Partial<Record<Mode, number>> = {};
+  for (const mode of filteredModesAvailable) {
+    filteredCandidatesByMode[mode] = nonZeroFilteredModeCounts[mode];
+  }
+
   const narrative = buildNarrative(
     ranked,
-    direct.length,
-    viaHub.length,
-    annotated.length,
-    availableOnly.length,
-    annotatedPartial.length,
-    viaTwoHub.length,
-    viaThreeHub.length
+    directCount,
+    viaHubCount,
+    structuralCount,
+    availableCount,
+    partialCount,
+    viaTwoHubCount,
+    viaThreeHubCount
   );
 
   let pagedResults = ranked;
@@ -114,9 +169,29 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
     pagination = { page: safePage, pageSize, total, totalPages };
   }
 
-  // Determine the primary mode for the response
+  // Determine the primary mode for the response based on filtered results
   let primaryMode: Mode = "train"; // default fallback
-  if (modesAvailable.length === 1) {
+  if (filteredJourneys.length > 0) {
+    // Count modes in the filtered results to determine the most common one
+    const modeCounts: Record<Mode, number> = { train: 0, bus: 0, flight: 0 };
+    for (const journey of filteredJourneys) {
+      for (const leg of journey.legs) {
+        const mode = leg.mode;
+        modeCounts[mode] = (modeCounts[mode] ?? 0) + 1;
+      }
+    }
+
+    // Find the mode with the highest count
+    let maxCount = 0;
+    for (const mode in modeCounts) {
+      if (modeCounts[mode as Mode] > maxCount) {
+        maxCount = modeCounts[mode as Mode];
+        primaryMode = mode as Mode;
+      }
+    }
+  }
+  // If no filtered results, fall back to the original logic
+  else if (modesAvailable.length === 1) {
     // Single mode available - use that mode
     primaryMode = modesAvailable[0];
   } else if (modesAvailable.length > 1) {
@@ -138,15 +213,15 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
     travelClass,
     quota,
     mode: primaryMode,
-    modesAvailable,
-    candidatesByMode,
+    modesAvailable: filteredModesAvailable,
+    candidatesByMode: filteredCandidatesByMode,
     graph,
     maxConnections,
     candidates: {
-      direct: direct.length,
-      oneConnection: viaHub.length,
-      twoConnection: viaTwoHub.length,
-      threeConnection: viaThreeHub.length,
+      direct: directCount,
+      oneConnection: viaHubCount,
+      twoConnection: viaTwoHubCount,
+      threeConnection: viaThreeHubCount,
     },
     fullyConfirmedCount: annotated.filter((j) => j.fullyConfirmed).length,
     narrative,
@@ -190,5 +265,55 @@ export function parseCommonParams(searchParams: URLSearchParams) {
   // like a bug rather than a bad request.
   const safeModes = modes && modes.length > 0 ? modes : undefined;
 
-  return { travelClass, quota, maxHubs, maxConnections, pageSize, modes: safeModes };
+  // Parse filter parameters
+  const sortRaw = searchParams.get("sort") ?? "best";
+  const sort = (["best", "cheapest", "fastest", "fewestChanges"] as const).includes(sortRaw as SortKey)
+    ? (sortRaw as SortKey)
+    : "best";
+
+  const connectionsRaw = searchParams.get("connections") ?? "any";
+  const connections = (["any", "direct", "oneChange", "twoChanges", "threeChanges"] as const).includes(connectionsRaw as ConnectionFilter)
+    ? (connectionsRaw as ConnectionFilter)
+    : "any";
+
+  const confirmedOnlyRaw = searchParams.get("confirmedOnly");
+  const confirmedOnly = confirmedOnlyRaw === "true";
+
+  const departureRaw = searchParams.get("departure") ?? "any";
+  const departure = (["any", "morning", "afternoon", "evening", "night"] as const).includes(departureRaw as DepartureWindow)
+    ? (departureRaw as DepartureWindow)
+    : "any";
+
+  const arrivalRaw = searchParams.get("arrival") ?? "any";
+  const arrival = (["any", "morning", "afternoon", "evening", "night"] as const).includes(arrivalRaw as DepartureWindow)
+    ? (arrivalRaw as DepartureWindow)
+    : "any";
+
+  const maxFareRaw = searchParams.get("maxFare");
+  const maxFare = maxFareRaw !== null ? (maxFareRaw === "" ? null : Number(maxFareRaw)) : null;
+
+  const maxDurationRaw = searchParams.get("maxDuration");
+  const maxDuration = maxDurationRaw !== null ? (maxDurationRaw === "" ? null : Number(maxDurationRaw)) : null;
+
+  const transportRaw = searchParams.get("transport") ?? "any";
+  const transport = (["any", "train", "bus", "flight", "mixed"] as const).includes(transportRaw as TransportFilter)
+    ? (transportRaw as TransportFilter)
+    : "any";
+
+  return {
+    travelClass,
+    quota,
+    maxHubs,
+    maxConnections,
+    pageSize,
+    modes: safeModes,
+    sort,
+    connections,
+    confirmedOnly,
+    departure,
+    arrival,
+    maxFare,
+    maxDuration,
+    transport,
+  };
 }
