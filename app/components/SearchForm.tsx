@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   Bus,
@@ -16,6 +16,7 @@ import type { Mode, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
 import ModeSelector from "./ModeSelector";
 import { useResolvedPlace } from '@/lib/query/resolvedPlace';
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { FilterState } from "./filters";
 
 export interface SearchFormValues {
@@ -77,38 +78,51 @@ export default function SearchForm({
   onSubmitMulti,
   loading,
 }: Props) {
-  // Resolved place data for origin and destination
-  const { data: originPlace, isLoading: originLoading } = useResolvedPlace(values.from);
-  const { data: destinationPlace, isLoading: destinationLoading } = useResolvedPlace(values.to);
+  // We manage the entire route state through JourneyStopsForm. This local
+  // copy IS the source of truth for what's in the From/To boxes — it
+  // mirrors `values.from`/`values.to` directly (whatever they hold: text
+  // being typed, or a settled id), never something re-derived from a
+  // place-resolution fetch. Resolving on every keystroke and feeding that
+  // back into this state was the bug: typing a letter re-resolved the
+  // (partial, usually wrong) text, and the moment that fetch returned it
+  // stomped whatever the user had typed since — see lastSentRef below.
+  const [origin, setOrigin] = useState(values.from);
+  const [stops, setStops] = useState<StopEntry[]>(() => [
+    { id: "base", to: values.to, date: values.date },
+    ...extraStops.map((s) => ({ ...s })), // preserve ids
+  ]);
 
-  const originPlaceId = originPlace?.id ?? "";
-  const destinationPlaceId = destinationPlace?.id ?? "";
+  // Tracks the last from/to WE sent up via onChange, so the sync effect
+  // below can tell "the parent just echoed back what I typed" apart from
+  // a genuine external change (URL params, a saved search loading, etc).
+  const lastSentRef = useRef({ from: values.from, to: values.to });
 
-  // We'll manage the entire route state through JourneyStopsForm.
-  // Keep a local copy that mirrors the values we need.
-  const [origin, setOrigin] = useState(originPlaceId);
-  const [stops, setStops] = useState<StopEntry[]>(() => {
-    // Build the full stops array: first stop is the main destination,
-    // followed by any extra stops.
-    return [
-      { id: "base", to: destinationPlaceId, date: values.date },
-      ...extraStops.map((s) => ({ ...s })), // preserve ids
-    ];
-  });
-
-  // Sync local state when external values change (e.g., URL params).
   useEffect(() => {
-    setOrigin(originPlaceId);
+    const externalFrom = values.from !== lastSentRef.current.from;
+    const externalTo = values.to !== lastSentRef.current.to;
+    if (!externalFrom && !externalTo) return; // our own change echoing back — ignore
+    lastSentRef.current = { from: values.from, to: values.to };
+    setOrigin(values.from);
     setStops([
-      { id: "base", to: destinationPlaceId, date: values.date },
+      { id: "base", to: values.to, date: values.date },
       ...extraStops.map((s) => ({ ...s })),
     ]);
-  }, [originPlaceId, destinationPlaceId, values.date, extraStops]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.from, values.to, values.date, extraStops]);
+
+  // Resolved place data for origin and destination — debounced so this
+  // only hits /api/places after the user pauses, not on every keystroke.
+  // Used purely for the search button's loading/disabled state; it no
+  // longer feeds back into `origin`/`stops`.
+  const debouncedFrom = useDebouncedValue(values.from, 300);
+  const debouncedTo = useDebouncedValue(values.to, 300);
+  const { isLoading: originLoading } = useResolvedPlace(debouncedFrom);
+  const { isLoading: destinationLoading } = useResolvedPlace(debouncedTo);
 
   // Whenever the route changes inside JourneyStopsForm, update the parent.
   const handleOriginChange = (newOrigin: string) => {
     setOrigin(newOrigin);
-    // Pass the original input value so the parent can re-resolve it if needed
+    lastSentRef.current = { ...lastSentRef.current, from: newOrigin };
     onChange({
       ...values,
       from: newOrigin,
@@ -120,6 +134,7 @@ export default function SearchForm({
     // The first stop holds the main destination and date.
     const first = newStops[0];
     const rest = newStops.slice(1);
+    lastSentRef.current = { ...lastSentRef.current, to: first.to };
     onChange({
       ...values,
       to: first.to,
@@ -147,6 +162,7 @@ export default function SearchForm({
       next[0] = { ...next[0], to: newTo };
       return next;
     });
+    lastSentRef.current = { from: newOrigin, to: newTo };
     onChange({
       ...values,
       from: newOrigin,

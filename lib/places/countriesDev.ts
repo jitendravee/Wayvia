@@ -1,26 +1,26 @@
 import type { Place } from "./model";
 
 /**
- * Response from countries.dev cities endpoint
+ * Response from countries.dev cities endpoint.
+ *
+ * NOTE: the real payload is camelCase (geonameId, countryCode, admin1Code,
+ * featureCode, ...) — there is no snake_case country_name/admin1_name/etc,
+ * and no human-readable state name, only a numeric admin1 code. An earlier
+ * version of this interface assumed a snake_case shape with name fields
+ * that don't exist on the actual API, which silently produced Places with
+ * no country/state and made any country_code filtering match nothing.
  */
 export interface CountriesDevCityResponse {
+  geonameId: number;
   name: string;
-  ascii_name: string;
-  alternate_names: string[];
+  asciiName: string;
+  countryCode: string;
+  admin1Code: string;
   latitude: number;
   longitude: number;
-  feature_code: string;
-  feature_name: string;
-  country_code: string;
-  country_name: string;
-  admin1_code: string;
-  admin1_name: string;
-  admin2_code: string;
-  admin2_name: string;
   population: number;
-  elevation: number;
   timezone: string;
-  modification_date: string;
+  featureCode: string;
 }
 
 /**
@@ -30,27 +30,21 @@ export function normalizeCountriesDevPlace(
   city: CountriesDevCityResponse,
   query: string
 ): Place {
-  // Generate a stable ID based on the canonical name
-  const normalizedName = city.name
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  // Use the first part of the name as the ID if it's too long
-  const id = normalizedName.length > 50
-    ? `place_${city.name.toLowerCase().replace(/\s+/g, "-").substring(0, 30)}`
-    : `place_${normalizedName}`;
-
   return {
-    id,
+    id: `place_${city.geonameId}`,
     name: city.name,
     normalizedName: city.name.toLowerCase(),
     latitude: city.latitude,
     longitude: city.longitude,
     hasCoords: true,
-    country: city.country_name,
-    state: city.admin1_name,
+    // countries.dev only gives us a country CODE, not a name. Fine to
+    // hardcode here since callers currently filter to countryCode === "IN"
+    // before this runs; revisit if this ever serves non-India results.
+    country: city.countryCode === "IN" ? "India" : city.countryCode,
+    // No human-readable state name is available from this API — only a
+    // numeric admin1Code (e.g. "09"). Left undefined rather than guessing;
+    // add a geonames admin1-code -> state-name table here if that's needed.
+    state: undefined,
     type: determinePlaceType(city),
     // Transport locations will be resolved separately by the resolver
     railway: { stations: [] },
@@ -65,7 +59,7 @@ export function normalizeCountriesDevPlace(
  */
 function determinePlaceType(city: CountriesDevCityResponse): "city" | "town" | "village" | "region" {
   // countries.dev feature codes for populated places
-  switch (city.feature_code) {
+  switch (city.featureCode) {
     case "PPLA": // Seat of a first-order administrative division
     case "PPLA2": // Seat of a second-order administrative division
     case "PPLA3": // Seat of a third-order administrative division
