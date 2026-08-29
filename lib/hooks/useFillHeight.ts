@@ -24,36 +24,73 @@ export function useFillHeight<T extends HTMLElement>(
 ) {
   const ref = useRef<T | null>(null);
   const [height, setHeight] = useState<number | null>(null);
+  const lastHeight = useRef<number | null>(null);
+  const rafId = useRef<number | null>(null);
+
+  // Anything smaller than this is noise (rounding, scrollbar gutter,
+  // mobile address-bar collapse/expand, rubber-band overscroll) — acting
+  // on it just relayouts the page for no visible benefit, and on mobile
+  // that relayout is itself what feeds the next spurious scroll/resize
+  // event. Committing state only past this threshold breaks that loop.
+  const TOLERANCE = 4;
 
   const recalc = useCallback(() => {
     const el = ref.current;
     if (!el) return;
 
     if (window.innerWidth < belowPx) {
-      setHeight(null);
+      if (lastHeight.current !== null) {
+        lastHeight.current = null;
+        setHeight(null);
+      }
       return;
     }
 
+    // visualViewport.height ignores the on-screen keyboard / address-bar
+    // resize dance that makes window.innerHeight jump around on mobile;
+    // fall back to innerHeight where it's unsupported.
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
     const top = el.getBoundingClientRect().top;
-    const next = Math.max(minHeight, Math.round(window.innerHeight - top - bottomGap));
-    setHeight(next);
+    const next = Math.max(minHeight, Math.round(viewportHeight - top - bottomGap));
+
+    if (lastHeight.current === null || Math.abs(next - lastHeight.current) >= TOLERANCE) {
+      lastHeight.current = next;
+      setHeight(next);
+    }
   }, [bottomGap, minHeight, belowPx]);
+
+  // Coalesce bursts of scroll/resize events into at most one recalc per
+  // animation frame, instead of one setState per raw event.
+  const scheduleRecalc = useCallback(() => {
+    if (rafId.current !== null) return;
+    rafId.current = requestAnimationFrame(() => {
+      rafId.current = null;
+      recalc();
+    });
+  }, [recalc]);
 
   useEffect(() => {
     recalc();
 
-    window.addEventListener("resize", recalc);
-    window.addEventListener("scroll", recalc, { passive: true });
+    window.addEventListener("resize", scheduleRecalc);
+    window.addEventListener("scroll", scheduleRecalc, { passive: true });
+    window.visualViewport?.addEventListener("resize", scheduleRecalc);
 
-    const ro = new ResizeObserver(recalc);
-    if (ref.current) ro.observe(document.body);
+    // Only watch the element itself (e.g. a border/padding change from a
+    // style tweak), never document.body — observing body means our own
+    // setHeight-driven layout change re-triggers this observer, which is
+    // what turns a single resize into a runaway loop.
+    const ro = new ResizeObserver(scheduleRecalc);
+    if (ref.current) ro.observe(ref.current);
 
     return () => {
-      window.removeEventListener("resize", recalc);
-      window.removeEventListener("scroll", recalc);
+      window.removeEventListener("resize", scheduleRecalc);
+      window.removeEventListener("scroll", scheduleRecalc);
+      window.visualViewport?.removeEventListener("resize", scheduleRecalc);
       ro.disconnect();
+      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
     };
-  }, [recalc]);
+  }, [recalc, scheduleRecalc]);
 
   return { ref, height };
 }
