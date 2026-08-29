@@ -29,8 +29,8 @@ const MODES: { id: Mode; label: string; icon: React.ElementType; enabled: boolea
 
 const LandingSearch = () => {
   // Default values as place IDs
-  const [origin, setOrigin] = useState("ndls"); // New Delhi
-  const [stops, setStops] = useState<StopEntry[]>([{ id: "hero-leg-0", to: "bct", date: todayIso() }]); // Mumbai
+  const [origin, setOrigin] = useState("New Delhi"); // New Delhi
+  const [stops, setStops] = useState<StopEntry[]>([{ id: "hero-leg-0", to: "Mumbai", date: todayIso() }]); // Mumbai
   const [touched, setTouched] = useState(false);
   const [mode, setMode] = useState<Mode>("train");
 
