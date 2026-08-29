@@ -6,6 +6,27 @@ import type { Mode } from "@/lib/graph/types";
 import type { SearchResponse } from "@/app/types";
 import type { SortKey, ConnectionFilter, DepartureWindow, TransportFilter } from "@/app/components/filters";
 import { applyFilters } from "@/app/components/filters";
+import { getOrCreatePlace } from "@/lib/places/repository";
+import { createSearchCache, type CandidateGenerationResult } from "@/lib/cache";
+import type { PartialCoverage } from "@/lib/graph/discover";
+
+/**
+ * Local memory cache for candidate generation results.
+ * Using a singleton instance for simplicity.
+ * In the future, this could be replaced with a Redis-backed cache
+ * without changing the rest of the search logic.
+ */
+const searchCache = createSearchCache({
+  defaultTtlSeconds: 20 * 60, // 20 minutes
+  maxEntries: 500,
+});
+
+/**
+ * Map to deduplicate concurrent cache misses.
+ * Keys are the same as cache keys, values are promises that resolve
+ * to the candidate generation result.
+ */
+const inflightPromises = new Map<string, Promise<CandidateGenerationResult>>();
 
 export interface JourneySearchParams {
   from: string;
@@ -39,22 +60,125 @@ export interface JourneySearchParams {
  * body of a single /api/search call — pulled out so a multi-city itinerary
  * (A→B on date1, B→C on date2, ...) can reuse it leg by leg instead of the
  * multi-city route reimplementing any of it.
+ *
+ * NOW WITH CACHING: The expensive candidate generation phase (graph search,
+ * train multi-hop, provider discovery) is cached based on the parameters
+ * that affect the generated candidate universe (from, to, date, maxHubs,
+ * maxConnections, modes). Post-generation filters (sort, budget, etc.) are
+ * applied after retrieving the cached candidate set.
  */
 export async function runJourneySearch(params: JourneySearchParams): Promise<SearchResponse> {
   const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes, sort, connections, confirmedOnly, departure, arrival, maxFare, maxDuration, transport } = params;
 
-  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable, candidatesByMode } = await searchJourneyPlaceFirst(from, to, {
+  // --- 1. Resolve place queries to get stable place IDs for caching ---
+  // We need to resolve the place queries to get stable IDs.
+  const [originPlace, destinationPlace] = await Promise.all([
+    getOrCreatePlace(from),
+    getOrCreatePlace(to),
+  ]);
+
+  // If either place cannot be resolved, we cannot generate a cache key.
+  // In that case, we skip caching and run the search directly.
+  if (!originPlace || !destinationPlace) {
+    const candidateResult = await runJourneySearchUncached(params);
+    return buildSearchResponseFromCandidateResult(candidateResult, params);
+  }
+
+  // --- 2. Build cache key from generation-affecting parameters ---
+  // Generation-affecting parameters: fromPlaceId, toPlaceId, date, maxHubs, maxConnections, modes (sorted)
+  const modeList = (modes ?? []).slice().sort(); // create a sorted copy
+  const cacheKey = JSON.stringify({
+    from: originPlace.id,
+    to: destinationPlace.id,
+    date,
+    maxHubs,
+    maxConnections,
+    modes: modeList,
+  });
+
+  // --- 3. Try to get cached candidate generation result ---
+  let candidateResult: CandidateGenerationResult | null = null;
+  let cacheHit = false;
+
+  // Check for in-flight promise first (to deduplicate concurrent requests)
+  const inFlight = inflightPromises.get(cacheKey);
+  if (inFlight) {
+    try {
+      candidateResult = await inFlight;
+      cacheHit = true; // treat as hit for logging purposes
+    } catch (err) {
+      // If the in-flight promise failed, remove it and fall back to uncached
+      inflightPromises.delete(cacheKey);
+      // fall through to uncached
+    }
+  }
+
+  if (!candidateResult) {
+    // Check the cache
+    const cached = await searchCache.get(cacheKey);
+    if (cached !== null) {
+      candidateResult = cached;
+      cacheHit = true;
+    }
+  }
+
+  // --- 4. If cache miss, run the expensive discovery and cache the result ---
+  if (candidateResult === null) {
+    // Create a promise for the uncached search to deduplicate concurrent misses
+    const uncachedPromise = runJourneySearchUncached(params)
+      .then(async (result) => {
+        // Cache the result
+        await searchCache.set(cacheKey, result);
+        // Remove from in-flight map
+        inflightPromises.delete(cacheKey);
+        return result;
+      });
+
+    // Store the promise in the in-flight map to deduplicate
+    inflightPromises.set(cacheKey, uncachedPromise);
+    try {
+      candidateResult = await uncachedPromise;
+    } catch (err) {
+      // If the uncached search fails, remove the in-flight promise and throw
+      inflightPromises.delete(cacheKey);
+      throw err;
+    }
+  }
+
+  // --- 5. Build the full SearchResponse from the candidate generation result ---
+  return buildSearchResponseFromCandidateResult(candidateResult, params);
+}
+
+/**
+ * Helper function to run the search without caching.
+ * Used when we cannot generate a cache key (e.g., place resolution fails)
+ * or as the underlying implementation for cache misses.
+ */
+async function runJourneySearchUncached(params: JourneySearchParams): Promise<CandidateGenerationResult> {
+  const { from, to, date, travelClass, quota, maxHubs, maxConnections, modes } = params;
+  // searchJourneyPlaceFirst returns the exact shape of CandidateGenerationResult
+  return await searchJourneyPlaceFirst(from, to, {
     date,
     maxHubs,
     maxConnections,
     modes,
   });
+}
+
+/**
+ * Builds a full SearchResponse from a CandidateGenerationResult by applying
+ * availability annotation, filtering, ranking, and pagination.
+ */
+async function buildSearchResponseFromCandidateResult(
+  candidateResult: CandidateGenerationResult,
+  params: JourneySearchParams
+): Promise<SearchResponse> {
+  const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes, sort, connections, confirmedOnly, departure, arrival, maxFare, maxDuration, transport } = params;
+  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable, candidatesByMode } = candidateResult;
   const allCandidates = [...direct, ...viaHub, ...viaTwoHub, ...viaThreeHub];
 
+  // If no candidates, handle the no-results case
   if (allCandidates.length === 0) {
-    const annotatedPartial = await annotatePartialCoverage(partial, date, travelClass, quota);
-    const narrative = buildNarrative(null, 0, 0, 0, 0, annotatedPartial.length, 0, 0);
-
     // Determine the primary mode for the response when no candidates are found
     let primaryMode: Mode = "train"; // default fallback
     if (modes && modes.length > 0) {
@@ -87,14 +211,15 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
       graph,
       maxConnections,
       candidates: { direct: 0, oneConnection: 0, twoConnection: 0, threeConnection: 0 },
-      narrative,
+      narrative: buildNarrative(null, 0, 0, 0, 0, partial.length, 0, 0),
       suggestion,
       results: null,
       mapOverview: [],
-      partial: annotatedPartial,
+      partial: [], // Empty partial coverage when no candidates
     };
   }
 
+  // Annotate with availability (this step is not cached because it depends on travelClass, quota, date)
   const [annotated, annotatedPartial] = await Promise.all([
     annotateWithAvailability(allCandidates, date, travelClass, quota),
     annotatePartialCoverage(partial, date, travelClass, quota),

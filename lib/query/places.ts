@@ -46,7 +46,6 @@ export const usePlaceSearch = (query: string, limit: number = 8) => {
     },
     enabled: !!query.trim(),
     // Keep previous data while loading
-    keepPreviousData: true,
     // Cache results for 5 minutes
     staleTime: 5 * 60 * 1000,
   });
