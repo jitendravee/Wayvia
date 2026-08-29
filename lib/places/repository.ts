@@ -90,3 +90,16 @@ export function allCachedPlaces(): Place[] {
 }
 
 export { normalizePlaceName };
+
+export function getPlaceByName(name: string): Place | null {
+  const id = byQuery.get(name.toLowerCase());
+  return id ? byId.get(id) ?? null : null;
+}
+
+export function getPlaceCoords(name: string): { lat: number; lon: number } | null {
+  const place = getPlaceByName(name);
+  if (place && place.hasCoords) {
+    return { lat: place.latitude, lon: place.longitude };
+  }
+  return null;
+}

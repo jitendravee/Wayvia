@@ -14,8 +14,8 @@ export interface AvlAvailability {
 export interface StationCoord {
   code: string;
   name: string;
-  lat: number;
-  lon: number;
+  lat: number;| null;
+  lon: number;| null;
 }
 
 export interface AnnotatedLeg {

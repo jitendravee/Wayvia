@@ -1,4 +1,5 @@
 import { DEFAULT_HUBS } from "./graph/hubs";
+import { getPlaceByName, getPlaceCoords } from "./places/repository";
 
 /**
  * Server-side station coordinate directory. This is what lets the API
@@ -6,8 +7,8 @@ import { DEFAULT_HUBS } from "./graph/hubs";
  * lib/mapOverview.ts) so the frontend can draw the "big picture" route map
  * — like the multi-route overview map with numbered pins — without doing
  * its own per-station geocoding on every request. RouteMap.tsx still keeps
- * a client-side Nominatim fallback for the rare station this list doesn't
- * cover, but for every curated station (the ones journeys are actually
+ * a client-side Nominatim fallback for the rare station code this list
+ * doesn't cover, but for every curated station (the ones journeys are actually
  * built through — origins, destinations, and hub junctions) coordinates
  * now come back with the search response itself.
  *
@@ -79,9 +80,26 @@ const COORD_MAP: Map<string, StationCoord> = (() => {
   return m;
 })();
 
-/** Looks up known lat/lon for a station code. Returns null if this station isn't in the curated coordinate directory (the frontend's RouteMap falls back to live geocoding in that case). */
-export function getStationCoord(code: string): StationCoord | null {
-  return COORD_MAP.get(code.toUpperCase()) ?? null;
+/** Looks up known lat/lon for a station code or place name. Returns null if this station/place isn't in the curated coordinate directory and not found as a place. */
+export function getStationCoord(identifier: string): StationCoord | null {
+  // 1) Try as station code in the curated directory
+  const curated = COORD_MAP.get(identifier.toUpperCase());
+  if (curated) return curated;
+
+  // 2) Fallback to place lookup by name (case-insensitive)
+  const placeCoords = getPlaceCoords(identifier);
+  if (placeCoords) {
+    // We need to return a StationCoord; we can use the identifier as code and name.
+    return {
+      code: identifier,
+      name: identifier,
+      lat: placeCoords.lat,
+      lon: placeCoords.lon,
+    };
+  }
+
+  // 3) Not found
+  return null;
 }
 
 /** Registers/overrides a coordinate at runtime — used so mock bus/flight stops that use real station codes stay resolvable even if a new code shows up that isn't curated yet. */

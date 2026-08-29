@@ -254,7 +254,7 @@ function LegPanel({
   const hasFilterableSet =
     ranked !== null && (ranked.all.length > 1 || (data.pagination !== undefined && data.pagination.total > 1));
 
-  const hasMap = page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
+  const hasMap = !!data.mapOverview && data.mapOverview.length > 0;
 
   const suggestion = (
     data as unknown as {

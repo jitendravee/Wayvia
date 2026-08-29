@@ -49,8 +49,6 @@ export default function OverviewMap({
     [entries],
   );
 
-  if (routes.length === 0) return null;
-
   return (
     <div className="mb-6  overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft bg-surface-alt px-4 py-2.5">
@@ -63,7 +61,13 @@ export default function OverviewMap({
       </div>
 
       <div style={{ height: height ?? 420 }} className="w-full">
-        <OverviewMapInner routes={routes} />
+        {routes.length > 0 ? (
+          <OverviewMapInner routes={routes} />
+        ) : (
+          <div className="flex h-full items-center justify-center text-[14px] text-ink-muted">
+            No geographic data available for the displayed results.
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-2 border-t border-border-soft bg-surface-alt/40 px-4 py-3">
         {entries.map((e) => (

@@ -77,12 +77,15 @@ export default function RouteMap({ legs }: { legs: AnnotatedLeg[] }) {
   const serverCoords = useMemo(() => {
     const m = new Map<string, { lat: number; lon: number; name: string }>();
     legs.forEach((leg) => {
-      if (leg.fromGeo) m.set(leg.from, leg.fromGeo);
-      if (leg.toGeo) m.set(leg.to, leg.toGeo);
+      if (leg.fromGeo && leg.fromGeo.lat !== null && leg.fromGeo.lon !== null) {
+        m.set(leg.from, { lat: leg.fromGeo.lat, lon: leg.fromGeo.lon, name: leg.fromGeo.name });
+      }
+      if (leg.toGeo && leg.toGeo.lat !== null && leg.toGeo.lon !== null) {
+        m.set(leg.to, { lat: leg.toGeo.lat, lon: leg.toGeo.lon, name: leg.toGeo.name });
+      }
     });
     return m;
   }, [legs]);
-
   const [resolved, setResolved] = useState<Map<string, { lat: number; lon: number }>>(new Map());
   const [loadingGeo, setLoadingGeo] = useState(false);
 
