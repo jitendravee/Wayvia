@@ -43,13 +43,34 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
   if (allCandidates.length === 0) {
     const annotatedPartial = await annotatePartialCoverage(partial, date, travelClass, quota);
     const narrative = buildNarrative(null, 0, 0, 0, 0, annotatedPartial.length, 0, 0);
+
+    // Determine the primary mode for the response when no candidates are found
+    let primaryMode: Mode = "train"; // default fallback
+    if (modes && modes.length > 0) {
+      // Use the first requested mode if modes were specified
+      primaryMode = modes[0];
+    } else if (modesAvailable.length === 1) {
+      // Single mode available - use that mode
+      primaryMode = modesAvailable[0];
+    } else if (modesAvailable.length > 1) {
+      // Multiple modes available - use the mode with the most candidates
+      let maxCount = 0;
+      for (const mode of modesAvailable) {
+        const count = candidatesByMode[mode] ?? 0;
+        if (count > maxCount) {
+          maxCount = count;
+          primaryMode = mode;
+        }
+      }
+    }
+
     return {
       from,
       to,
       date,
       travelClass,
       quota,
-      mode: "train",
+      mode: primaryMode,
       modesAvailable,
       candidatesByMode,
       graph,

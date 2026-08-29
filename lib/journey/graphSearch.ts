@@ -2,12 +2,34 @@ import type { Leg } from "../graph/types";
 import type { Place } from "../places/model";
 import { rankedPlaceNeighbors } from "../places/graph";
 import { getProvider } from "../transport/registry";
-import { allCachedPlaces, getPlaceById } from "../places/repository";
+import { allCachedPlaces, getOrCreatePlace, getPlaceById } from "../places/repository";
+import { searchStations } from "../stations";
+import { cityNameFromStationName } from "../providers/ixigo/cityResolve";
 import type { SearchFilters } from "./filters";
 import type { SearchState } from "./searchState";
 import { initialState } from "./searchState";
 import { canConnect, withinBudget, withinDuration, withinDepartureWindow, withinArrivalWindow } from "./connectionValidator";
 import { scoreAndFilterConnections } from "./transportRanking";
+
+// Debug flag for graph search - set to true to enable detailed logging
+const DEBUG_GRAPH_SEARCH = true;
+
+// Helper function to resolve a station code to a Place object
+async function resolvePlaceFromStationCode(stationCode: string): Promise<Place | null> {
+  try {
+    const stations = await searchStations(stationCode, 1); // Get best match
+    if (stations.length === 0) return null;
+    const bestStation = stations[0];
+    const cityName = cityNameFromStationName(bestStation.name);
+    return await getOrCreatePlace(cityName);
+  } catch (err) {
+    if (DEBUG_GRAPH_SEARCH) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`[GRAPH SEARCH] Failed to resolve place from station code ${stationCode}:`, message);
+    }
+    return null;
+  }
+}
 
 /**
  * `GraphSearch.ts` from the architecture doc — the actual bounded,
@@ -116,15 +138,18 @@ export async function multimodalGraphSearch(origin: Place, destination: Place, d
               const legs = await fetchEdges(state.currentPlace, target, mode);
               // Extract destination places from connections and resolve them to Place objects
               const placePromises = legs.map(async (leg) => {
-                // leg.to is a string ID, resolve it to a Place object
+                // leg.to is a string ID (station code), resolve it to a Place object
                 const placeId = leg.to;
-                const placeObj = getPlaceById(placeId);
+                const placeObj = await resolvePlaceFromStationCode(placeId);
                 return placeObj ? placeObj : null;
               });
               const resolvedPlaces = await Promise.all(placePromises);
               return resolvedPlaces.filter((p): p is Place => p !== null);
-            } catch (err) {
+            } catch (err:any) {
               // Silently fail for individual targets to avoid stopping the whole search
+              if (DEBUG_GRAPH_SEARCH) {
+                console.log(`[GRAPH SEARCH]   -> Query to ${target.name} failed:`, err.message);
+              }
               return [] as Place[];
             }
           });
