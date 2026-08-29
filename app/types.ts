@@ -145,9 +145,19 @@ export interface SearchResponse {
   date: string;
   travelClass?: string;
   quota?: string;
-  mode?: "train";
+  mode?: Mode;
   /** Every mode this search actually queried — e.g. ["train","bus","flight"] once those providers are wired in. */
   modesAvailable?: Mode[];
+  /**
+   * DEBUG: raw leg count each mode contributed (direct + every hub-crossing
+   * leg combined) BEFORE availability filtering — not how many made it into
+   * `results`, since that also requires fullyConfirmed. Exists so "ixigo
+   * returned 0 legs" is distinguishable from "ixigo returned legs but none
+   * had seats" just by reading the response, without server log access.
+   * Safe to remove once the bus/flight provider integrations are confirmed
+   * working end to end.
+   */
+  candidatesByMode?: Partial<Record<Mode, number>>;
   graph?: GraphStats;
   maxConnections?: 1 | 2 | 3;
   candidates?: { direct: number; oneConnection: number; twoConnection: number; threeConnection: number };

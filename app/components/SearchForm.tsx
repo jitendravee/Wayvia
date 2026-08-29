@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   Bus,
@@ -15,6 +15,8 @@ import JourneyStopsForm from "./JourneyStopsForm";
 import type { Mode, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
 import ModeSelector from "./ModeSelector";
+import { useResolvedPlace } from '@/lib/query/resolvedPlace';
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { FilterState } from "./filters";
 
 export interface SearchFormValues {
@@ -28,7 +30,7 @@ export interface SearchFormValues {
   modes: Mode[];
 }
 
-export const ALL_SEARCH_MODES: Mode[] = ["train"];
+export const ALL_SEARCH_MODES: Mode[] = ["train","bus"];
 
 /* ------------------------------------------------------------------ */
 /* Mode chips – unchanged                                             */
@@ -76,30 +78,51 @@ export default function SearchForm({
   onSubmitMulti,
   loading,
 }: Props) {
-  // We'll manage the entire route state through JourneyStopsForm.
-  // Keep a local copy that mirrors the values we need.
+  // We manage the entire route state through JourneyStopsForm. This local
+  // copy IS the source of truth for what's in the From/To boxes — it
+  // mirrors `values.from`/`values.to` directly (whatever they hold: text
+  // being typed, or a settled id), never something re-derived from a
+  // place-resolution fetch. Resolving on every keystroke and feeding that
+  // back into this state was the bug: typing a letter re-resolved the
+  // (partial, usually wrong) text, and the moment that fetch returned it
+  // stomped whatever the user had typed since — see lastSentRef below.
   const [origin, setOrigin] = useState(values.from);
-  const [stops, setStops] = useState<StopEntry[]>(() => {
-    // Build the full stops array: first stop is the main destination,
-    // followed by any extra stops.
-    return [
-      { id: "base", to: values.to, date: values.date },
-      ...extraStops.map((s) => ({ ...s })), // preserve ids
-    ];
-  });
+  const [stops, setStops] = useState<StopEntry[]>(() => [
+    { id: "base", to: values.to, date: values.date },
+    ...extraStops.map((s) => ({ ...s })), // preserve ids
+  ]);
 
-  // Sync local state when external values change (e.g., URL params).
+  // Tracks the last from/to WE sent up via onChange, so the sync effect
+  // below can tell "the parent just echoed back what I typed" apart from
+  // a genuine external change (URL params, a saved search loading, etc).
+  const lastSentRef = useRef({ from: values.from, to: values.to });
+
   useEffect(() => {
+    const externalFrom = values.from !== lastSentRef.current.from;
+    const externalTo = values.to !== lastSentRef.current.to;
+    if (!externalFrom && !externalTo) return; // our own change echoing back — ignore
+    lastSentRef.current = { from: values.from, to: values.to };
     setOrigin(values.from);
     setStops([
       { id: "base", to: values.to, date: values.date },
       ...extraStops.map((s) => ({ ...s })),
     ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.from, values.to, values.date, extraStops]);
+
+  // Resolved place data for origin and destination — debounced so this
+  // only hits /api/places after the user pauses, not on every keystroke.
+  // Used purely for the search button's loading/disabled state; it no
+  // longer feeds back into `origin`/`stops`.
+  const debouncedFrom = useDebouncedValue(values.from, 300);
+  const debouncedTo = useDebouncedValue(values.to, 300);
+  const { isLoading: originLoading } = useResolvedPlace(debouncedFrom);
+  const { isLoading: destinationLoading } = useResolvedPlace(debouncedTo);
 
   // Whenever the route changes inside JourneyStopsForm, update the parent.
   const handleOriginChange = (newOrigin: string) => {
     setOrigin(newOrigin);
+    lastSentRef.current = { ...lastSentRef.current, from: newOrigin };
     onChange({
       ...values,
       from: newOrigin,
@@ -111,6 +134,7 @@ export default function SearchForm({
     // The first stop holds the main destination and date.
     const first = newStops[0];
     const rest = newStops.slice(1);
+    lastSentRef.current = { ...lastSentRef.current, to: first.to };
     onChange({
       ...values,
       to: first.to,
@@ -138,6 +162,7 @@ export default function SearchForm({
       next[0] = { ...next[0], to: newTo };
       return next;
     });
+    lastSentRef.current = { from: newOrigin, to: newTo };
     onChange({
       ...values,
       from: newOrigin,
@@ -158,10 +183,10 @@ export default function SearchForm({
   const multi = stops.length > 1;
   const invalid = legs.some(
     (l) =>
-      !l.from.trim() ||
-      !l.to.trim() ||
-      !l.date.trim() ||
-      l.from.trim().toUpperCase() === l.to.trim().toUpperCase(),
+      !l.from ||
+      !l.to ||
+      !l.date ||
+      l.from === l.to,
   );
 
   // Mode chip state.
@@ -204,10 +229,10 @@ export default function SearchForm({
   const searchButton = (
     <button
       type="submit"
-      disabled={loading || invalid}
+      disabled={(loading || originLoading || destinationLoading) || invalid}
       className="flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-violet to-violet-dark px-5 font-display text-sm font-semibold text-white shadow-sm shadow-violet-soft transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 sm:flex-none"
     >
-      {loading ? (
+      {(loading || originLoading || destinationLoading) ? (
         <>
           <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
           Searching…
@@ -226,7 +251,7 @@ export default function SearchForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-6 overflow-hidden rounded-2xl border border-border bg-white shadow-sm shadow-violet-soft/40"
+      className="mb-6 overflow-visible rounded-2xl border border-border bg-white shadow-sm shadow-violet-soft/40"
     >
       {/* The route input – now using the full JourneyStopsForm */}
       <div className="px-4 py-4 sm:px-5">

@@ -1,31 +1,31 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MapPin } from "lucide-react";
+import { usePlaceSearch } from "@/lib/hooks/usePlaceSearch";
+import { useResolvedPlace } from "@/lib/query/resolvedPlace";
 
-export interface StationSuggestion {
-  code: string;
+export interface PlaceSuggestion {
+  id: string;
   name: string;
   state?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface Props {
   id: string;
   label: string;
-  value: string; // always a station code, e.g. "NDLS"
-  onChange: (code: string) => void;
+  value: string; // Last value sent to onChange: place name (e.g. "Ahmedabad")
+  onChange: (value: string) => void; // Called with the current text while typing, or the picked name on select
   placeholder?: string;
-  /** Override the label's classes — lets callers (e.g. the hero search) match a different visual context. */
   labelClassName?: string;
-  /** Override the input's classes — lets callers (e.g. the hero search) match a different visual context. */
   inputClassName?: string;
-  /**
-   * Shows the resolved station name under the code (e.g. "NDLS" / "New Delhi"),
-   * like the two-line station display on the landing hero. When `value` is a
-   * bare code that hasn't been resolved yet (e.g. set from outside via swap,
-   * or an initial default), this looks it up against /api/stations.
-   */
+  /** Shows a fuller caption ("Ahmedabad, Gujarat, India") under the input once a suggestion has been picked. */
+  showPlaceName?: boolean;
+  /** Backward compatibility alias for showPlaceName */
   showStationName?: boolean;
-  /** Classes for the resolved-name caption. Only used when showStationName is true. */
   subLabelClassName?: string;
 }
 
@@ -42,100 +42,97 @@ export default function StationInput({
   placeholder,
   labelClassName,
   inputClassName,
-  showStationName = false,
+  showPlaceName = false,
+  showStationName,
   subLabelClassName,
 }: Props) {
-  const [query, setQuery] = useState(value);
-  const [suggestions, setSuggestions] = useState<StationSuggestion[]>([]);
+  const shouldShowPlaceName = showStationName ?? showPlaceName;
+
+  // What's visible in the input.
+  const [inputValue, setInputValue] = useState(value);
+  // Drives usePlaceSearch. Only ever set while the user is typing — NOT on
+  // selection — so picking a suggestion never fires another API call.
+  const [searchQuery, setSearchQuery] = useState("");
+  // The full object the user picked (or null while typing/unresolved).
+  // We already have name/state/country from the suggestion itself, so
+  // there's no need to re-fetch anything to show a caption — and no need
+  // to keep an `id` around anywhere, since only `name` is ever used.
+  const [selected, setSelected] = useState<PlaceSuggestion | null>(null);
+
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [resolvedCode, setResolvedCode] = useState("");
-  const [resolvedName, setResolvedName] = useState("");
   const wrapRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Keep the visible text in sync if the value changes from outside (e.g. swap button).
+  // Tracks the last value WE sent up via onChange. Used to tell "the parent
+  // just echoed back what I typed" apart from "the parent genuinely changed
+  // this field" (swap button, reset, chained-stop prefill, etc). Without
+  // this, every keystroke's round trip through the parent can race with
+  // typing and stomp the character you just entered — the flicker/dropped
+  // letters bug.
+  const lastSentRef = useRef(value);
+
+  // If `value` is a place id/slug (e.g. from JourneyStopsForm's origin/stop
+  // state) rather than a display name, resolve it so the box shows "Pune"
+  // instead of the raw id. Harmless no-op if `value` is already a name —
+  // the resolver just won't find a match and we fall back to `value`.
+  const { data: resolvedValuePlace } = useResolvedPlace(value);
+
+  // Sync with genuine external value changes only.
   useEffect(() => {
-    setQuery(value);
-  }, [value]);
-
-  // When we only have a bare code (e.g. the initial default, or a value set
-  // via swap) look its name up so the two-line "NDLS / New Delhi" display
-  // can render. Skipped once we already know the name for this exact code.
-  useEffect(() => {
-    if (!showStationName) return;
-    const code = value.trim().toUpperCase();
-    if (!code) {
-      setResolvedCode("");
-      setResolvedName("");
-      return;
-    }
-    if (code === resolvedCode && resolvedName) return;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/stations?q=${encodeURIComponent(code)}&limit=8`);
-        const json = await res.json();
-        const match: StationSuggestion | undefined = (json.results ?? []).find(
-          (r: StationSuggestion) => r.code.toUpperCase() === code
-        );
-        if (cancelled) return;
-        if (match) {
-          setResolvedCode(match.code.toUpperCase());
-          setResolvedName(match.name);
-        } else {
-          setResolvedCode("");
-          setResolvedName("");
-        }
-      } catch {
-        if (!cancelled) {
-          setResolvedCode("");
-          setResolvedName("");
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    if (value === lastSentRef.current) return; // our own change echoing back — ignore
+    lastSentRef.current = value;
+    setSelected(null);
+    setSearchQuery("");
+    setOpen(false);
+    setInputValue(resolvedValuePlace?.name ?? value);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, showStationName]);
+  }, [value, resolvedValuePlace]);
 
-  function handleType(text: string) {
-    setQuery(text.toUpperCase());
-    onChange(text.toUpperCase()); // the raw typed text is still sent to the search API as the code,
-    // so typing a known code directly (without picking a suggestion) keeps working.
-    setHighlight(0);
+  const { data: suggestions = [], isLoading, error } = usePlaceSearch(searchQuery, {
+    limit: 8,
+    debounceMs: 300,
+    minLength: 2,
+  });
 
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (text.trim().length === 0) {
-      setSuggestions([]);
+  // Open/close the dropdown in response to fresh results, not on every
+  // keystroke — avoids the "still showing stale suggestions" flash.
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2 && (suggestions.length > 0 || isLoading)) {
+      setOpen(true);
+    } else if (searchQuery.trim().length < 2) {
       setOpen(false);
-      return;
     }
-    setLoading(true);
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/stations?q=${encodeURIComponent(text)}&limit=8`);
-        const json = await res.json();
-        setSuggestions(json.results ?? []);
-        setOpen(true);
-      } catch {
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
+  }, [searchQuery, suggestions, isLoading]);
+
+  // Close on outside click.
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
       }
-    }, 150);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const v = e.target.value;
+    lastSentRef.current = v; // this change originates here, not externally
+    setInputValue(v);
+    setSearchQuery(v); // this is what triggers the API call
+    setSelected(null); // no longer have a confirmed pick
+    setHighlight(0);
+    onChange(v);
   }
 
-  function pick(s: StationSuggestion) {
-    setQuery(s.code);
-    onChange(s.code); // the station CODE is what gets sent to the journey-search API
-    setResolvedCode(s.code.toUpperCase());
-    setResolvedName(s.name);
+  function handlePlaceSelect(place: PlaceSuggestion) {
+    lastSentRef.current = place.name;
+    setInputValue(place.name);
+    setSelected(place);
+    setSearchQuery(""); // stop searching — prevents the extra API call
+    setHighlight(0);
     setOpen(false);
-    setSuggestions([]);
+    onChange(place.name); // only the name goes to the parent
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -148,14 +145,18 @@ export default function StationInput({
       setHighlight((h) => Math.max(h - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      pick(suggestions[highlight]);
+      if (suggestions[highlight]) {
+        handlePlaceSelect(suggestions[highlight]);
+      }
     } else if (e.key === "Escape") {
       setOpen(false);
     }
   }
 
-  const showCaption =
-    showStationName && !open && !!resolvedName && query.trim().toUpperCase() === resolvedCode;
+  const caption = selected
+    ? [selected.name, selected.state, selected.country].filter(Boolean).join(", ")
+    : "";
+  const showCaption = shouldShowPlaceName && !open && !!caption;
 
   return (
     <div ref={wrapRef} className="relative flex flex-col gap-1">
@@ -165,9 +166,9 @@ export default function StationInput({
       <input
         id={id}
         autoComplete="off"
-        value={query}
-        onChange={(e) => handleType(e.target.value)}
-        onFocus={() => query.trim().length > 0 && suggestions.length > 0 && setOpen(true)}
+        value={inputValue}
+        onChange={handleInputChange}
+        onFocus={() => searchQuery.trim().length >= 2 && suggestions.length > 0 && setOpen(true)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         role="combobox"
@@ -176,25 +177,31 @@ export default function StationInput({
         aria-controls={`${id}-listbox`}
         className={inputClassName ?? DEFAULT_INPUT_CLASS}
       />
-      {showCaption && <span className={subLabelClassName ?? DEFAULT_SUBLABEL_CLASS}>{resolvedName}</span>}
+      {showCaption && <span className={subLabelClassName ?? DEFAULT_SUBLABEL_CLASS}>{caption}</span>}
 
-      {open && (suggestions.length > 0 || loading) && (
+      {open && (suggestions.length > 0 || isLoading) && (
         <ul
           id={`${id}-listbox`}
           role="listbox"
           className="absolute top-full z-40 mt-1.5 max-h-64 w-full min-w-[220px] overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg"
         >
-          {loading && suggestions.length === 0 && (
+          {isLoading && suggestions.length === 0 && (
             <li className="px-3 py-2 font-mono text-[11px] text-ink-dim">Searching…</li>
+          )}
+          {error && (
+            <li className="px-3 py-2 font-mono text-[11px] text-ink-dim">Unable to load suggestions</li>
+          )}
+          {!isLoading && suggestions.length === 0 && (
+            <li className="px-3 py-2 font-mono text-[11px] text-ink-dim">No places found</li>
           )}
           {suggestions.map((s, i) => (
             <li
-              key={s.code}
+              key={s.id}
               role="option"
               aria-selected={i === highlight}
               onMouseDown={(e) => {
                 e.preventDefault();
-                pick(s);
+                handlePlaceSelect(s);
               }}
               onMouseEnter={() => setHighlight(i)}
               className={`flex cursor-pointer items-center justify-between gap-3 px-3 py-2 text-[13px] ${
@@ -203,10 +210,14 @@ export default function StationInput({
             >
               <span className="truncate">
                 {s.name}
-                {s.state ? <span className="text-ink-dim"> · {s.state}</span> : null}
+                {s.state && s.country ? (
+                  <span className="text-ink-dim"> · {s.state}, {s.country}</span>
+                ) : s.state ? (
+                  <span className="text-ink-dim"> · {s.state}</span>
+                ) : null}
               </span>
-              <span className="shrink-0 rounded-md bg-surface-alt px-1.5 py-0.5 font-mono text-[11px] text-ink-muted">
-                {s.code}
+              <span className="flex shrink-0 items-center gap-1.5">
+                <MapPin className="h-3 w-3 text-ink-dim" />
               </span>
             </li>
           ))}

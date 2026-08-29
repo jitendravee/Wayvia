@@ -1,9 +1,32 @@
-import { discoverMultimodal } from "@/lib/graph/discoverMultimodal";
+import { searchJourneyPlaceFirst } from "@/lib/journey/searchService";
 import { annotateWithAvailability, annotatePartialCoverage } from "@/lib/availability";
 import { rankJourneys, buildNarrative } from "@/lib/score";
 import { buildMapOverview } from "@/lib/mapOverview";
 import type { Mode } from "@/lib/graph/types";
 import type { SearchResponse } from "@/app/types";
+import type { SortKey, ConnectionFilter, DepartureWindow, TransportFilter } from "@/app/components/filters";
+import { applyFilters } from "@/app/components/filters";
+import { getOrCreatePlace } from "@/lib/places/repository";
+import { createSearchCache, type CandidateGenerationResult } from "@/lib/cache";
+import type { PartialCoverage } from "@/lib/graph/discover";
+
+/**
+ * Local memory cache for candidate generation results.
+ * Using a singleton instance for simplicity.
+ * In the future, this could be replaced with a Redis-backed cache
+ * without changing the rest of the search logic.
+ */
+const searchCache = createSearchCache({
+  defaultTtlSeconds: 20 * 60, // 20 minutes
+  maxEntries: 500,
+});
+
+/**
+ * Map to deduplicate concurrent cache misses.
+ * Keys are the same as cache keys, values are promises that resolve
+ * to the candidate generation result.
+ */
+const inflightPromises = new Map<string, Promise<CandidateGenerationResult>>();
 
 export interface JourneySearchParams {
   from: string;
@@ -17,6 +40,15 @@ export interface JourneySearchParams {
   pageSize: number;
   /** Which modes to search — defaults to every mode with a registered provider (train + whatever's in lib/providers/registry.ts). */
   modes?: Mode[];
+  /** Filters to apply to results before pagination */
+  sort?: SortKey;
+  connections?: ConnectionFilter;
+  confirmedOnly?: boolean;
+  departure?: DepartureWindow;
+  arrival?: DepartureWindow;
+  maxFare?: number | null;
+  maxDuration?: number | null;
+  transport?: TransportFilter;
 }
 
 /**
@@ -28,40 +60,166 @@ export interface JourneySearchParams {
  * body of a single /api/search call — pulled out so a multi-city itinerary
  * (A→B on date1, B→C on date2, ...) can reuse it leg by leg instead of the
  * multi-city route reimplementing any of it.
+ *
+ * NOW WITH CACHING: The expensive candidate generation phase (graph search,
+ * train multi-hop, provider discovery) is cached based on the parameters
+ * that affect the generated candidate universe (from, to, date, maxHubs,
+ * maxConnections, modes). Post-generation filters (sort, budget, etc.) are
+ * applied after retrieving the cached candidate set.
  */
 export async function runJourneySearch(params: JourneySearchParams): Promise<SearchResponse> {
-  const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes } = params;
+  const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes, sort, connections, confirmedOnly, departure, arrival, maxFare, maxDuration, transport } = params;
 
-  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable } = await discoverMultimodal(from, to, {
+  // --- 1. Resolve place queries to get stable place IDs for caching ---
+  // We need to resolve the place queries to get stable IDs.
+  const [originPlace, destinationPlace] = await Promise.all([
+    getOrCreatePlace(from),
+    getOrCreatePlace(to),
+  ]);
+
+  // If either place cannot be resolved, we cannot generate a cache key.
+  // In that case, we skip caching and run the search directly.
+  if (!originPlace || !destinationPlace) {
+    const candidateResult = await runJourneySearchUncached(params);
+    return buildSearchResponseFromCandidateResult(candidateResult, params);
+  }
+
+  // --- 2. Build cache key from generation-affecting parameters ---
+  // Generation-affecting parameters: fromPlaceId, toPlaceId, date, maxHubs, maxConnections, modes (sorted)
+  const modeList = (modes ?? []).slice().sort(); // create a sorted copy
+  const cacheKey = JSON.stringify({
+    from: originPlace.id,
+    to: destinationPlace.id,
+    date,
+    maxHubs,
+    maxConnections,
+    modes: modeList,
+  });
+
+  // --- 3. Try to get cached candidate generation result ---
+  let candidateResult: CandidateGenerationResult | null = null;
+  let cacheHit = false;
+
+  // Check for in-flight promise first (to deduplicate concurrent requests)
+  const inFlight = inflightPromises.get(cacheKey);
+  if (inFlight) {
+    try {
+      candidateResult = await inFlight;
+      cacheHit = true; // treat as hit for logging purposes
+    } catch (err) {
+      // If the in-flight promise failed, remove it and fall back to uncached
+      inflightPromises.delete(cacheKey);
+      // fall through to uncached
+    }
+  }
+
+  if (!candidateResult) {
+    // Check the cache
+    const cached = await searchCache.get(cacheKey);
+    if (cached !== null) {
+      candidateResult = cached;
+      cacheHit = true;
+    }
+  }
+
+  // --- 4. If cache miss, run the expensive discovery and cache the result ---
+  if (candidateResult === null) {
+    // Create a promise for the uncached search to deduplicate concurrent misses
+    const uncachedPromise = runJourneySearchUncached(params)
+      .then(async (result) => {
+        // Cache the result
+        await searchCache.set(cacheKey, result);
+        // Remove from in-flight map
+        inflightPromises.delete(cacheKey);
+        return result;
+      });
+
+    // Store the promise in the in-flight map to deduplicate
+    inflightPromises.set(cacheKey, uncachedPromise);
+    try {
+      candidateResult = await uncachedPromise;
+    } catch (err) {
+      // If the uncached search fails, remove the in-flight promise and throw
+      inflightPromises.delete(cacheKey);
+      throw err;
+    }
+  }
+
+  // --- 5. Build the full SearchResponse from the candidate generation result ---
+  return buildSearchResponseFromCandidateResult(candidateResult, params);
+}
+
+/**
+ * Helper function to run the search without caching.
+ * Used when we cannot generate a cache key (e.g., place resolution fails)
+ * or as the underlying implementation for cache misses.
+ */
+async function runJourneySearchUncached(params: JourneySearchParams): Promise<CandidateGenerationResult> {
+  const { from, to, date, travelClass, quota, maxHubs, maxConnections, modes } = params;
+  // searchJourneyPlaceFirst returns the exact shape of CandidateGenerationResult
+  return await searchJourneyPlaceFirst(from, to, {
     date,
     maxHubs,
     maxConnections,
     modes,
   });
+}
+
+/**
+ * Builds a full SearchResponse from a CandidateGenerationResult by applying
+ * availability annotation, filtering, ranking, and pagination.
+ */
+async function buildSearchResponseFromCandidateResult(
+  candidateResult: CandidateGenerationResult,
+  params: JourneySearchParams
+): Promise<SearchResponse> {
+  const { from, to, date, travelClass, quota, maxHubs, maxConnections, page, pageSize, modes, sort, connections, confirmedOnly, departure, arrival, maxFare, maxDuration, transport } = params;
+  const { direct, viaHub, viaTwoHub, viaThreeHub, partial, graph, suggestion, modesAvailable, candidatesByMode } = candidateResult;
   const allCandidates = [...direct, ...viaHub, ...viaTwoHub, ...viaThreeHub];
 
+  // If no candidates, handle the no-results case
   if (allCandidates.length === 0) {
-    const annotatedPartial = await annotatePartialCoverage(partial, date, travelClass, quota);
-    const narrative = buildNarrative(null, 0, 0, 0, 0, annotatedPartial.length, 0, 0);
+    // Determine the primary mode for the response when no candidates are found
+    let primaryMode: Mode = "train"; // default fallback
+    if (modes && modes.length > 0) {
+      // Use the first requested mode if modes were specified
+      primaryMode = modes[0];
+    } else if (modesAvailable.length === 1) {
+      // Single mode available - use that mode
+      primaryMode = modesAvailable[0];
+    } else if (modesAvailable.length > 1) {
+      // Multiple modes available - use the mode with the most candidates
+      let maxCount = 0;
+      for (const mode of modesAvailable) {
+        const count = candidatesByMode[mode] ?? 0;
+        if (count > maxCount) {
+          maxCount = count;
+          primaryMode = mode;
+        }
+      }
+    }
+
     return {
       from,
       to,
       date,
       travelClass,
       quota,
-      mode: "train",
+      mode: primaryMode,
       modesAvailable,
+      candidatesByMode,
       graph,
       maxConnections,
       candidates: { direct: 0, oneConnection: 0, twoConnection: 0, threeConnection: 0 },
-      narrative,
+      narrative: buildNarrative(null, 0, 0, 0, 0, partial.length, 0, 0),
       suggestion,
       results: null,
       mapOverview: [],
-      partial: annotatedPartial,
+      partial: [], // Empty partial coverage when no candidates
     };
   }
 
+  // Annotate with availability (this step is not cached because it depends on travelClass, quota, date)
   const [annotated, annotatedPartial] = await Promise.all([
     annotateWithAvailability(allCandidates, date, travelClass, quota),
     annotatePartialCoverage(partial, date, travelClass, quota),
@@ -69,16 +227,60 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
 
   const availableOnly = annotated.filter((j) => j.fullyConfirmed);
 
-  const ranked = rankJourneys(availableOnly);
+  // Apply filters FIRST, then rank
+  const frontendFilters = {
+    sort: sort ?? "best",
+    connections: connections ?? "any",
+    confirmedOnly: confirmedOnly ?? false,
+    departure: departure ?? "any",
+    arrival: arrival ?? "any",
+    maxFare: maxFare ?? null,
+    maxDuration: maxDuration ?? null,
+    transport: transport ?? "any",
+  };
+  const filteredJourneys = applyFilters(availableOnly, frontendFilters);
+  const ranked = rankJourneys(filteredJourneys);
+
+  // Compute counts from filtered results for the narrative
+  const directCount = filteredJourneys.filter(j => j.connections === 0).length;
+  const viaHubCount = filteredJourneys.filter(j => j.connections === 1).length;
+  const structuralCount = availableOnly.length; // Structurally feasible before availability check
+  const availableCount = filteredJourneys.length; // After filtering and ranking
+  const partialCount = annotatedPartial.length;
+  const viaTwoHubCount = filteredJourneys.filter(j => j.connections === 2).length;
+  const viaThreeHubCount = filteredJourneys.filter(j => j.connections === 3).length;
+
+  // Compute filtered modesAvailable and candidatesByMode for the response
+  const filteredModeCounts: Record<Mode, number> = { train: 0, bus: 0, flight: 0 };
+  for (const journey of filteredJourneys) {
+    for (const leg of journey.legs) {
+      const mode = leg.mode;
+      filteredModeCounts[mode] = (filteredModeCounts[mode] ?? 0) + 1;
+    }
+  }
+  // Remove zero counts
+  const nonZeroFilteredModeCounts: Partial<Record<Mode, number>> = {};
+  for (const mode in filteredModeCounts) {
+    if (filteredModeCounts[mode as Mode] > 0) {
+      nonZeroFilteredModeCounts[mode as Mode] = filteredModeCounts[mode as Mode];
+    }
+  }
+  const filteredModesAvailable: Mode[] = Object.keys(nonZeroFilteredModeCounts)
+    .map(mode => mode as Mode);
+  const filteredCandidatesByMode: Partial<Record<Mode, number>> = {};
+  for (const mode of filteredModesAvailable) {
+    filteredCandidatesByMode[mode] = nonZeroFilteredModeCounts[mode];
+  }
+
   const narrative = buildNarrative(
     ranked,
-    direct.length,
-    viaHub.length,
-    annotated.length,
-    availableOnly.length,
-    annotatedPartial.length,
-    viaTwoHub.length,
-    viaThreeHub.length
+    directCount,
+    viaHubCount,
+    structuralCount,
+    availableCount,
+    partialCount,
+    viaTwoHubCount,
+    viaThreeHubCount
   );
 
   let pagedResults = ranked;
@@ -92,21 +294,59 @@ export async function runJourneySearch(params: JourneySearchParams): Promise<Sea
     pagination = { page: safePage, pageSize, total, totalPages };
   }
 
+  // Determine the primary mode for the response based on filtered results
+  let primaryMode: Mode = "train"; // default fallback
+  if (filteredJourneys.length > 0) {
+    // Count modes in the filtered results to determine the most common one
+    const modeCounts: Record<Mode, number> = { train: 0, bus: 0, flight: 0 };
+    for (const journey of filteredJourneys) {
+      for (const leg of journey.legs) {
+        const mode = leg.mode;
+        modeCounts[mode] = (modeCounts[mode] ?? 0) + 1;
+      }
+    }
+
+    // Find the mode with the highest count
+    let maxCount = 0;
+    for (const mode in modeCounts) {
+      if (modeCounts[mode as Mode] > maxCount) {
+        maxCount = modeCounts[mode as Mode];
+        primaryMode = mode as Mode;
+      }
+    }
+  }
+  // If no filtered results, fall back to the original logic
+  else if (modesAvailable.length === 1) {
+    // Single mode available - use that mode
+    primaryMode = modesAvailable[0];
+  } else if (modesAvailable.length > 1) {
+    // Multiple modes available - use the mode with the most candidates
+    let maxCount = 0;
+    for (const mode of modesAvailable) {
+      const count = candidatesByMode[mode] ?? 0;
+      if (count > maxCount) {
+        maxCount = count;
+        primaryMode = mode;
+      }
+    }
+  }
+
   return {
     from,
     to,
     date,
     travelClass,
     quota,
-    mode: "train",
-    modesAvailable,
+    mode: primaryMode,
+    modesAvailable: filteredModesAvailable,
+    candidatesByMode: filteredCandidatesByMode,
     graph,
     maxConnections,
     candidates: {
-      direct: direct.length,
-      oneConnection: viaHub.length,
-      twoConnection: viaTwoHub.length,
-      threeConnection: viaThreeHub.length,
+      direct: directCount,
+      oneConnection: viaHubCount,
+      twoConnection: viaTwoHubCount,
+      threeConnection: viaThreeHubCount,
     },
     fullyConfirmedCount: annotated.filter((j) => j.fullyConfirmed).length,
     narrative,
@@ -150,5 +390,55 @@ export function parseCommonParams(searchParams: URLSearchParams) {
   // like a bug rather than a bad request.
   const safeModes = modes && modes.length > 0 ? modes : undefined;
 
-  return { travelClass, quota, maxHubs, maxConnections, pageSize, modes: safeModes };
+  // Parse filter parameters
+  const sortRaw = searchParams.get("sort") ?? "best";
+  const sort = (["best", "cheapest", "fastest", "fewestChanges"] as const).includes(sortRaw as SortKey)
+    ? (sortRaw as SortKey)
+    : "best";
+
+  const connectionsRaw = searchParams.get("connections") ?? "any";
+  const connections = (["any", "direct", "oneChange", "twoChanges", "threeChanges"] as const).includes(connectionsRaw as ConnectionFilter)
+    ? (connectionsRaw as ConnectionFilter)
+    : "any";
+
+  const confirmedOnlyRaw = searchParams.get("confirmedOnly");
+  const confirmedOnly = confirmedOnlyRaw === "true";
+
+  const departureRaw = searchParams.get("departure") ?? "any";
+  const departure = (["any", "morning", "afternoon", "evening", "night"] as const).includes(departureRaw as DepartureWindow)
+    ? (departureRaw as DepartureWindow)
+    : "any";
+
+  const arrivalRaw = searchParams.get("arrival") ?? "any";
+  const arrival = (["any", "morning", "afternoon", "evening", "night"] as const).includes(arrivalRaw as DepartureWindow)
+    ? (arrivalRaw as DepartureWindow)
+    : "any";
+
+  const maxFareRaw = searchParams.get("maxFare");
+  const maxFare = maxFareRaw !== null ? (maxFareRaw === "" ? null : Number(maxFareRaw)) : null;
+
+  const maxDurationRaw = searchParams.get("maxDuration");
+  const maxDuration = maxDurationRaw !== null ? (maxDurationRaw === "" ? null : Number(maxDurationRaw)) : null;
+
+  const transportRaw = searchParams.get("transport") ?? "any";
+  const transport = (["any", "train", "bus", "flight", "mixed"] as const).includes(transportRaw as TransportFilter)
+    ? (transportRaw as TransportFilter)
+    : "any";
+
+  return {
+    travelClass,
+    quota,
+    maxHubs,
+    maxConnections,
+    pageSize,
+    modes: safeModes,
+    sort,
+    connections,
+    confirmedOnly,
+    departure,
+    arrival,
+    maxFare,
+    maxDuration,
+    transport,
+  };
 }

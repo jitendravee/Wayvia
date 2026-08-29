@@ -1,0 +1,1 @@
+npx tsc --noEmit app/components/StationInput.tsx 2>&1 | grep -v "node_modules" | grep -v "Private identifiers"

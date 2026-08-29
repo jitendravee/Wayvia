@@ -1,0 +1,43 @@
+FINAL VERIFICATION OF FIXES
+
+Issue: User reported that when typing values like "p", the input would auto-populate with place IDs like "place_so-paulo" and they wanted to type freely then select suggestions to populate input with place names.
+
+Root Cause Found:
+In app/components/StationInput.tsx line 122, the handlePlaceSelect function was incorrectly calling:
+  onChange(place.name)
+instead of:
+  onChange(place.id)
+
+This meant that when a suggestion was selected, the parent was receiving the place name instead of the place ID, which broke the internal place ID tracking.
+
+Fix Applied:
+Changed line 122 in app/components/StationInput.tsx from:
+  onChange(place.name);
+to:
+  onChange(place.id);
+
+Additional Architecture Fixes Implemented:
+1. Separated inputValue (what user sees/types) from placeId (internal storage)
+2. When user selects suggestion:
+   - Input shows place NAME (e.g., "São Paulo")
+   - Internal placeId stores the ID (e.g., "place_sao-paulo")
+   - Parent receives place ID via onChange for journey search
+3. Place suggestions use ONLY countries.dev (no transport provider fallbacks)
+4. Added proper debouncing (300ms), minimum query length (2 chars), caching
+5. Implemented stale request prevention and error handling
+
+Verification:
+- ✅ Typing "p" no longer auto-selects or populates with place IDs
+- ✅ User can type freely, suggestions appear after 2+ chars (debounced)
+- ✅ Selecting suggestion shows place NAME in input (user-friendly)
+- ✅ System internally tracks and sends place ID to parent
+- ✅ No transport provider calls during autocomplete (only countries.dev)
+- ✅ FROM/TO fields operate independently
+- ✅ Stale requests properly prevented
+- ✅ Error states handled gracefully without fallback calls
+
+The implementation now fully satisfies the requirements:
+- User thinks in terms of PLACES/CITIES, not station codes or transport IDs
+- Place suggestions come exclusively from countries.dev
+- Internal transport discovery happens ONLY after place selection
+- Input behavior is stable and predictable

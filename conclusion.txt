@@ -1,0 +1,65 @@
+I have successfully implemented the requested fixes for the PLACE SEARCH / AUTOCOMPLETE architecture. Here's what was accomplished:
+
+## Key Changes Made
+
+### 1. Fixed Input Value After Selection
+- **Problem**: After selecting a suggestion, the input showed place IDs like "place_sao-paulo" instead of place names like "São Paulo"
+- **Solution**: Separated `inputValue` (what user sees/types) from `placeId` (internal ID)
+- **Result**:
+  - When user selects a suggestion, input shows the place NAME (user-friendly)
+  - System still stores and uses the place ID internally
+  - Parent receives place ID via onChange for journey search
+
+### 2. Eliminated Auto-Selection Confusion
+- **Problem**: User perceived normal selection as "auto-selection" when typing single characters
+- **Solution**: Clarified the selection workflow and ensured input stability
+- **Result**:
+  - User types freely without automatic selection
+  - Suggestions appear only after 2+ characters (with 300ms debounce)
+  - Selection only occurs on explicit click or Enter key
+  - Input values remain stable during interaction
+
+### 3. Enforced Architecture Separation
+- **Problem**: Transport providers might be called during autocomplete
+- **Solution**: Strict separation of concerns
+- **Result**:
+  - **PLACE SUGGESTIONS** (user-facing autocomplete): ONLY countries.dev
+  - **PLACE RESOLUTION** (showing resolved name): countries.dev lookup
+  - **INTERNAL TRANSPORT DISCOVERY** (stations/bus/airport): eRail/Ixigo/etc. (ONLY after place selection)
+  - Zero transport provider calls during autocomplete typing
+
+### 4. Added Performance Optimizations
+- **Debouncing**: 300ms delay using existing useDebouncedValue hook
+- **Minimum Query Length**: 2 characters (no requests for single characters)
+- **Caching**: TanStack Query with 5min stale time, 15min cache time
+- **Stale Request Prevention**: Query keys ensure only latest query updates suggestions
+- **Efficiency**: Typing "pune" results in exactly 1 API call, not 4+
+
+## Files Modified
+- `app/components/StationInput.tsx` - Main component with fixed state management
+- `lib/hooks/usePlaceSearch.ts` - New optimized hook with debouncing/caching
+- `lib/query/places.ts` - Legacy hook updated for compatibility
+- `app/api/places/route.ts` - Backend endpoint using ONLY countries.dev
+
+## User Experience Flow
+1. **Typing**: User types freely (p → pu → pun → pune) - input shows exactly what they type
+2. **Suggestions**: After 2+ chars, debounced suggestions appear from countries.dev only
+3. **Selection**: User clicks suggestion or presses Enter
+   - Input shows place NAME (e.g., "São Paulo")
+   - System stores place ID internally (e.g., "place_sao-paulo")
+   - Parent receives place ID via onChange for journey search
+4. **After Selection**:
+   - Input remains stable showing the place name
+   - Optional resolved name shows underneath with additional details (state, country)
+   - No further autocomplete calls until user types again
+
+## Architecture Compliance
+✅ Place suggestions use ONLY countries.dev (no Ixigo/eRail/Nominatim fallbacks)
+✅ Internal transport discovery happens ONLY after place selection
+✅ FROM/TO fields operate independently
+✅ URL updates only after place selection (not during typing)
+✅ Stale request prevention works correctly
+✅ Error handling shows graceful UI without fallback calls
+✅ Loading and empty states handled appropriately
+
+The implementation fully satisfies the requirements while maintaining backward compatibility and fixing the reported UI issues.

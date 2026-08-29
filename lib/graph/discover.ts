@@ -229,6 +229,22 @@ export async function hubSearch(from: string, to: string, opts: DiscoverOptions)
 }
 
 /**
+ * The same relevance-scored hub pool `hubSearch` fans out to (static geo
+ * list ∪ live erail directory ∪ this process's own discoveries) — but
+ * without actually querying erail for anything. These are "candidate
+ * places worth transferring through", a purely geographic/topological
+ * notion, not a train-specific one. lib/places/graph.ts and lib/journey/graphSearch.ts use
+ * this so a bus-only (or bus+flight, no train) search still gets a
+ * sensible hub list to route indirect journeys through, instead of being
+ * forced to piggyback on the train engine's own hub search just to find
+ * out which junctions exist.
+ */
+export async function getHubCandidates(from: string, to: string, maxHubs = 10): Promise<ScoredHub[]> {
+  const pool = await buildHubPool();
+  return rankedCandidateHubs(from, to, maxHubs, pool);
+}
+
+/**
  * Tier 4: reads real routes of a few trains that leave `from` (seeded from
  * whatever hubSearch already found departing `from`, even if those
  * particular legs didn't connect through to `to`) and retries the hub
@@ -536,6 +552,9 @@ export interface GraphDiscoveryResult {
   /** Present only when results are thin and a deeper junction search wasn't run — a hint for the FE to offer bumping the slider. */
   suggestion: ConnectionSuggestion | null;
 }
+
+// Export PartialCoverage for use in other modules
+export type { PartialCoverage };
 
 /**
  * Runs direct search AND hub-graph expansion together, every time.
