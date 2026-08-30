@@ -59,7 +59,22 @@ export const TRANSPORT_OPTIONS: { value: TransportFilter; label: string }[] = [
   { value: "flight", label: "Flight" },
   { value: "mixed", label: "Mix (multimodal)" },
 ];
+export function journeySignature(j: AnnotatedJourney): string {
+  return j.legs.map((l) => `${l.trainNo || l.trainName}-${l.depAbsMin}-${l.arrAbsMin}`).join("|");
+}
+/** Which badge (if any) a journey card should show, relative to the rest of its result set. */
+export function tagFor(journey: AnnotatedJourney, ranked: RankedResults): string | undefined {
+  const sig = journeySignature(journey);
 
+  if (ranked.cheapest && journeySignature(ranked.cheapest) === sig) return "Cheapest";
+  if (ranked.fastest && journeySignature(ranked.fastest) === sig) return "Fastest";
+  if (ranked.easiest && journeySignature(ranked.easiest) === sig) return "Fewest changes";
+  if (ranked.mostReliable && journeySignature(ranked.mostReliable) === sig && journey.fullyConfirmed) {
+    return "Most reliable";
+  }
+  if (journey.fullyConfirmed) return "Confirmed";
+  return journey.connections === 0 ? "Direct backup" : "Backup route";
+}
 export const DEPARTURE_WINDOW_LABEL: Record<DepartureWindow, string> = {
   any: "Any time",
   morning: "Morning · 6am–12pm",
@@ -140,11 +155,39 @@ export function maxDurationInSet(journeys: AnnotatedJourney[]): number {
   return journeys.length > 0 ? Math.max(...journeys.map((j) => j.totalDurationMin)) : 0;
 }
 
-/** Which badge (if any) a journey card should show, relative to the rest of its result set. */
-export function tagFor(journey: AnnotatedJourney, ranked: RankedResults): string | undefined {
-  if (ranked.cheapest && journey === ranked.cheapest) return "Cheapest";
-  if (journey === ranked.fastest) return "Fastest";
-  if (journey === ranked.easiest) return "Fewest changes";
-  if (journey === ranked.mostReliable && journey.fullyConfirmed) return "Fully confirmed backup";
-  return journey.connections === 0 ? "Direct backup" : "Backup route";
+export interface TaggedJourney {
+  journey: AnnotatedJourney;
+  tag: string;
+}
+
+/** Lead cards for page 1: one distinct card each for Best match / Cheapest /
+ *  Fastest / Fewest changes (skipping any that are duplicates of an earlier
+ *  pick), then the rest of the candidate set in the server's original
+ *  order, each tagged relative to the full set. Mirrors the mapOverview
+ *  curation the backend already does. */
+export function buildLeadList(ranked: RankedResults): TaggedJourney[] {
+  const seen = new Set<string>();
+  const leads: TaggedJourney[] = [];
+
+  const tryAdd = (journey: AnnotatedJourney | undefined | null, tag: string) => {
+    if (!journey) return;
+    const sig = journeySignature(journey);
+    if (seen.has(sig)) return;
+    seen.add(sig);
+    leads.push({ journey, tag });
+  };
+
+  tryAdd(ranked.bestOverall, "Best overall");
+  tryAdd(ranked.cheapest, "Cheapest");
+  tryAdd(ranked.fastest, "Fastest");
+  tryAdd(ranked.easiest, "Fewest changes");
+
+  const rest = ranked.all
+    .filter((j) => !seen.has(journeySignature(j)))
+    .map((j) => {
+      seen.add(journeySignature(j));
+      return { journey: j, tag: tagFor(j, ranked) ?? "Alternative" };
+    });
+
+  return [...leads, ...rest];
 }

@@ -10,12 +10,17 @@ import { ChevronDownIcon, ClockIcon, JunctionIcon, WalletIcon } from "./Icons";
 
 const RouteMap = dynamic(() => import("./RouteMap"), {
   ssr: false,
-  loading: () => <div className="mt-4 h-[280px] w-full animate-pulse rounded-xl border border-border bg-surface-alt" />,
+  loading: () => (
+    <div className="mt-4 h-[280px] w-full animate-pulse rounded-xl border border-border bg-surface-alt" />
+  ),
 });
 
 const BEST_OVERALL_TAG = "Best overall";
 
-const MODE_ICON: Record<Mode, React.ComponentType<{ size?: number; className?: string }>> = {
+const MODE_ICON: Record<
+  Mode,
+  React.ComponentType<{ size?: number; className?: string }>
+> = {
   train: TrainFront,
   bus: BusFront,
   flight: Plane,
@@ -55,7 +60,13 @@ const AVAILABILITY_STYLE: Record<string, string> = {
   UNKNOWN: "bg-surface-alt text-ink-dim",
 };
 
-export function AvailabilityPill({ leg, compact = false }: { leg: AnnotatedLeg; compact?: boolean }) {
+export function AvailabilityPill({
+  leg,
+  compact = false,
+}: {
+  leg: AnnotatedLeg;
+  compact?: boolean;
+}) {
   const avl = leg.availability;
   if (!avl) return null;
 
@@ -116,9 +127,13 @@ export function TimelineStopNode({
   dayOffset: number;
 }) {
   return (
-    <div className={`flex ${TIMELINE_NODE_WIDTH} shrink-0 flex-col items-center gap-1 px-1 text-center`}>
+    <div
+      className={`flex ${TIMELINE_NODE_WIDTH} shrink-0 flex-col items-center gap-1 px-1 text-center`}
+    >
       <span className="h-2.5 w-2.5 shrink-0 rounded-full border-2 border-violet bg-white" />
-      <span className="font-display text-[13px] font-semibold leading-tight text-ink">{code}</span>
+      <span className="font-display text-[13px] font-semibold leading-tight text-ink">
+        {code}
+      </span>
       <span className="whitespace-nowrap font-mono text-[11px] leading-tight text-ink-muted">
         {time}
         {dayOffset > 0 && <span className="text-violet"> +{dayOffset}d</span>}
@@ -138,7 +153,9 @@ export function TimelineLegConnector({ leg }: { leg: AnnotatedLeg }) {
   const Icon = MODE_ICON[leg.mode];
 
   return (
-    <div className={`flex ${TIMELINE_LEG_MIN_WIDTH} flex-1 flex-col items-center gap-1 px-1 pt-[5px]`}>
+    <div
+      className={`flex ${TIMELINE_LEG_MIN_WIDTH} flex-1 flex-col items-center gap-1 px-1 pt-[5px]`}
+    >
       <div className="flex w-full items-center gap-1">
         <span className="h-px min-w-[8px] flex-1 bg-border" />
         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-violet-ring bg-violet-soft text-violet">
@@ -166,7 +183,10 @@ export function RouteTimeline({ journey }: { journey: AnnotatedJourney }) {
   // that is the arrival end of journey.legs[i-1] — so the two arrays line
   // up 1:1 by index, and comparing each stop's absolute minute against the
   // very first departure tells us whether it lands a day (or more) later.
-  const dayOffsets = [0, ...journey.legs.map((l) => Math.floor(l.arrAbsMin / 1440) - baseDay)];
+  const dayOffsets = [
+    0,
+    ...journey.legs.map((l) => Math.floor(l.arrAbsMin / 1440) - baseDay),
+  ];
 
   return (
     // Always scrollable, on every breakpoint: if the row's min-width (all the
@@ -224,25 +244,39 @@ export function SegmentCard({ leg }: { leg: AnnotatedLeg }) {
       </div>
 
       <div className="min-w-0">
-        <p className="truncate font-display text-[13.5px] font-semibold text-ink">{leg.trainName}</p>
+        <p className="truncate font-display text-[13.5px] font-semibold text-ink">
+          {leg.trainName}
+        </p>
         <p className="font-mono text-[11.5px] text-ink-muted">
           {leg.from} → {leg.to}
         </p>
       </div>
 
-      {leg.fare !== null && <p className="font-display text-[13px] font-semibold text-violet">₹{leg.fare}</p>}
+      {leg.fare !== null && (
+        <p className="font-display text-[13px] font-semibold text-violet">
+          ₹{leg.fare}
+        </p>
+      )}
 
       <div className="flex items-center gap-2">
         <div className="flex shrink-0 flex-col items-start leading-tight">
-          <span className="font-display text-[13px] font-semibold text-ink">{leg.departure}</span>
-          <span className="font-mono text-[10.5px] text-ink-dim">{leg.from}</span>
+          <span className="font-display text-[13px] font-semibold text-ink">
+            {leg.departure}
+          </span>
+          <span className="font-mono text-[10.5px] text-ink-dim">
+            {leg.from}
+          </span>
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1">
-          <span className="whitespace-nowrap font-mono text-[9.5px] text-ink-dim">{formatTravelTime(leg.travelTime)}</span>
+          <span className="whitespace-nowrap font-mono text-[9.5px] text-ink-dim">
+            {formatTravelTime(leg.travelTime)}
+          </span>
           <span className="h-px w-full bg-border" />
         </div>
         <div className="flex shrink-0 flex-col items-end leading-tight">
-          <span className="font-display text-[13px] font-semibold text-ink">{leg.arrival}</span>
+          <span className="font-display text-[13px] font-semibold text-ink">
+            {leg.arrival}
+          </span>
           <span className="font-mono text-[10.5px] text-ink-dim">{leg.to}</span>
         </div>
       </div>
@@ -267,16 +301,21 @@ export default function JourneyCard({
   const isBest = tag === BEST_OVERALL_TAG;
   const [showMap, setShowMap] = useState(false);
   const [expanded, setExpanded] = useState(false);
-
   return (
     <div
       className={`group relative w-full min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg ${
-        isBest ? "border-violet-ring shadow-violet-soft/50 ring-1 ring-violet-ring" : "border-border"
+        isBest
+          ? "border-violet-ring shadow-violet-soft/50 ring-1 ring-violet-ring"
+          : "border-border"
       }`}
     >
-      {isBest && <div className="h-1 w-full bg-gradient-to-r from-violet via-violet-dark to-violet" />}
+      {isBest && (
+        <div className="h-1 w-full bg-gradient-to-r from-violet via-violet-dark to-violet" />
+      )}
 
-      <div className={`min-w-0 p-4 sm:p-5 ${isBest ? "bg-gradient-to-br from-violet-soft/30 to-white" : ""}`}>
+      <div
+        className={`min-w-0 p-4 sm:p-5 ${isBest ? "bg-gradient-to-br from-violet-soft/30 to-white" : ""}`}
+      >
         {/* Header: rank + tag + stat pills + View path */}
         <div className="flex flex-wrap items-center gap-2">
           {rank !== undefined && (
@@ -288,14 +327,17 @@ export default function JourneyCard({
           )}
 
           {tag && (
-            <span className={`shrink-0 rounded-full px-2.5 py-1 font-mono text-[10.5px] font-bold uppercase tracking-wide ${tagStyle(tag)}`}>
+            <span
+              className={`shrink-0 rounded-full px-2.5 py-1 font-mono text-[10.5px] font-bold uppercase tracking-wide ${tagStyle(tag)}`}
+            >
               {tagDisplay(tag)}
             </span>
           )}
 
           {journey.totalFare !== null && (
             <span className="flex shrink-0 items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1 font-mono text-[11.5px] font-semibold text-ink shadow-sm">
-              <WalletIcon className="h-3.5 w-3.5 text-violet" />₹{journey.totalFare}
+              <WalletIcon className="h-3.5 w-3.5 text-violet" />₹
+              {journey.totalFare}
             </span>
           )}
 
@@ -306,11 +348,18 @@ export default function JourneyCard({
 
           <span className="flex shrink-0 items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1 font-mono text-[11.5px] text-ink-muted shadow-sm">
             <JunctionIcon className="h-3.5 w-3.5 text-violet" />
-            {journey.connections === 0 ? "direct" : `${journey.connections} connection${journey.connections > 1 ? "s" : ""}`}
+            {journey.connections === 0
+              ? "direct"
+              : `${journey.connections} connection${journey.connections > 1 ? "s" : ""}`}
           </span>
 
           {(journey.hub || journey.hub2) && (
-            <Badge>via {[journey.hub, journey.hub2, journey.hub3].filter(Boolean).join(" → ")}</Badge>
+            <Badge>
+              via{" "}
+              {[journey.hub, journey.hub2, journey.hub3]
+                .filter(Boolean)
+                .join(" → ")}
+            </Badge>
           )}
 
           {journey.modesUsed.length > 1 && (
@@ -319,7 +368,9 @@ export default function JourneyCard({
                 const Icon = MODE_ICON[leg.mode];
                 return (
                   <span key={i} className="flex items-center gap-1">
-                    {i > 0 && <span className="text-[10px] text-ink-dim">→</span>}
+                    {i > 0 && (
+                      <span className="text-[10px] text-ink-dim">→</span>
+                    )}
                     <Icon className="h-3.5 w-3.5 text-violet" size={14} />
                   </span>
                 );
@@ -327,7 +378,10 @@ export default function JourneyCard({
             </span>
           )}
 
-          <StatusBadge fullyConfirmed={journey.fullyConfirmed} hasBlockedLeg={journey.hasBlockedLeg} />
+          <StatusBadge
+            fullyConfirmed={journey.fullyConfirmed}
+            hasBlockedLeg={journey.hasBlockedLeg}
+          />
 
           <button
             type="button"
@@ -335,7 +389,9 @@ export default function JourneyCard({
             className="ml-auto flex shrink-0 items-center gap-1 rounded-full border border-border bg-white px-3 py-1.5 font-mono text-[11px] font-medium text-ink-muted shadow-sm transition-colors hover:border-violet-ring hover:text-violet"
           >
             {showMap ? "Hide path" : "View path"}
-            <ChevronDownIcon className={`h-3 w-3 transition-transform ${showMap ? "rotate-180" : ""}`} />
+            <ChevronDownIcon
+              className={`h-3 w-3 transition-transform ${showMap ? "rotate-180" : ""}`}
+            />
           </button>
         </div>
 
@@ -351,7 +407,9 @@ export default function JourneyCard({
             onClick={() => setExpanded((v) => !v)}
             className="flex items-center gap-1.5 font-mono text-[12px] font-medium text-ink-muted transition-colors hover:text-ink"
           >
-            <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
+            <ChevronDownIcon
+              className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
             {journey.legs.length} segment{journey.legs.length > 1 ? "s" : ""}
           </button>
 
@@ -361,7 +419,10 @@ export default function JourneyCard({
             className="flex items-center gap-1.5 rounded-lg bg-violet px-4 py-2 font-display text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-dark"
           >
             {expanded ? "Hide details" : "View details"}
-            <ArrowRight size={14} className={`transition-transform ${expanded ? "rotate-90" : ""}`} />
+            <ArrowRight
+              size={14}
+              className={`transition-transform ${expanded ? "rotate-90" : ""}`}
+            />
           </button>
         </div>
 

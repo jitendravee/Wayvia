@@ -14,6 +14,7 @@ import {
   maxDurationInSet,
   maxFareInSet,
   tagFor,
+  buildLeadList,
 } from "./filters";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
 import { useFillHeight } from "@/lib/hooks/useFillHeight";
@@ -99,13 +100,15 @@ export default function MultiLegResults({
           : ["train"],
       page: 1,
       filters: DEFAULT_FILTERS,
-    }))
+    })),
   );
 
   const [activeIndex, setActiveIndex] = useState(0);
 
   function patchLegState(i: number, patch: Partial<LegQueryState>) {
-    setLegStates((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+    setLegStates((prev) =>
+      prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)),
+    );
   }
 
   // Debounce only the two continuous slider filters (maxFare/maxDuration) —
@@ -113,8 +116,14 @@ export default function MultiLegResults({
   // confirmed-only, sort) is a single click/tap and refetches immediately.
   // One hook call each (not one per leg, which would break rules-of-hooks
   // for a variable-length leg list) debouncing the whole per-leg array.
-  const debouncedMaxFares = useDebouncedArray(legStates.map((s) => s.filters.maxFare), 400);
-  const debouncedMaxDurations = useDebouncedArray(legStates.map((s) => s.filters.maxDuration), 400);
+  const debouncedMaxFares = useDebouncedArray(
+    legStates.map((s) => s.filters.maxFare),
+    400,
+  );
+  const debouncedMaxDurations = useDebouncedArray(
+    legStates.map((s) => s.filters.maxDuration),
+    400,
+  );
 
   const searchParamsPerLeg: SearchParams[] = legs.map((leg, i) => {
     const s = legStates[i];
@@ -136,7 +145,7 @@ export default function MultiLegResults({
         page: s.page,
         pageSize,
       },
-      effectiveFilters
+      effectiveFilters,
     );
   });
 
@@ -171,7 +180,9 @@ export default function MultiLegResults({
     queries: searchParamsPerLeg.map((params, i) => ({
       queryKey: ["journey-search", params] as const,
       queryFn: () => fetchSearch(params),
-      initialData: matchesInitialFetch(params, legs[i]) ? initial.results[i] : undefined,
+      initialData: matchesInitialFetch(params, legs[i])
+        ? initial.results[i]
+        : undefined,
       // Keep the previous page's results on screen (instead of flashing to
       // a loading state) while a filter/page change is in flight.
       placeholderData: (prev: SearchResponse | undefined) => prev,
@@ -190,7 +201,11 @@ export default function MultiLegResults({
 
   return (
     <div>
-      <LegTabs tabs={tabs} active={String(activeIndex)} onChange={(k) => setActiveIndex(Number(k))} />
+      <LegTabs
+        tabs={tabs}
+        active={String(activeIndex)}
+        onChange={(k) => setActiveIndex(Number(k))}
+      />
 
       <LegPanel
         leg={legs[activeIndex]}
@@ -198,12 +213,18 @@ export default function MultiLegResults({
         loading={activeQuery.isFetching}
         filters={activeState.filters}
         maxHubs={activeState.maxHubs}
-        onFiltersChange={(filters) => patchLegState(activeIndex, { filters, page: 1 })}
+        onFiltersChange={(filters) =>
+          patchLegState(activeIndex, { filters, page: 1 })
+        }
         onRefine={(next: RefineOpts) =>
           patchLegState(activeIndex, {
-            ...(next.travelClass !== undefined ? { travelClass: next.travelClass } : {}),
+            ...(next.travelClass !== undefined
+              ? { travelClass: next.travelClass }
+              : {}),
             ...(next.quota !== undefined ? { quota: next.quota } : {}),
-            ...(next.maxConnections !== undefined ? { maxConnections: next.maxConnections } : {}),
+            ...(next.maxConnections !== undefined
+              ? { maxConnections: next.maxConnections }
+              : {}),
             ...(next.maxHubs !== undefined ? { maxHubs: next.maxHubs } : {}),
             // A refine changes the underlying candidate set out from under
             // the person — same as before, drop whatever display filter
@@ -241,27 +262,47 @@ function LegPanel({
 
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
-  const fareCeiling = useMemo(() => (ranked ? maxFareInSet(ranked.all) : 0), [ranked]);
-  const durationCeiling = useMemo(() => (ranked ? maxDurationInSet(ranked.all) : 0), [ranked]);
+  const fareCeiling = useMemo(
+    () => (ranked ? maxFareInSet(ranked.all) : 0),
+    [ranked],
+  );
+  const durationCeiling = useMemo(
+    () => (ranked ? maxDurationInSet(ranked.all) : 0),
+    [ranked],
+  );
 
   const listItems = useMemo(() => {
     if (!ranked) return [];
     if (page !== 1) return ranked.all;
     const rest = ranked.all.filter((j) => j !== ranked.bestOverall);
-    return ranked.all.includes(ranked.bestOverall) ? [ranked.bestOverall, ...rest] : ranked.all;
+    return ranked.all.includes(ranked.bestOverall)
+      ? [ranked.bestOverall, ...rest]
+      : ranked.all;
   }, [ranked, page]);
 
   const hasFilterableSet =
-    ranked !== null && (ranked.all.length > 1 || (data.pagination !== undefined && data.pagination.total > 1));
+    ranked !== null &&
+    (ranked.all.length > 1 ||
+      (data.pagination !== undefined && data.pagination.total > 1));
 
-  const hasMap = page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
+  const hasMap =
+    page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
 
   const suggestion = (
     data as unknown as {
       suggestion?: { message: string; nextConnections: 1 | 2 | 3 };
     }
   ).suggestion;
-
+  const displayList = useMemo(() => {
+    if (!ranked) return [];
+    if (page !== 1) {
+      // Later pages: no curated lead cards, just tag each journey relative
+      // to the whole set (cheapest/fastest may still appear here if they
+      // land on a later page after filtering).
+      return ranked.all.map((j) => ({ journey: j, tag: tagFor(j, ranked) }));
+    }
+    return buildLeadList(ranked);
+  }, [ranked, page]);
   return (
     <section>
       {page === 1 && data.partial && data.partial.length > 0 && (
@@ -271,7 +312,10 @@ function LegPanel({
           </div>
           <div className="space-y-3">
             {data.partial.map((p, i) => (
-              <PartialMatchCard key={`${p.type}-${p.hub}-${p.leg.trainNo}-${i}`} match={p} />
+              <PartialMatchCard
+                key={`${p.type}-${p.hub}-${p.leg.trainNo}-${i}`}
+                match={p}
+              />
             ))}
           </div>
         </div>
@@ -303,7 +347,9 @@ function LegPanel({
           partialAnchorId="partial-matches"
           suggestion={suggestion}
           onWidenSearch={
-            suggestion ? () => onRefine({ maxConnections: suggestion.nextConnections }) : undefined
+            suggestion
+              ? () => onRefine({ maxConnections: suggestion.nextConnections })
+              : undefined
           }
           loading={loading}
         />
@@ -323,11 +369,12 @@ function LegPanel({
               }`}
             >
               <div className="space-y-3">
-                {listItems.map((j, i) => (
+                {displayList.map(({ journey, tag }, i) => (
                   <JourneyCard
                     key={i}
-                    journey={j}
-                    tag={i === 0 && page === 1 ? "Best overall" : tagFor(j, ranked)}
+                    journey={journey}
+                    tag={tag}
+                    rank={i + 1}
                   />
                 ))}
               </div>
