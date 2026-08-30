@@ -3,7 +3,7 @@ import { searchStations } from "../stations";
 import { ixigoAutocomplete } from "../providers/ixigo/client";
 import { cityNameFromStationName } from "../providers/ixigo/cityResolve";
 import { fetchCountriesDevPlaces, type CountriesDevCityResponse } from "./countriesDev";
-import type { Place, RailwayLocation, BusLocation, AirportLocation } from "./model";
+import type { Place, RailwayLocation, BusLocation } from "./model";
 
 /**
  * "Pune Junction" -> "pune", "Secunderabad Junction, Hyderabad" -> "hyderabad".
@@ -87,59 +87,6 @@ export function placeFromHubSeed(hub: { code: string; name: string; lat: number;
  * verify this against a live environment before relying on it.
  */
 const geocodeCache = new Map<string, { lat: number; lon: number } | null>();
-const CITY_TO_IATA: Record<string, string> = {
-  'new delhi': 'DEL',
-  'mumbai': 'BOM',
-  'pune': 'PNQ',
-  'bangalore': 'BLR',
-  'hyderabad': 'HYD',
-  'chennai': 'MAA',
-  'kolkata': 'CCU',
-  'ahmedabad': 'AMD',
-  'goa': 'GOI',
-  'jaipur': 'JAI',
-  'lucknow': 'LKO',
-  'kochi': 'COK',
-  'vizag': 'VTZ',
-  'indore': 'IDR',
-  'nagpur': 'NAG',
-  'bhubaneswar': 'BBI',
-  'vadodara': 'BDQ',
-  'surat': 'STV',
-  'patna': 'PAT',
-  'rajahmundry': 'RJA',
-  'raipur': 'RPR',
-  'jammu': 'IXJ',
-  'srinagar': 'SXR',
-  'deen': 'DED',
-  'amd': 'AMD', // Ahmedabad
-  'del': 'DEL',
-  'bom': 'BOM',
-  'pnq': 'PNQ',
-  'blr': 'BLR',
-  'hyd': 'HYD',
-  'maa': 'MAA',
-  'ccu': 'CCU',
-  'jai': 'JAI',
-  'lko': 'LKO',
-  'kok': 'COK',
-  'vtz': 'VTZ',
-  'idr': 'IDR',
-  'nag': 'NAG',
-  'bbi': 'BBI',
-  'bdq': 'BDQ',
-  'stv': 'STV',
-  'pat': 'PAT',
-  'rja': 'RJA',
-  'rpr': 'RPR',
-  'ixj': 'IXJ',
-  'sxr': 'SXR',
-  'ded': 'DED',
-};
-
-function normalizeCityName(name: string): string {
-  return name.trim().toLowerCase();
-}
 
 async function geocodePlace(name: string): Promise<{ lat: number; lon: number } | null> {
   const key = normalizePlaceName(name);
@@ -257,26 +204,6 @@ export async function resolvePlace(query: string): Promise<Place | null> {
       }
       if (railwayStations.length > 0) {
         place.railway = { stations: railwayStations };
-      }
-    }
-    // Flight locations from ixigo (if we haven't already added them)
-    if (!place.flight || place.flight.airports.length === 0) {
-      try {
-        const ixigoResults = await ixigoAutocomplete(place.name);
-        const airportLocations: AirportLocation[] = [];
-        for (const r of ixigoResults) {
-          if (r.alias_type === "Alias" && r.label.endsWith(" Airport")) {
-            // Derive IATA code from place name using CITY_TO_IATA mapping
-            const normalized = normalizeCityName(place.name);
-            const iataCode = CITY_TO_IATA[normalized] ?? place.name.toUpperCase();
-            airportLocations.push({ code: iataCode, name: r.label });
-          }
-        }
-        if (airportLocations.length > 0) {
-          place.flight = { airports: airportLocations };
-        }
-      } catch (err) {
-        console.error(`resolvePlace ixigo flight enrichment for "${q}" failed:`, err);
       }
     }
 

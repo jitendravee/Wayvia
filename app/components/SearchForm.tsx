@@ -15,7 +15,7 @@ import JourneyStopsForm from "./JourneyStopsForm";
 import type { Mode, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
 import ModeSelector from "./ModeSelector";
-import { useResolvedPlace } from '@/lib/query/resolvedPlace';
+import { useResolvedPlace } from "@/lib/query/resolvedPlace";
 import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { FilterState } from "./filters";
 
@@ -30,7 +30,7 @@ export interface SearchFormValues {
   modes: Mode[];
 }
 
-export const ALL_SEARCH_MODES: Mode[] = ["train","bus"];
+export const ALL_SEARCH_MODES: Mode[] = ["train", "bus", "flight"];
 
 /* ------------------------------------------------------------------ */
 /* Mode chips – unchanged                                             */
@@ -182,11 +182,7 @@ export default function SearchForm({
 
   const multi = stops.length > 1;
   const invalid = legs.some(
-    (l) =>
-      !l.from ||
-      !l.to ||
-      !l.date ||
-      l.from === l.to,
+    (l) => !l.from || !l.to || !l.date || l.from === l.to,
   );
 
   // Mode chip state.
@@ -229,10 +225,10 @@ export default function SearchForm({
   const searchButton = (
     <button
       type="submit"
-      disabled={(loading || originLoading || destinationLoading) || invalid}
+      disabled={loading || originLoading || destinationLoading || invalid}
       className="flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-violet to-violet-dark px-5 font-display text-sm font-semibold text-white shadow-sm shadow-violet-soft transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 sm:flex-none"
     >
-      {(loading || originLoading || destinationLoading) ? (
+      {loading || originLoading || destinationLoading ? (
         <>
           <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
           Searching…

@@ -1,0 +1,123 @@
+import type { Leg } from "../../graph/types";
+import type { ModeProvider} from "./types";
+import { ixigoGetFlightList } from "./client";
+import { mapIxigoFlightToLeg } from "./mapFlightResponse";
+import { resolvePlace } from "../../places/resolver";
+import type { Place } from "../../places/model";
+
+const CITY_TO_IATA: Record<string, string> = {
+  'new delhi': 'DEL',
+  'mumbai': 'BOM',
+  'pune': 'PNQ',
+  'bangalore': 'BLR',
+  'hyderabad': 'HYD',
+  'chennai': 'MAA',
+  'kolkata': 'CCU',
+  'ahmedabad': 'AMD',
+  'goa': 'GOI',
+  'jaipur': 'JAI',
+  'lucknow': 'LKO',
+  'kochi': 'COK',
+  'vizag': 'VTZ',
+  'indore': 'IDR',
+  'nagpur': 'NAG',
+  'bhubaneswar': 'BBI',
+  'vadodara': 'BDQ',
+  'surat': 'STV',
+  'patna': 'PAT',
+  'rajahmundry': 'RJA',
+  'raipur': 'RPR',
+  'jammu': 'IXJ',
+  'srinagar': 'SXR',
+  'deen': 'DED',
+  'amd': 'AMD', // Ahmedabad
+  'del': 'DEL',
+  'bom': 'BOM',
+  'pnq': 'PNQ',
+  'blr': 'BLR',
+  'hyd': 'HYD',
+  'maa': 'MAA',
+  'ccu': 'CCU',
+  'jai': 'JAI',
+  'lko': 'LKO',
+  'kok': 'COK',
+  'vtz': 'VTZ',
+  'idr': 'IDR',
+  'nag': 'NAG',
+  'bbi': 'BBI',
+  'bdq': 'BDQ',
+  'stv': 'STV',
+  'pat': 'PAT',
+  'rja': 'RJA',
+  'rpr': 'RPR',
+  'ixj': 'IXJ',
+  'sxr': 'SXR',
+  'ded': 'DED',
+};
+
+function normalizeCityName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+function isoToDDMMYYYY(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${d}-${m}-${y}`;
+}
+
+/**
+ * Real ixigo-backed flight search using the outlook/ranged endpoint.
+ * Note: this endpoint returns fare calendar data but not flight times.
+ * Times are set to placeholders (00:00) and should be replaced with
+ * real times from a schedule endpoint in the future.
+ */
+export const ixigoFlightProvider: ModeProvider = {
+  mode: "flight",
+  async search(from, to, date): Promise<Leg[]> {
+    // Resolve the place names to Place objects
+    const fromPlace = await resolvePlace(from);
+    const toPlace = await resolvePlace(to);
+    if (!fromPlace || !toPlace) return [];
+
+    // Extract IATA codes from the place objects.
+    // We assume the place has a flight property with an airports array.
+    let originCode = fromPlace.flight?.airports[0]?.code;
+    let destinationCode = toPlace.flight?.airports[0]?.code;
+
+    // If not found in flight.airports, try to map from city name.
+    if (!originCode) {
+      const normalized = normalizeCityName(fromPlace.name);
+      originCode = CITY_TO_IATA[normalized] ?? fromPlace.name;
+    }
+    if (!destinationCode) {
+      const normalized = normalizeCityName(toPlace.name);
+      destinationCode = CITY_TO_IATA[normalized] ?? toPlace.name;
+    }
+
+    if (!originCode || !destinationCode) return [];
+
+    const params = {
+      origin: originCode,
+      destination: destinationCode,
+      departureDate: isoToDDMMYYYY(date),
+      fareClass: "e",
+      paxCombinationType: "100",
+      refundTypes: "REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE",
+    };
+
+    let raw;
+    try {
+      raw = await ixigoGetFlightList(params);
+    } catch (err) {
+      console.error(`ixigoFlightProvider.search(${from} -> ${to}) failed:`, err);
+      return [];
+    }
+
+    const results = raw.data.going.results ?? [];
+    const legs: Leg[] = [];
+    for (const item of results) {
+      const leg = mapIxigoFlightToLeg(item, originCode, destinationCode);
+      if (leg) legs.push(leg);
+    }
+    return legs;
+  },
+};

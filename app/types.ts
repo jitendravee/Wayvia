@@ -1,3 +1,5 @@
+import { number } from "framer-motion";
+
 export type Mode = "train" | "bus" | "flight";
 
 export type AvlStatusCategory = "AVAILABLE" | "WAITLIST" | "RAC" | "NOT_AVAILABLE" | "REGRET" | "UNKNOWN";
@@ -14,8 +16,8 @@ export interface AvlAvailability {
 export interface StationCoord {
   code: string;
   name: string;
-  lat: number;| null;
-  lon: number;| null;
+  lat: number| null;
+  lon: number | null;
 }
 
 export interface AnnotatedLeg {

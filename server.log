@@ -1,0 +1,2822 @@
+
+> frontend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.3.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.8:3000
+✓ Ready in 885ms
+⚠ Warning: Next.js ignored package-lock.json in /home/jitendra/Downloads/personal because it is outside the current Git repository (/home/jitendra/Downloads/personal/railway-app).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 68ms
+
+⚠ Slow filesystem detected. The benchmark took 546ms. If /home/jitendra/Downloads/personal/railway-app/.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+[IXIGO REQUEST #1]
+from: NEW DELHI
+to: MUMBAI
+date: 2026-08-31
+purpose: initial-discovery
+graphDepth: 0
+currentPlace: NEW DELHI
+targetPlace: MUMBAI
+---
+[FlightProvider] Searching for flights from "NEW DELHI" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Thane" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Kota" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Ratlam" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Borivali" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Vasai Road" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Kalyan" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Jaipur" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Ujjain" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Vadodara" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Surat" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Hazrat Nizamuddin" on date 2026-08-31
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'vadodara', name: 'Vadodara', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: BDQ
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'BDQ',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'jaipur', name: 'Jaipur', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: JAI
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'JAI',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'kalyan', name: 'Kalyan', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Kalyan
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Kalyan',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Kota
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Kota',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Ratlam
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Ratlam',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'ujjain', name: 'Ujjain', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Ujjain
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Ujjain',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Thane
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Thane',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'surat', name: 'Surat', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: STV
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'STV',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [ [Object] ] } }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: DELHI
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'DELHI',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Vasai Road
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Vasai Road',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: { id: 'borivali', name: 'Borivali', flight: undefined }
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Borivali
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Borivali',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: {
+  id: 'new-delhi',
+  name: 'NEW DELHI',
+  flight: { airports: [ [Object] ] }
+}
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: DEL
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Searching for flights from "NEW DELHI" to "Mumbai CSMT" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Bandra" on date 2026-08-31
+[FlightProvider] Searching for flights from "NEW DELHI" to "Panvel" on date 2026-08-31
+[FlightProvider] Resolved fromPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: DEL
+[FlightProvider] Destination code from city mapping: Panvel
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Panvel',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: DEL
+[FlightProvider] Destination code from city mapping: Bandra
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Bandra',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: DEL
+[FlightProvider] Destination code from city mapping: Mumbai CSMT
+[FlightProvider] Request params: {
+  origin: 'DEL',
+  destination: 'Mumbai CSMT',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:218:26)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:218:26)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+ixigoBusProvider.search(Thane -> NEW DELHI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Thane -> MUMBAI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Thane -> Delhi) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:218:26)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+ixigoBusProvider.search(Thane -> Hazrat Nizamuddin) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+[FlightProvider] Searching for flights from "Thane" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Thane" to "NEW DELHI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Thane" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "Thane" to "Hazrat Nizamuddin" on date 2026-08-31
+[FlightProvider] Searching for flights from "Mumbai CSMT" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Mumbai CSMT" to "NEW DELHI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Mumbai CSMT" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "Mumbai CSMT" to "Hazrat Nizamuddin" on date 2026-08-31
+ixigoBusProvider.search(Kota -> MUMBAI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Ratlam) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Thane) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Kalyan) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Borivali) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Vasai Road) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Surat) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Ujjain) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> NEW DELHI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Delhi) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kota -> Hazrat Nizamuddin) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+[FlightProvider] Searching for flights from "Kota" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Thane" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Ratlam" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Borivali" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Kalyan" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Vasai Road" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Ujjain" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Panvel" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Mumbai CSMT" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Surat" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Manmad" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "NEW DELHI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kota" to "Hazrat Nizamuddin" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "Thane" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "Mumbai CSMT" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "Borivali" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "Kalyan" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "NEW DELHI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "Panvel" to "Hazrat Nizamuddin" on date 2026-08-31
+[FlightProvider] Searching for flights from "Bandra" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Bandra" to "NEW DELHI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Bandra" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "Bandra" to "Hazrat Nizamuddin" on date 2026-08-31
+ixigoBusProvider.search(Ratlam -> MUMBAI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Borivali) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Kalyan) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Vasai Road) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Thane) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Surat) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Delhi) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Vadodara) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> NEW DELHI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Ratlam -> Hazrat Nizamuddin) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+[FlightProvider] Searching for flights from "Ratlam" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Thane" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Borivali" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Kalyan" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Vasai Road" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Panvel" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Mumbai CSMT" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Manmad" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Surat" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Vadodara" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Lonavala" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "NEW DELHI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "Ratlam" to "Hazrat Nizamuddin" on date 2026-08-31
+ixigoBusProvider.search(Vasai Road -> MUMBAI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Vasai Road -> Borivali) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Vasai Road -> Kalyan) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Vasai Road -> Thane) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Vasai Road -> NEW DELHI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Vasai Road -> Delhi) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Vasai Road -> Hazrat Nizamuddin) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+[FlightProvider] Searching for flights from "Vasai Road" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "Borivali" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "Thane" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "Mumbai CSMT" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "Kalyan" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "Panvel" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "NEW DELHI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "Delhi" on date 2026-08-31
+[FlightProvider] Searching for flights from "Vasai Road" to "Hazrat Nizamuddin" on date 2026-08-31
+[FlightProvider] Resolved fromPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Thane
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'Thane',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Thane
+[FlightProvider] Destination code from city mapping: Delhi
+[FlightProvider] Request params: {
+  origin: 'Thane',
+  destination: 'Delhi',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Thane
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Thane',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Thane
+[FlightProvider] Destination code from city mapping: DEL
+[FlightProvider] Request params: {
+  origin: 'Thane',
+  destination: 'DEL',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Mumbai CSMT
+[FlightProvider] Destination code from city mapping: DEL
+[FlightProvider] Request params: {
+  origin: 'Mumbai CSMT',
+  destination: 'DEL',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Mumbai CSMT
+[FlightProvider] Destination code from city mapping: Delhi
+[FlightProvider] Request params: {
+  origin: 'Mumbai CSMT',
+  destination: 'Delhi',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Mumbai CSMT
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Mumbai CSMT',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Mumbai CSMT
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'Mumbai CSMT',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Searching for flights from "Hazrat Nizamuddin" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Thane
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Thane',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Ratlam
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Ratlam',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'ujjain', name: 'Ujjain', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Ujjain
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Ujjain',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: DEL
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'DEL',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'kalyan', name: 'Kalyan', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Kalyan
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Kalyan',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Panvel
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Panvel',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'manmad', name: 'Manmad', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Manmad
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Manmad',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'surat', name: 'Surat', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: STV
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'STV',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Delhi
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Delhi',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'borivali', name: 'Borivali', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Borivali
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Borivali',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Vasai Road
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Vasai Road',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Mumbai CSMT
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Mumbai CSMT',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+ixigoBusProvider.search(Hazrat Nizamuddin -> MUMBAI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+    at async (lib/journey/graphSearch.ts:218:26)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async (lib/journey/graphSearch.ts:244:15)
+    ... collapsed 3 duplicate lines matching above lines ...
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Bandra
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Bandra',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Bandra
+[FlightProvider] Destination code from city mapping: Delhi
+[FlightProvider] Request params: {
+  origin: 'Bandra',
+  destination: 'Delhi',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: Thane
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'Thane',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Searching for flights from "Kota" to "Bandra" on date 2026-08-31
+[FlightProvider] Searching for flights from "Borivali" to "MUMBAI" on date 2026-08-31
+[FlightProvider] Searching for flights from "Kalyan" to "MUMBAI" on date 2026-08-31
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Bandra
+[FlightProvider] Destination code from city mapping: DEL
+[FlightProvider] Request params: {
+  origin: 'Bandra',
+  destination: 'DEL',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: Delhi
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'Delhi',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'kalyan', name: 'Kalyan', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: Kalyan
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'Kalyan',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: DEL
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'DEL',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: Mumbai CSMT
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'Mumbai CSMT',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Bandra
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'Bandra',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'borivali', name: 'Borivali', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: Borivali
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'Borivali',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Panvel
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'Panvel',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+ixigoBusProvider.search(Borivali -> MUMBAI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+    at async (lib/journey/graphSearch.ts:218:26)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async (lib/journey/graphSearch.ts:244:15)
+    ... collapsed 3 duplicate lines matching above lines ...
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+ixigoBusProvider.search(Kalyan -> MUMBAI) failed: Error: ixigo GetBusList failed with status 429
+    at ixigoGetBusList (lib/providers/ixigo/client.ts:58:11)
+    at async Object.search (lib/providers/ixigoBus.ts:55:13)
+    at async (lib/journey/graphSearch.ts:218:26)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async (lib/journey/graphSearch.ts:244:15)
+    ... collapsed 3 duplicate lines matching above lines ...
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  56 |   });
+  57 |   if (!res.ok) {
+> 58 |     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
+     |           ^
+  59 |   }
+  60 |   return (await res.json()) as IxigoGetBusListResponse;
+  61 | }
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Thane
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Thane',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'manmad', name: 'Manmad', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Manmad
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Manmad',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: DEL
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'DEL',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Panvel
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Panvel',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'vadodara', name: 'Vadodara', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: BDQ
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'BDQ',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Delhi
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Delhi',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'kalyan', name: 'Kalyan', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Kalyan
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Kalyan',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'surat', name: 'Surat', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: STV
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'STV',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:138:28)
+    at async expand (lib/journey/graphSearch.ts:157:38)
+    at async (lib/journey/graphSearch.ts:244:15)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'borivali', name: 'Borivali', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Borivali
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Borivali',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Mumbai CSMT
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Mumbai CSMT',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'lonavala', name: 'Lonavala', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Lonavala
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Lonavala',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Vasai Road
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Vasai Road',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'borivali', name: 'Borivali', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Borivali
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Borivali',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'kalyan', name: 'Kalyan', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Kalyan
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Kalyan',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'new-delhi', name: 'NEW DELHI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: DEL
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'DEL',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'thane', name: 'Thane', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Thane
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Thane',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'panvel', name: 'Panvel', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Panvel
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Panvel',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Searching for flights from "Ratlam" to "Bandra" on date 2026-08-31
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'mumbai-csmt', name: 'Mumbai CSMT', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Mumbai CSMT
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Mumbai CSMT',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Hazrat Nizamuddin',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'delhi', name: 'Delhi', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Delhi
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Delhi',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Searching for flights from "Vasai Road" to "Bandra" on date 2026-08-31
+[FlightProvider] Resolved fromPlace: {
+  id: 'hazrat-nizamuddin',
+  name: 'Hazrat Nizamuddin',
+  flight: undefined
+}
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Hazrat Nizamuddin
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Hazrat Nizamuddin',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+    at async (lib/journey/graphSearch.ts:218:26)
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async (lib/journey/graphSearch.ts:244:15)
+    ... collapsed 3 duplicate lines matching above lines ...
+    at async (lib/journey/graphSearch.ts:213:9)
+    at async expand (lib/journey/graphSearch.ts:211:5)
+    at async multimodalGraphSearch (lib/journey/graphSearch.ts:252:3)
+    at async searchJourneyPlaceFirst (lib/journey/searchService.ts:129:22)
+    at async runJourneySearchUncached (lib/searchJourney.ts:160:10)
+    at async runJourneySearch (lib/searchJourney.ts:140:25)
+    at async GET (app/api/search/route.ts:43:22)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'kota', name: 'Kota', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kota
+[FlightProvider] Destination code from city mapping: Bandra
+[FlightProvider] Request params: {
+  origin: 'Kota',
+  destination: 'Bandra',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'borivali', name: 'Borivali', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Borivali
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Borivali',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] Resolved fromPlace: { id: 'kalyan', name: 'Kalyan', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'mumbai', name: 'MUMBAI', flight: { airports: [] } }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Kalyan
+[FlightProvider] Destination code from city mapping: BOM
+[FlightProvider] Request params: {
+  origin: 'Kalyan',
+  destination: 'BOM',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'ratlam', name: 'Ratlam', flight: { airports: [] } }
+[FlightProvider] Resolved toPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Ratlam
+[FlightProvider] Destination code from city mapping: Bandra
+[FlightProvider] Request params: {
+  origin: 'Ratlam',
+  destination: 'Bandra',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+[FlightProvider] Resolved fromPlace: { id: 'vasai-road', name: 'Vasai Road', flight: undefined }
+[FlightProvider] Resolved toPlace: { id: 'bandra', name: 'Bandra', flight: undefined }
+[FlightProvider] Origin code from place.flight: undefined
+[FlightProvider] Destination code from place.flight: undefined
+[FlightProvider] Origin code from city mapping: Vasai Road
+[FlightProvider] Destination code from city mapping: Bandra
+[FlightProvider] Request params: {
+  origin: 'Vasai Road',
+  destination: 'Bandra',
+  departureDate: '31-08-2026',
+  fareClass: 'e',
+  paxCombinationType: '100',
+  refundTypes: 'REFUNDABLE,NON_REFUNDABLE,PARTIALLY_REFUNDABLE'
+}
+[FlightProvider] ixigoGetFlightList failed: Error: ixigo flight list failed with status 429
+    at ixigoGetFlightList (lib/providers/ixigo/client.ts:73:22)
+    at async Object.search (lib/providers/ixigo/flight.ts:123:13)
+  71 |   const url = `https://www.ixigo.com/outlook/v1/onward/ranged?${query}`;
+  72 |   const res = await fetch(url, { headers: IXIGO_HEADERS });
+> 73 |   if (!res.ok) throw new Error(`ixigo flight list failed with status ${res.status}`);
+     |                      ^
+  74 |   return (await res.json()) as IxigoFlightResponse;
+  75 | }
+  76 |
+Direct before dedupe: 37 viaHub: 787 viaTwoHub: 62933 viaThreeHub: 0
+[ERAIL API] CALL
+[ERAIL API] URL: https://s.erail.in/getvalue
+[ERAIL API] Method: POST
+[ERAIL API] Keys: 948
+[ERAIL API] Requests in this call: 1
+[ERAIL API] Keys: [
+  '11058_NDLS_CSMT_3A_GN_31-8',
+  '12138_NDLS_CSMT_3A_GN_31-8',
+  '12432_NZM_BSR_3A_GN_31-8',
+  '12472_NDLS_BDTS_3A_GN_31-8',
+  '12618_NZM_PNVL_3A_GN_31-8',
+  '12904_NZM_BDTS_3A_GN_31-8',
+  '12926_NDLS_BDTS_3A_GN_31-8',
+  '12954_NZM_MMCT_3A_GN_31-8',
+  '06904_DSJ_PNVL_3A_GN_31-8',
+  '19020_NZM_BDTS_3A_GN_31-8',
+  '12215_DEE_BDTS_3A_GN_31-8',
+  '12952_NDLS_MMCT_3A_GN_31-8',
+  '12172_NZM_LTT_3A_GN_31-8',
+  '22222_NZM_CSMT_3A_GN_31-8',
+  '22210_NZM_MMCT_3A_GN_31-8',
+  '12060_NZM_KOTA_3A_GN_31-8',
+  '12926_KOTA_BDTS_3A_GN_31-8',
+  '12954_KOTA_MMCT_3A_GN_31-8',
+  '12952_KOTA_MMCT_3A_GN_31-8',
+  '12240_KOTA_MMCT_3A_GN_31-8',
+  '12416_NDLS_KOTA_3A_GN_31-8',
+  '12432_KOTA_BSR_3A_GN_31-8',
+  '12904_KOTA_BDTS_3A_GN_31-8',
+  '09186_KOTA_MMCT_3A_GN_31-8',
+  '12432_NZM_KOTA_3A_GN_31-8',
+  '22934_KOTA_BDTS_3A_GN_31-8',
+  '12956_KOTA_MMCT_3A_GN_31-8',
+  '19038_KOTA_BDTS_3A_GN_31-8',
+  '12940_KOTA_BSR_3A_GN_31-8',
+  '12472_NDLS_KOTA_3A_GN_31-8',
+  '12904_NZM_KOTA_3A_GN_31-8',
+  '12918_NZM_KOTA_3A_GN_31-8',
+  '12926_NDLS_KOTA_3A_GN_31-8',
+  '19020_KOTA_BDTS_3A_GN_31-8',
+  '12954_NZM_KOTA_3A_GN_31-8',
+  '12963_NZM_KOTA_3A_GN_31-8',
+  '19020_NZM_KOTA_3A_GN_31-8',
+  '12952_NDLS_KOTA_3A_GN_31-8',
+  '09804_NZM_KOTA_3A_GN_31-8',
+  '22210_NZM_KOTA_3A_GN_31-8',
+  '12402_NZM_KOTA_3A_GN_31-8',
+  '20452_NDLS_SGAC_3A_GN_31-8',
+  '20156_NDLS_KOTA_3A_GN_31-8',
+  '12432_NZM_RTM_3A_GN_31-8',
+  '22934_RTM_BDTS_3A_GN_31-8',
+  '12956_RTM_MMCT_3A_GN_31-8',
+  '12962_RTM_MMCT_3A_GN_31-8',
+  '22944_RTM_BSR_3A_GN_31-8',
+  '19038_RTM_BDTS_3A_GN_31-8',
+  '12940_RTM_BSR_3A_GN_31-8',
+  '09086_RTM_MMCT_3A_GN_31-8',
+  '12472_NDLS_RTM_3A_GN_31-8',
+  '12432_RTM_BSR_3A_GN_31-8',
+  '12904_RTM_BDTS_3A_GN_31-8',
+  '19020_RTM_BDTS_3A_GN_31-8',
+  '09186_RTM_MMCT_3A_GN_31-8',
+  '12904_NZM_RTM_3A_GN_31-8',
+  '12918_NZM_RTM_3A_GN_31-8',
+  '12908_RTM_BDTS_3A_GN_31-8',
+  '12926_RTM_BDTS_3A_GN_31-8',
+  '12954_RTM_MMCT_3A_GN_31-8',
+  '12980_RTM_BDTS_3A_GN_31-8',
+  '12952_RTM_MMCT_3A_GN_31-8',
+  '19667_RTM_BSR_3A_GN_31-8',
+  '12240_RTM_MMCT_3A_GN_31-8',
+  '12926_NDLS_RTM_3A_GN_31-8',
+  '22195_RTM_BDTS_3A_GN_31-8',
+  '12954_NZM_RTM_3A_GN_31-8',
+  '19020_NZM_RTM_3A_GN_31-8',
+  '12952_NDLS_RTM_3A_GN_31-8',
+  '22210_NZM_RTM_3A_GN_31-8',
+  '19020_NZM_VR_3A_GN_31-8',
+  '91102_VR_BVI_3A_GN_31-8',
+  '91138_VR_BVI_3A_GN_31-8',
+  '91150_VR_BVI_3A_GN_31-8',
+  '91118_VR_BVI_3A_GN_31-8',
+  '91122_VR_BVI_3A_GN_31-8',
+  '91160_VR_BVI_3A_GN_31-8',
+  '91168_VR_BVI_3A_GN_31-8',
+  '91104_VR_BVI_3A_GN_31-8',
+  '91176_VR_BVI_3A_GN_31-8',
+  '92054_VR_BVI_3A_GN_31-8',
+  '91110_VR_BVI_3A_GN_31-8',
+  '91126_VR_BVI_3A_GN_31-8',
+  '91132_VR_BVI_3A_GN_31-8',
+  '91142_VR_BVI_3A_GN_31-8',
+  '91152_VR_BVI_3A_GN_31-8',
+  '91156_VR_BVI_3A_GN_31-8',
+  '91164_VR_BVI_3A_GN_31-8',
+  '91172_VR_BVI_3A_GN_31-8',
+  '91112_VR_BVI_3A_GN_31-8',
+  '19426_VR_BVI_3A_GN_31-8',
+  '12015_NDLS_JP_3A_GN_31-8',
+  '22934_JP_BDTS_3A_GN_31-8',
+  '12956_JP_MMCT_3A_GN_31-8',
+  '12215_JP_BDTS_3A_GN_31-8',
+  '12940_JP_BSR_3A_GN_31-8',
+  '12240_JP_MMCT_3A_GN_31-8',
+  '12414_DLI_JP_3A_GN_31-8',
+  '06904_DSJ_KWP_3A_GN_31-8',
+  ... 848 more items
+]
+[ERAIL API] Status: 200
+[ERAIL API] Duration: 724ms
+ GET /api/search?from=NEW+DELHI&to=MUMBAI&date=2026-08-31&class=3A&quota=GN&maxHubs=10&maxConnections=2&page=1&pageSize=10&modes=train%2Cbus%2Cflight 200 in 29.6s (next.js: 1058ms, application-code: 28.6s)
+[?25h
