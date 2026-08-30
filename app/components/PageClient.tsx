@@ -8,7 +8,11 @@ import SearchForm, {
 import { StopEntry } from "../components/JourneyStopsForm";
 import NarrativeBanner from "../components/NarrativeBanner";
 import MultiLegResults from "../components/MultiLegResults";
-import { DEFAULT_FILTERS, FilterState } from "../components/filters";
+import {
+  DEFAULT_FILTERS,
+  FilterState,
+  TransportFilter,
+} from "../components/filters";
 import { SearchResponse, MultiSearchResponse, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
 const PAGE_SIZE = 10;
@@ -48,7 +52,9 @@ export function PageInner() {
   // previous trip's filters/tab/page.
   const [tripData, setTripData] = useState<MultiSearchResponse | null>(null);
   const [tripVersion, setTripVersion] = useState(0);
-
+  const [initialTransport, setInitialTransport] = useState<
+    TransportFilter | undefined
+  >(undefined);
   const searchParams = useSearchParams();
 
   // Single-leg search — still hits the plain /api/search (simpler than the
@@ -106,7 +112,6 @@ export function PageInner() {
         pageSize: String(PAGE_SIZE),
         modes: form.modes.join(","),
         // modes: "train",
-
       });
       const res = await fetch(`/api/search/multi?${params}`);
       const json: MultiSearchResponse = await res.json();
@@ -166,6 +171,25 @@ export function PageInner() {
     const cls = searchParams.get("class");
     const quota = searchParams.get("quota");
     const modesRaw = searchParams.get("modes");
+    const transportRaw = searchParams.get("transport");
+
+    const VALID_TRANSPORTS: TransportFilter[] = [
+      "train",
+      "bus",
+      "flight",
+      "mixed",
+    ];
+    const transport: TransportFilter | null =
+      transportRaw &&
+      VALID_TRANSPORTS.includes(transportRaw.toLowerCase() as TransportFilter)
+        ? (transportRaw.toLowerCase() as TransportFilter)
+        : null;
+
+    // modes ONLY comes from an explicit ?modes= override. `transport` NEVER
+    // narrows this — it's a pure client-side display filter, applied after
+    // the fact via initialTransport below. This keeps the backend call (and
+    // therefore its cache key) identical whether transport=train, transport=bus,
+    // or no transport param at all — always the full mode set.
     const modes = modesRaw
       ? modesRaw
           .split(",")
@@ -176,7 +200,7 @@ export function PageInner() {
           )
       : null;
 
-    if (!from && !to && !date && !cls && !quota && !modes) return;
+    if (!from && !to && !date && !cls && !quota && !modes && !transport) return;
 
     const effective: SearchFormValues = {
       ...form,
@@ -188,13 +212,13 @@ export function PageInner() {
       ...(modes && modes.length > 0 ? { modes } : {}),
     };
     setForm(effective);
+    if (transport) setInitialTransport(transport);
 
     if (effective.from && effective.to && effective.date) {
       doSearch(effective, 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
     <main className="mx-auto md:mx-10 px-5 pb-24 pt-10 sm:px-6">
       <SearchForm
@@ -239,9 +263,9 @@ export function PageInner() {
           maxHubs={form.maxHubs}
           maxConnections={form.maxConnections}
           pageSize={PAGE_SIZE}
+          initialTransport={initialTransport}
         />
       )}
-
       <p className="mt-10 border-t border-border pt-5 text-[12px] leading-relaxed text-ink-dim">
         Direct trains and junction-connection routes are always searched
         together — never one only after the other looks thin. Seat availability

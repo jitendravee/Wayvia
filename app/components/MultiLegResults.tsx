@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import JourneyCard from "./JourneyCard";
 import OverviewMap from "./OverviewMap";
@@ -15,18 +15,21 @@ import {
   maxFareInSet,
   tagFor,
   buildLeadList,
+  TransportFilter,
 } from "./filters";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
 import { useFillHeight } from "@/lib/hooks/useFillHeight";
 import { useDebouncedArray } from "@/lib/hooks/useDebouncedValue";
 import { toSearchParams, fetchSearch, SearchParams } from "@/lib/query/search";
 import NoResultsState from "./Noresultsstate";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface Props {
   initial: MultiSearchResponse;
   maxHubs: number;
   maxConnections: 1 | 2 | 3;
   pageSize: number;
+  initialTransport?: TransportFilter;
 }
 
 /**
@@ -82,8 +85,20 @@ export default function MultiLegResults({
   maxHubs,
   maxConnections,
   pageSize,
+  initialTransport,
 }: Props) {
   const [legs] = useState<TripLeg[]>(initial.legs);
+  const router = useRouter();
+  const pathname = usePathname();
+  const routerSearchParams = useSearchParams();
+
+  const initialFilters: FilterState = useMemo(
+    () => ({
+      ...DEFAULT_FILTERS,
+      transport: initialTransport ?? DEFAULT_FILTERS.transport,
+    }),
+    [initialTransport],
+  );
 
   const [legStates, setLegStates] = useState<LegQueryState[]>(
     initial.results.map((data) => ({
@@ -91,15 +106,12 @@ export default function MultiLegResults({
       quota: data.quota ?? "GN",
       maxConnections: data.maxConnections ?? maxConnections,
       maxHubs,
-      // The modes this leg was actually searched with — same fallback the
-      // old refetch logic used, so refining never silently drops bus/flight
-      // from a leg that originally had them.
       modes:
         data.modesAvailable && data.modesAvailable.length > 0
           ? data.modesAvailable
           : ["train"],
       page: 1,
-      filters: DEFAULT_FILTERS,
+      filters: initialFilters,
     })),
   );
 
@@ -110,6 +122,29 @@ export default function MultiLegResults({
       prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)),
     );
   }
+  useEffect(() => {
+    if (legs.length !== 1) return;
+    const liveTransport = legStates[0]?.filters.transport;
+    if (!liveTransport) return;
+
+    const current = new URLSearchParams(routerSearchParams.toString());
+    const currentlyInUrl = current.get("transport");
+    const desired = liveTransport === "any" ? null : liveTransport;
+
+    if (currentlyInUrl === desired) return; // already in sync, avoid a no-op replace
+
+    if (desired) current.set("transport", desired);
+    else current.delete("transport");
+
+    const qs = current.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [
+    legs.length,
+    legStates[0]?.filters.transport,
+    pathname,
+    router,
+    routerSearchParams,
+  ]);
 
   // Debounce only the two continuous slider filters (maxFare/maxDuration) —
   // every other filter (connections, transport, departure/arrival window,
@@ -156,14 +191,14 @@ export default function MultiLegResults({
   function matchesInitialFetch(params: SearchParams, leg: TripLeg): boolean {
     return (
       params.page === 1 &&
-      params.sort === DEFAULT_FILTERS.sort &&
-      params.connections === DEFAULT_FILTERS.connections &&
-      params.confirmedOnly === DEFAULT_FILTERS.confirmedOnly &&
-      params.departure === DEFAULT_FILTERS.departure &&
-      params.arrival === DEFAULT_FILTERS.arrival &&
-      params.maxFare === DEFAULT_FILTERS.maxFare &&
-      params.maxDuration === DEFAULT_FILTERS.maxDuration &&
-      params.transport === DEFAULT_FILTERS.transport &&
+      params.sort === initialFilters.sort &&
+      params.connections === initialFilters.connections &&
+      params.confirmedOnly === initialFilters.confirmedOnly &&
+      params.departure === initialFilters.departure &&
+      params.arrival === initialFilters.arrival &&
+      params.maxFare === initialFilters.maxFare &&
+      params.maxDuration === initialFilters.maxDuration &&
+      params.transport === initialFilters.transport &&
       params.from === leg.from &&
       params.to === leg.to &&
       params.date === leg.date

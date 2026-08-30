@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ArrowRight, BusFront, MoreHorizontal, Plane, TrainFront } from "lucide-react";
+import {
+  ArrowRight,
+  BusFront,
+  MoreHorizontal,
+  Plane,
+  TrainFront,
+} from "lucide-react";
 import JourneySearchButton from "../../JourneySearchButton";
 import JourneyStopsForm, { StopEntry } from "../../JourneyStopsForm";
 import { todayIso } from "@/lib/date";
@@ -13,24 +19,33 @@ import { useResolvedPlace } from "@/lib/query/resolvedPlace";
 // Class, quota, and everything else train-specific live as filters on the
 // journey planner once real results are on screen, so this box stays valid
 // however many modes (train/bus/flight) end up behind it.
-const glassLabel = "font-sans text-[10.5px] uppercase tracking-wide text-ink/45 sm:text-[11px]";
+const glassLabel =
+  "font-sans text-[10.5px] uppercase tracking-wide text-ink/45 sm:text-[11px]";
 const glassInput =
   "w-full bg-transparent p-0 font-display font-semibold text-[15px] text-ink outline-none placeholder:text-ink/35 placeholder:font-normal sm:text-[16px]";
-const glassCaption = "font-sans text-[11.5px] leading-none text-ink/45 truncate sm:text-[12px]";
+const glassCaption =
+  "font-sans text-[11.5px] leading-none text-ink/45 truncate sm:text-[12px]";
 
 type Mode = "train" | "bus" | "flight" | "more";
 
-const MODES: { id: Mode; label: string; icon: React.ElementType; enabled: boolean }[] = [
+const MODES: {
+  id: Mode;
+  label: string;
+  icon: React.ElementType;
+  enabled: boolean;
+}[] = [
   { id: "train", label: "Trains", icon: TrainFront, enabled: true },
-  { id: "bus", label: "Buses", icon: BusFront, enabled: false },
+  { id: "bus", label: "Buses", icon: BusFront, enabled: true },
   { id: "flight", label: "Flights", icon: Plane, enabled: false },
-  { id: "more", label: "More", icon: MoreHorizontal, enabled: false },
+  { id: "more", label: "More", icon: MoreHorizontal, enabled: true },
 ];
 
 const LandingSearch = () => {
   // Default values as place IDs
   const [origin, setOrigin] = useState("New Delhi"); // New Delhi
-  const [stops, setStops] = useState<StopEntry[]>([{ id: "hero-leg-0", to: "Mumbai", date: todayIso() }]); // Mumbai
+  const [stops, setStops] = useState<StopEntry[]>([
+    { id: "hero-leg-0", to: "Mumbai", date: todayIso() },
+  ]); // Mumbai
   const [touched, setTouched] = useState(false);
   const [mode, setMode] = useState<Mode>("train");
 
@@ -45,11 +60,15 @@ const LandingSearch = () => {
   // legs A→B, B→C, C→D.
   const legs: TripLeg[] = useMemo(() => {
     const chain = [origin, ...stops.map((s) => s.to)];
-    return stops.map((s, i) => ({ from: chain[i], to: chain[i + 1], date: s.date }));
+    return stops.map((s, i) => ({
+      from: chain[i],
+      to: chain[i + 1],
+      date: s.date,
+    }));
   }, [origin, stops]);
 
   const invalid = legs.some(
-    (l) => !l.from || !l.to || !l.date || l.from === l.to
+    (l) => !l.from || !l.to || !l.date || l.from === l.to,
   );
 
   // Rendered twice by JourneyStopsForm (inline on desktop, its own full-width
@@ -61,6 +80,7 @@ const LandingSearch = () => {
       to={multi ? undefined : legs[0]?.to}
       date={multi ? undefined : legs[0]?.date}
       legs={multi ? legs : undefined}
+      transport={mode === "more" ? undefined : mode}
       size="lg"
       className="w-full shrink-0 sm:w-auto"
       label={multi ? `Search ${legs.length}-stop trip` : "Find a Way"}
@@ -72,7 +92,6 @@ const LandingSearch = () => {
       }}
     />
   );
-
   return (
     <div className="flex flex-col gap-2.5 max-w-[800px] sm:gap-3">
       {/* One card: search fields + CTA, "Add a stop", and the mode switcher all live together */}
@@ -120,7 +139,10 @@ const LandingSearch = () => {
                       : "text-ink/35 cursor-not-allowed"
                 }`}
               >
-                <Icon size={15} className={`shrink-0 sm:size-4 ${active ? "text-violet" : ""}`} />
+                <Icon
+                  size={15}
+                  className={`shrink-0 sm:size-4 ${active ? "text-violet" : ""}`}
+                />
                 <span className="truncate">{m.label}</span>
                 {!m.enabled && (
                   <span className="hidden shrink-0 rounded-full bg-violet-soft px-1.5 py-0.5 font-sans text-[9px] font-bold uppercase tracking-wide text-violet sm:inline-flex">
@@ -138,6 +160,5 @@ const LandingSearch = () => {
     </div>
   );
 };
-
 
 export default LandingSearch;

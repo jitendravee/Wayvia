@@ -23,6 +23,8 @@ export interface JourneySearchButtonProps {
    * search, but a caller that already knows them (e.g. a "search again" link)
    * can still forward them through the URL.
    */
+  transport?: string;
+
   travelClass?: string;
   quota?: string;
   label?: string;
@@ -37,18 +39,27 @@ export interface JourneySearchButtonProps {
   /** Return false to cancel navigation (e.g. to show a validation message instead). */
   onBeforeNavigate?: () => boolean | void;
   /** Called right before navigating, with the params that are about to be sent. */
-  onNavigate?: (params: { from: string; to: string; date: string } | { legs: TripLeg[] }) => void;
+  onNavigate?: (
+    params: { from: string; to: string; date: string } | { legs: TripLeg[] },
+  ) => void;
 }
 
-const VARIANT_CLASS: Record<NonNullable<JourneySearchButtonProps["variant"]>, string> = {
+const VARIANT_CLASS: Record<
+  NonNullable<JourneySearchButtonProps["variant"]>,
+  string
+> = {
   primary:
     "bg-gradient-to-r from-violet to-violet-dark text-white shadow-sm shadow-violet-soft hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100",
   outline:
     "border border-violet bg-white text-violet hover:bg-violet-soft/60 disabled:opacity-50",
-  ghost: "bg-violet-soft/60 text-violet-dark hover:bg-violet-soft disabled:opacity-50",
+  ghost:
+    "bg-violet-soft/60 text-violet-dark hover:bg-violet-soft disabled:opacity-50",
 };
 
-const SIZE_CLASS: Record<NonNullable<JourneySearchButtonProps["size"]>, string> = {
+const SIZE_CLASS: Record<
+  NonNullable<JourneySearchButtonProps["size"]>,
+  string
+> = {
   sm: "h-9 px-3.5 text-[12.5px]",
   md: "h-11 px-5 text-sm",
   lg: "h-[52px] px-7 text-[15px]",
@@ -77,6 +88,8 @@ export default function JourneySearchButton({
   variant = "primary",
   size = "md",
   icon,
+  transport,
+
   onBeforeNavigate,
   onNavigate,
 }: JourneySearchButtonProps) {
@@ -86,8 +99,6 @@ export default function JourneySearchButton({
     if (loading || disabled) return;
     if (onBeforeNavigate && onBeforeNavigate() === false) return;
 
-    // Multi-city takes priority: if the caller handed us 2+ stops, this is a
-    // "A→B on date1, B→C on date2, ..." itinerary, not a single search.
     if (legs && legs.length >= 2) {
       const cleanLegs: TripLeg[] = legs.map((l) => ({
         from: l.from.trim().toUpperCase(),
@@ -101,23 +112,26 @@ export default function JourneySearchButton({
       params.set("legs", JSON.stringify(cleanLegs));
       if (travelClass) params.set("class", travelClass);
       if (quota) params.set("quota", quota);
+      if (transport) params.set("transport", transport);
 
       onNavigate?.({ legs: cleanLegs });
       router.push(`/journey-planner?${params.toString()}`);
       return;
     }
 
-    // Anything not explicitly passed as a prop is picked up from whatever is
-    // already in the address bar — so this button works both as a fully
-    // controlled search-and-go CTA (landing hero) and as a "reuse whatever
-    // the URL already says" shortcut (e.g. a route card that only overrides
-    // `to`).
-    const current = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
-    const resolvedFrom = (from ?? current.get("from") ?? "").trim().toUpperCase();
+    const current =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : new URLSearchParams();
+    const resolvedFrom = (from ?? current.get("from") ?? "")
+      .trim()
+      .toUpperCase();
     const resolvedTo = (to ?? current.get("to") ?? "").trim().toUpperCase();
     const resolvedDate = (date ?? current.get("date") ?? todayIso()).trim();
+    const resolvedTransport =
+      transport ?? current.get("transport") ?? undefined;
 
-    if (!resolvedFrom || !resolvedTo) return; // nothing sensible to search yet
+    if (!resolvedFrom || !resolvedTo) return;
 
     const params = new URLSearchParams();
     params.set("from", resolvedFrom);
@@ -125,11 +139,11 @@ export default function JourneySearchButton({
     params.set("date", resolvedDate);
     if (travelClass) params.set("class", travelClass);
     if (quota) params.set("quota", quota);
+    if (resolvedTransport) params.set("transport", resolvedTransport);
 
     onNavigate?.({ from: resolvedFrom, to: resolvedTo, date: resolvedDate });
     router.push(`/journey-planner?${params.toString()}`);
   }
-
   return (
     <button
       type="button"
