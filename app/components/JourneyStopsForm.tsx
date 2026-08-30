@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import StationInput from "./StationInput";
-import { formatDatePretty } from "@/lib/date";
+import { formatDatePretty, todayIso } from "@/lib/date";
 import { useResolvedPlace } from "@/lib/query/resolvedPlace";
 
 export interface StopEntry {
@@ -51,6 +51,15 @@ interface Props {
    * apply at the current breakpoint.
    */
   searchButton?: ReactNode;
+  /**
+   * Fires whenever the "every station field currently holds a confirmed,
+   * resolved place" status changes. A field is confirmed once it's been
+   * picked from the suggestion dropdown, or auto-resolved on load/swap —
+   * never just because it holds non-empty text. Parents use this to keep
+   * the search button disabled until every field is actually a real place,
+   * not raw text that happens to look like one (see StationInput).
+   */
+  onAllConfirmedChange?: (confirmed: boolean) => void;
 }
 
 function newStop(prefill?: Partial<StopEntry>): StopEntry {
@@ -92,6 +101,7 @@ export default function JourneyStopsForm({
   captionClassName,
   idPrefix,
   searchButton,
+  onAllConfirmedChange,
 }: Props) {
   const label = labelClassName ?? DEFAULT_LABEL;
   const input = inputClassName ?? DEFAULT_INPUT;
@@ -101,6 +111,26 @@ export default function JourneyStopsForm({
   // actually adding a stop — purely a "not right now" affordance, it never
   // removes an already-added stop (each stop row has its own X for that).
   const [showAddStopHint, setShowAddStopHint] = useState(true);
+
+  // Per-field confirmed status, keyed "origin" | "stop-0" | "stop-1" | ...
+  // ("stop-0" is the primary destination, stops.slice(1) are stop-1+).
+  // Aggregated below into a single onAllConfirmedChange callback so the
+  // parent doesn't need to know how many fields exist.
+  const [confirmedMap, setConfirmedMap] = useState<Record<string, boolean>>({});
+
+  function setFieldConfirmed(key: string, confirmedValue: boolean) {
+    setConfirmedMap((prev) => {
+      if (prev[key] === confirmedValue) return prev;
+      return { ...prev, [key]: confirmedValue };
+    });
+  }
+
+  useEffect(() => {
+    const requiredKeys = ["origin", ...stops.map((_, i) => `stop-${i}`)];
+    const allConfirmed = requiredKeys.every((k) => confirmedMap[k] === true);
+    onAllConfirmedChange?.(allConfirmed);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirmedMap, stops.length]);
 
   function setStop(i: number, patch: Partial<StopEntry>) {
     onStopsChange(stops.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
@@ -140,7 +170,24 @@ export default function JourneyStopsForm({
   function removeStop(i: number) {
     if (i === 0) return; // row 0 is the base search, not removable
     onStopsChange(stops.filter((_, idx) => idx !== i));
+    setConfirmedMap((prev) => {
+      // Reindex confirmed flags down one slot so a removed middle stop
+      // doesn't leave a stale "stop-N" entry blocking submission forever.
+      const next: Record<string, boolean> = {
+        origin: prev.origin,
+        "stop-0": prev["stop-0"],
+      };
+      let write = 1;
+      for (let read = 1; read < stops.length; read++) {
+        if (read === i) continue;
+        next[`stop-${write}`] = prev[`stop-${read}`];
+        write++;
+      }
+      return next;
+    });
   }
+
+  const today = todayIso();
 
   return (
     <div className="flex flex-col gap-3">
@@ -151,10 +198,13 @@ export default function JourneyStopsForm({
             idPrefix={`${idPrefix}-0`}
             from={origin}
             onFromChange={onOriginChange}
+            onFromConfirmedChange={(c) => setFieldConfirmed("origin", c)}
             to={stops[0]?.to ?? ""}
             onToChange={(v) => setStop(0, { to: v })}
+            onToConfirmedChange={(c) => setFieldConfirmed("stop-0", c)}
             date={stops[0]?.date ?? ""}
             onDateChange={(v) => setStop(0, { date: v })}
+            minDate={today}
             onSwap={swapFirstLeg}
             labelClassName={label}
             inputClassName={input}
@@ -168,11 +218,14 @@ export default function JourneyStopsForm({
 
       {/* Same CTA, full-width, its own row — mobile only */}
       {searchButton && <div className="sm:hidden">{searchButton}</div>}
-      {(stops.length > 1 || showAddStopHint ) && <div className="self-stretch h-[0.5px] w-full bg-ink-dim/30"></div>
-}
+      {(stops.length > 1 || showAddStopHint) && (
+        <div className="self-stretch h-[0.5px] w-full bg-ink-dim/30"></div>
+      )}
       {/* Rows 1+ — chained stops, one growable list appended by the row below */}
       {stops.slice(1).map((stop, idx) => {
         const i = idx + 1;
+        const prevDate = stops[i - 1]?.date;
+        const minDate = prevDate && prevDate > today ? prevDate : today;
         return (
           <StopRow
             key={stop.id}
@@ -181,8 +234,10 @@ export default function JourneyStopsForm({
             from={stops[i - 1].to}
             to={stop.to}
             onToChange={(v) => setStop(i, { to: v })}
+            onToConfirmedChange={(c) => setFieldConfirmed(`stop-${i}`, c)}
             date={stop.date}
             onDateChange={(v) => setStop(i, { date: v })}
+            minDate={minDate}
             onRemove={() => removeStop(i)}
             labelClassName={label}
             inputClassName={input}
@@ -238,10 +293,13 @@ function PrimaryRow({
   idPrefix,
   from,
   onFromChange,
+  onFromConfirmedChange,
   to,
   onToChange,
+  onToConfirmedChange,
   date,
   onDateChange,
+  minDate,
   onSwap,
   labelClassName,
   inputClassName,
@@ -250,17 +308,19 @@ function PrimaryRow({
   idPrefix: string;
   from: string;
   onFromChange: (code: string) => void;
+  onFromConfirmedChange?: (confirmed: boolean) => void;
   to: string;
   onToChange: (code: string) => void;
+  onToConfirmedChange?: (confirmed: boolean) => void;
   date: string;
   onDateChange: (date: string) => void;
+  minDate?: string;
   onSwap: () => void;
   labelClassName: string;
   inputClassName: string;
   captionClassName: string;
 }) {
   const dateInputRef = useRef<HTMLInputElement>(null);
-  const fromName = useResolvedPlaceName(from);
 
   function openDatePicker() {
     const el = dateInputRef.current;
@@ -289,6 +349,7 @@ function PrimaryRow({
               label="From"
               value={from}
               onChange={onFromChange}
+              onConfirmedChange={onFromConfirmedChange}
               placeholder="Delhi or NDLS"
               labelClassName={labelClassName}
               inputClassName={inputClassName}
@@ -315,6 +376,7 @@ function PrimaryRow({
               label="To"
               value={to}
               onChange={onToChange}
+              onConfirmedChange={onToConfirmedChange}
               placeholder="Mumbai or BCT"
               labelClassName={labelClassName}
               inputClassName={inputClassName}
@@ -353,7 +415,14 @@ function PrimaryRow({
           ref={dateInputRef}
           type="date"
           value={date}
-          onChange={(e) => onDateChange(e.target.value)}
+          min={minDate}
+          onChange={(e) => {
+            // Belt-and-braces: ignore a past date even if it somehow gets
+            // through (some mobile date pickers don't enforce `min` in the
+            // native UI the way desktop browsers do).
+            if (minDate && e.target.value && e.target.value < minDate) return;
+            onDateChange(e.target.value);
+          }}
           tabIndex={-1}
           className="sr-only"
         />
@@ -369,8 +438,10 @@ function StopRow({
   from,
   to,
   onToChange,
+  onToConfirmedChange,
   date,
   onDateChange,
+  minDate,
   onRemove,
   labelClassName,
   inputClassName,
@@ -381,8 +452,10 @@ function StopRow({
   from: string;
   to: string;
   onToChange: (code: string) => void;
+  onToConfirmedChange?: (confirmed: boolean) => void;
   date: string;
   onDateChange: (date: string) => void;
+  minDate?: string;
   onRemove: () => void;
   labelClassName: string;
   inputClassName: string;
@@ -430,6 +503,7 @@ function StopRow({
           label="To"
           value={to}
           onChange={onToChange}
+          onConfirmedChange={onToConfirmedChange}
           placeholder="Next stop"
           labelClassName={labelClassName}
           inputClassName={inputClassName}
@@ -452,7 +526,11 @@ function StopRow({
         ref={dateInputRef}
         type="date"
         value={date}
-        onChange={(e) => onDateChange(e.target.value)}
+        min={minDate}
+        onChange={(e) => {
+          if (minDate && e.target.value && e.target.value < minDate) return;
+          onDateChange(e.target.value);
+        }}
         tabIndex={-1}
         className="sr-only"
       />
