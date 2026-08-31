@@ -389,37 +389,35 @@ function PrimaryRow({
       </div>
 
       {/* Date */}
-      <div className="relative flex min-w-[150px] items-center gap-2 pt-3 sm:items-center sm:pt-0 sm:pl-4">
-        <div className="relative flex-1">
+      <div className="relative min-w-[150px] sm:pl-4">
+        <label htmlFor={`${idPrefix}-date`} className="block cursor-pointer">
           <span className={labelClassName}>Date</span>
 
-          <input
-            id={`${idPrefix}-date`}
-            type="date"
-            value={date}
-            min={minDate}
-            onChange={(e) => {
-              if (minDate && e.target.value && e.target.value < minDate) return;
-              onDateChange(e.target.value);
-            }}
-            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-            aria-label="Travel date"
-          />
+          <span className="mt-1 block font-semibold text-ink text-[13.5px] leading-none sm:text-[14px]">
+            {formatDatePretty(date)}
+          </span>
 
-          <div className="pointer-events-none flex flex-col gap-1">
-            <span className="font-semibold text-ink text-[13.5px] leading-none sm:text-[14px]">
-              {formatDatePretty(date)}
-            </span>
+          {dayName(date) && (
+            <span className={captionClassName}>{dayName(date)}</span>
+          )}
+        </label>
 
-            {dayName(date) && (
-              <span className={captionClassName}>{dayName(date)}</span>
-            )}
-          </div>
-        </div>
+        <input
+          id={`${idPrefix}-date`}
+          type="date"
+          value={date}
+          min={minDate}
+          onChange={(e) => {
+            if (minDate && e.target.value && e.target.value < minDate) return;
+            onDateChange(e.target.value);
+          }}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          aria-label="Travel date"
+        />
 
         <Calendar
           size={16}
-          className="pointer-events-none shrink-0 text-violet"
+          className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-violet"
         />
       </div>
     </div>
