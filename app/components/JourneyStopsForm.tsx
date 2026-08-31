@@ -389,42 +389,37 @@ function PrimaryRow({
       </div>
 
       {/* Date */}
-      <div className="flex items-end justify-between gap-2 pt-3 sm:items-center sm:pt-0 sm:pl-4 sm:min-w-[150px]">
-        <button
-          type="button"
-          onClick={openDatePicker}
-          className="flex flex-col gap-1 text-left"
-        >
+      <div className="relative flex min-w-[150px] items-center gap-2 pt-3 sm:items-center sm:pt-0 sm:pl-4">
+        <div className="relative flex-1">
           <span className={labelClassName}>Date</span>
-          <span className="font-semibold text-ink text-[13.5px] leading-none sm:text-[14px]">
-            {formatDatePretty(date)}
-          </span>
-          {dayName(date) && (
-            <span className={captionClassName}>{dayName(date)}</span>
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={openDatePicker}
-          aria-label="Open date picker"
-          className="mb-2 flex h-6 w-6 shrink-0 items-center justify-center text-violet sm:mb-0"
-        >
-          <Calendar size={16} />
-        </button>
-        <input
-          ref={dateInputRef}
-          type="date"
-          value={date}
-          min={minDate}
-          onChange={(e) => {
-            // Belt-and-braces: ignore a past date even if it somehow gets
-            // through (some mobile date pickers don't enforce `min` in the
-            // native UI the way desktop browsers do).
-            if (minDate && e.target.value && e.target.value < minDate) return;
-            onDateChange(e.target.value);
-          }}
-          tabIndex={-1}
-          className="sr-only"
+
+          <input
+            id={`${idPrefix}-date`}
+            type="date"
+            value={date}
+            min={minDate}
+            onChange={(e) => {
+              if (minDate && e.target.value && e.target.value < minDate) return;
+              onDateChange(e.target.value);
+            }}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            aria-label="Travel date"
+          />
+
+          <div className="pointer-events-none flex flex-col gap-1">
+            <span className="font-semibold text-ink text-[13.5px] leading-none sm:text-[14px]">
+              {formatDatePretty(date)}
+            </span>
+
+            {dayName(date) && (
+              <span className={captionClassName}>{dayName(date)}</span>
+            )}
+          </div>
+        </div>
+
+        <Calendar
+          size={16}
+          className="pointer-events-none shrink-0 text-violet"
         />
       </div>
     </div>

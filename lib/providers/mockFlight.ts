@@ -48,6 +48,7 @@ export const mockFlightProvider: ModeProvider = {
         trainNo: flightNo,
         trainName: airline.name,
         from,
+        bookingUrl:"",
         to,
         departure: minutesToHHMM(depAbsMin),
         arrival: minutesToHHMM(arrAbsMin),

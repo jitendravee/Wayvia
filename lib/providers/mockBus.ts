@@ -60,6 +60,7 @@ export const mockBusProvider: ModeProvider = {
         trainNo: busId,
         trainName: operator,
         from,
+        bookingUrl:"",
         to,
         departure: minutesToHHMM(depAbsMin),
         arrival: minutesToHHMM(arrAbsMin),
