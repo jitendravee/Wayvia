@@ -1,11 +1,46 @@
 import type { Leg } from "../../graph/types";
 import type { AvlAvailability, AvlStatusCategory } from "../../erail/avl";
-import type { IxigoServiceDetail } from "./types";
+import type { IxigoServiceDetail, IxigoAutocompleteResult } from "./types";
 import { minutesToHHMM } from "../types";
+import { ixigoAutocomplete } from "./client";
 
 /** Midnight of `date` ('YYYY-MM-DD'), as an epoch ms, in IST. India has no DST so a fixed +05:30 offset is always correct. */
 function istMidnightEpochMs(date: string): number {
   return Date.parse(`${date}T00:00:00+05:30`);
+}
+
+/** Cache for ixigo city IDs to avoid repeated lookups for booking URLs */
+export const ixigoCityIds: Map<string, number> = new Map();
+
+/**
+ * Populates the ixigo city ID cache with results from an autocomplete query.
+ * This should be called whenever we get search results to keep the cache warm.
+ */
+export async function populateIxigoCityCache(query: string): Promise<void> {
+  try {
+    const results = await ixigoAutocomplete(query);
+    for (const result of results) {
+      // Only cache actual city records (not sub-entities like airports)
+      if (result.alias_type === "City" && result.stn_rfn === 1) {
+        ixigoCityIds.set(result.label.toLowerCase(), result.id);
+        // Also cache common variations
+        ixigoCityIds.set(result.label.toLowerCase().trim(), result.id);
+      }
+    }
+  } catch (err) {
+    console.error("Failed to populate ixigo city cache:", err);
+  }
+}
+
+/**
+ * Sets the ixigo city ID in the cache for a given city label.
+ * @param cityLabel The city label (as resolved from station name)
+ * @param cityId The ixigo city ID
+ */
+export function setIxigoCityId(cityLabel: string, cityId: number): void {
+  const lower = cityLabel.toLowerCase();
+  ixigoCityIds.set(lower, cityId);
+  ixigoCityIds.set(lower.trim(), cityId);
 }
 
 /**
@@ -51,24 +86,45 @@ export function mapIxigoServiceToLeg(item: IxigoServiceDetail, from: string, to:
 
   const operator = item.travelerAgentName || item.serviceName || "Bus operator";
   const busType = item.busTypeName ? ` · ${item.busTypeName}` : "";
+return {
+  mode: "bus",
+  source: "live",
+  trainNo: String(
+    item.serviceKey ??
+    item.masterId ??
+    `${from}-${to}-${depAbsMin}`
+  ),
+  trainName: `${operator}${busType}`,
+  from,
+  to,
+  departure: minutesToHHMM(depAbsMin),
+  arrival: minutesToHHMM(arrAbsMin),
+  travelTime: minutesToHHMM(durationMin),
+  runningDays: "1111111",
+  depAbsMin,
+  arrAbsMin,
 
-  return {
-    mode: "bus",
-    source: "live",
-    trainNo: String(item.serviceKey ?? item.masterId ?? `${from}-${to}-${depAbsMin}`),
-    trainName: `${operator}${busType}`,
-    from,
-    to,
-    departure: minutesToHHMM(depAbsMin),
-    arrival: minutesToHHMM(arrAbsMin),
-    travelTime: minutesToHHMM(durationMin),
-    // ixigo's search is for one specific date, not a weekly timetable the
-    // way erail's is — "runs every day" is the closest honest stand-in, and
-    // nothing downstream re-checks runningDays for non-train legs anyway
-    // (see the comment on Leg.precomputed in lib/graph/types.ts).
-    runningDays: "1111111",
-    depAbsMin,
-    arrAbsMin,
-    precomputed: { availability, fare },
-  };
+  bookingUrl: buildIxigoBusBookingUrl(from, to, searchDate),
+
+  precomputed: { availability, fare },
+};
+}
+
+function formatIxigoDate(date:string) {
+  // YYYY-MM-DD -> DD-MM-YYYY
+  const [year, month, day] = date.split("-");
+  return `${day}-${month}-${year}`;
+}
+
+function buildIxigoBusBookingUrl(from:string, to:string, date:string) {
+  const fromId = ixigoCityIds.get(from.toLowerCase()) || ixigoCityIds.get(from.toLowerCase().trim());
+  const toId = ixigoCityIds.get(to.toLowerCase()) || ixigoCityIds.get(to.toLowerCase().trim());
+
+  if (!fromId || !toId) {
+    return null; // or construct a generic search URL if preferred
+  }
+
+  const ixigoDate = formatIxigoDate(date);
+
+  return `https://www.ixigo.com/buses/bus_search/${encodeURIComponent(from)}/${fromId}/${encodeURIComponent(to)}/${toId}/${ixigoDate}/O`;
 }

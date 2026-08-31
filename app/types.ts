@@ -29,6 +29,7 @@ export interface AnnotatedLeg {
   departure: string;
   arrival: string;
   travelTime: string;
+  bookingUrl:string | null;
   runningDays: string;
   depAbsMin: number;
   arrAbsMin: number;

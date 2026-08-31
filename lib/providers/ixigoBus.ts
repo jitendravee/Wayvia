@@ -2,7 +2,7 @@ import type { Leg } from "../graph/types";
 import type { ModeProvider } from "./types";
 import { ixigoGetBusList } from "./ixigo/client";
 import { resolveIxigoCity, IxigoCityMatch } from "./ixigo/cityResolve";
-import { mapIxigoServiceToLeg } from "./ixigo/mapResponse";
+import { mapIxigoServiceToLeg, setIxigoCityId } from "./ixigo/mapResponse";
 
 function isoToDDMMYYYY(iso: string): string {
   const [y, m, d] = iso.split("-");
@@ -49,6 +49,10 @@ export const ixigoBusProvider: ModeProvider = {
   async search(from, to, date): Promise<Leg[]> {
     const [src, dst] = await Promise.all([resolveIxigoCity(from), resolveIxigoCity(to)]);
     if (!src || !dst) return []; // no ixigo coverage for one (or both) ends of this pair
+
+    // Cache the resolved city IDs for booking URL generation
+    setIxigoCityId(src.label, src.id);
+    setIxigoCityId(dst.label, dst.id);
 
     let raw;
     try {
