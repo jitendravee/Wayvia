@@ -21,6 +21,7 @@ export interface Leg {
   /** Minutes since the search date's midnight (day 0). Can exceed 1440 for overnight legs. */
   depAbsMin: number;
   arrAbsMin: number;
+  bookingUrl:string |null;
   /** "live" = real data (erail today). "mock" = placeholder data standing in until a real bus/flight API is wired up. Omitted defaults to "live". */
   source?: "live" | "mock";
   /**

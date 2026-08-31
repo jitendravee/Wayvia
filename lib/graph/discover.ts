@@ -60,6 +60,7 @@ function entryToLeg(entry: BetweenStationEntry): Omit<Leg, "depAbsMin" | "arrAbs
     from: t.from_stn_code,
     to: t.to_stn_code,
     departure: t.from_time,
+    bookingUrl:"https://www.irctc.co.in/nget/train-search",
     arrival: t.to_time,
     travelTime: t.travel_time,
     runningDays: t.running_days,

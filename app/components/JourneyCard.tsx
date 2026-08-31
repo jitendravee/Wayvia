@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { ArrowRight, BusFront, Plane, TrainFront } from "lucide-react";
+import {
+  ArrowRight,
+  BusFront,
+  MoveUpRight,
+  Plane,
+  TrainFront,
+} from "lucide-react";
 import type { AnnotatedJourney, AnnotatedLeg, Mode } from "../types";
 import { Badge, StatusBadge } from "./Badge";
 import { durationLabel } from "./status";
@@ -280,6 +286,14 @@ export function SegmentCard({ leg }: { leg: AnnotatedLeg }) {
           <span className="font-mono text-[10.5px] text-ink-dim">{leg.to}</span>
         </div>
       </div>
+      <a
+        href={`${leg.bookingUrl}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex p-2 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-5 font-display text-sm font-semibold text-violet! border border-violet shadow-sm shadow-violet-soft transition-transform hover:scale-[1.02] active:scale-[0.98] sm:flex-none"
+      >
+        Book Now <MoveUpRight size={16} />
+      </a>
     </div>
   );
 }
@@ -300,7 +314,7 @@ export default function JourneyCard({
 }) {
   const isBest = tag === BEST_OVERALL_TAG;
   const [showMap, setShowMap] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   return (
     <div
       className={`group relative w-full min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg ${
@@ -427,7 +441,15 @@ export default function JourneyCard({
         </div>
 
         {expanded && (
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            className={`mt-3 grid gap-3 ${
+              journey.legs.length === 1
+                ? "grid-cols-1"
+                : journey.legs.length === 2
+                  ? "grid-cols-1 sm:grid-cols-2"
+                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            }`}
+          >
             {journey.legs.map((leg, i) => (
               <SegmentCard key={i} leg={leg} />
             ))}
