@@ -2,7 +2,7 @@ import { DEFAULT_HUBS } from "../graph/hubs";
 import { searchStations } from "../stations";
 import { ixigoAutocomplete } from "../providers/ixigo/client";
 import { cityNameFromStationName } from "../providers/ixigo/cityResolve";
-import { fetchCountriesDevPlaces, type CountriesDevCityResponse } from "./countriesDev";
+import { fetchGeonamesPlaces } from "./geonames";
 import type { Place, RailwayLocation, BusLocation } from "./model";
 
 /**
@@ -124,22 +124,28 @@ export async function resolvePlace(query: string): Promise<Place | null> {
   const q = query.trim();
   if (!q) return null;
 
-  // 1) Primary: Discover the canonical place via countries.dev
-  const countriesDevPlaces = await fetchCountriesDevPlaces(q, 5);
+  // 1) Primary: Discover the canonical place via GeoNames' own search
+  // webservice (lib/places/geonames.ts) — this used to call countries.dev,
+  // which mirrors only a subset of GeoNames' database and could come up
+  // empty for small towns. Querying GeoNames directly means step 2's
+  // erail-station fallback below only has to fire when GeoNames itself
+  // has never heard of the place at all, not just when a third party's
+  // partial mirror of it hasn't.
+  const geonamesPlaces = await fetchGeonamesPlaces(q, 5);
   let place: Place | null = null;
 
-  if (countriesDevPlaces.length > 0) {
-    // Take the best match (first result from countries.dev is already ranked)
-    place = { ...countriesDevPlaces[0] };
+  if (geonamesPlaces.length > 0) {
+    // Take the best match (first result from GeoNames is already ranked by relevance)
+    place = { ...geonamesPlaces[0] };
 
     // Override the name with the original query if it's a better match
-    // This handles cases where countries.dev might return a variant name
+    // This handles cases where GeoNames might return a variant name
     place.name = q;
     place.normalizedName = normalizePlaceName(q);
     place.id = placeIdFromName(q);
   }
 
-  // 2) Fallback: If countries.dev didn't return results, use existing logic
+  // 2) Fallback: If GeoNames didn't return results, use existing logic
   if (!place) {
     // 2a) A train station (matched by code or name) is the strongest signal — it
     //     pins down both the railway location AND, via cityNameFromStationName,

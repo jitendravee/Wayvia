@@ -50,5 +50,18 @@ export async function trainMultiHopSearch(from: Place, to: Place, opts: Discover
   const fromCode = primaryStationCode(from);
   const toCode = primaryStationCode(to);
   if (!fromCode || !toCode) return null;
-  return discoverJourneys(fromCode, toCode, opts);
+
+  // Pass the resolved Place's real coordinates through, so hub-relevance
+  // scoring (lib/graph/hubs.ts's scoreHub) still works geographically even
+  // when `from`/`to` are small stations that aren't themselves one of the
+  // curated DEFAULT_HUBS junctions — without this, a search whose
+  // endpoint isn't in that ~100-station list falls back to scoring every
+  // candidate hub as equally (neutrally) relevant, which is a lot less
+  // useful for a search like "Pune -> Rohtak" than knowing Rohtak sits
+  // northwest of Delhi and scoring hubs accordingly.
+  return discoverJourneys(fromCode, toCode, {
+    ...opts,
+    originCoords: from.hasCoords ? { lat: from.latitude, lon: from.longitude } : opts.originCoords,
+    destCoords: to.hasCoords ? { lat: to.latitude, lon: to.longitude } : opts.destCoords,
+  });
 }

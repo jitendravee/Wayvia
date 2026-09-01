@@ -16,7 +16,9 @@ interface PlacesApiResponse {
 }
 
 /**
- * Hook for place autocomplete using countries.dev as the sole source.
+ * Hook for place autocomplete — calls /api/places, which merges GeoNames
+ * (India-wide, town/village-level coverage) with the erail station
+ * directory (see app/api/places/route.ts for the merge logic).
  * Features:
  * - Debounced input (300ms default)
  * - Minimum query length (2 characters)
