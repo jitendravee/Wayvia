@@ -176,7 +176,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "pnr-status-explained-cnf-rac-wl-meaning",
     title: "PNR status explained: what CNF, RAC, WL, GNWL, PQWL, RLWL and TQWL mean",
     excerpt:
-      "A plain-English guide to every code you'll see on your PNR — what CNF, RAC, WL, GNWL, PQWL, RLWL and TQWL actually mean, and how to check your status.",
+      "PNR status meaning, explained simply: what CNF, RAC, WL, GNWL, PQWL, RLWL and TQWL actually mean on your ticket, and how to check your status.",
     coverImage: "https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "6 min read",
@@ -189,11 +189,14 @@ export const BLOG_POSTS: BlogPost[] = [
       "cnf meaning train ticket",
       "how to check pnr status",
       "tqwl meaning railway",
+      "what is gn quota in railway",
+      "what is roadside waitlist",
     ],
     relatedSlugs: [
+      "rswl-rqwl-gn-quota-explained",
       "waitlist-ticket-confirmation-chances-explained",
       "rac-vs-waitlist-difference-explained",
-      "irctc-tatkal-booking-2026-timings-rules",
+      "train-ticket-cancellation-refund-rules-2026",
     ],
     content: [
       {
@@ -218,11 +221,15 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "checklist",
         items: [
-          "GNWL (General Waitlist) — for passengers boarding at or near the train's originating station. This pool usually has the most cancellations, so it generally confirms best.",
+          "GNWL (General Waitlist) — for passengers boarding at or near the train's originating station, booked under the General (GN) quota. This pool usually has the most cancellations, so it generally confirms best.",
           "PQWL (Pooled Quota Waitlist) — for journeys between two intermediate stations sharing a pooled quota, separate from the general quota.",
           "RLWL (Remote Location Waitlist) — a quota reserved for a specific station along the route. It only moves when passengers booked under that same quota cancel, so it can be slower to clear than GNWL.",
           "TQWL (Tatkal Waitlist) — a waitlist within the Tatkal quota itself. Because the Tatkal quota is small and booked a day before travel, TQWL tickets have the lowest confirmation chances of the four.",
         ],
+      },
+      {
+        type: "paragraph",
+        text: "There are a couple of rarer codes worth knowing too: RSWL (Roadside Waitlist, for tickets booked from the originating station to a smaller roadside stop) and RQWL (Request Waitlist, for journeys between two intermediate stations that don't fall under any quota). Both tend to confirm less often than GNWL — we cover them in more detail in our RSWL and GN quota guide.",
       },
       { type: "tip", text: "Between two waitlisted tickets with the same number, GNWL is almost always the safer bet — check which type yours is, not just the number." },
       { type: "heading", id: "how-to-check-your-pnr-status", text: "How to check your PNR status" },
@@ -238,10 +245,73 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
   },
   {
+    slug: "rswl-rqwl-gn-quota-explained",
+    title: "RSWL, RQWL and GN quota explained: the waitlist codes most guides skip",
+    excerpt:
+      "What is roadside waitlist (RSWL)? What is GN quota in railway bookings? A clear breakdown of RSWL, RQWL and General quota — and how they differ from GNWL.",
+    coverImage: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "5 min read",
+    date: "2026-08-31",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "what is roadside waitlist",
+      "rswl full form",
+      "rs waiting list",
+      "what is gn quota in railway",
+      "rqwl meaning",
+      "roadside station waiting list confirmation chances",
+    ],
+    relatedSlugs: [
+      "pnr-status-explained-cnf-rac-wl-meaning",
+      "waitlist-confirmation-prediction-and-trends",
+      "rac-vs-waitlist-difference-explained",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Most PNR guides cover CNF, RAC, GNWL, PQWL, RLWL and TQWL and stop there — but two more codes show up often enough to confuse people: RSWL and RQWL. Both are waitlist types, and both are worth understanding before you assume the worst about your ticket.",
+      },
+      { type: "heading", id: "what-is-rswl", text: "RSWL: Roadside (Station) Waitlist" },
+      {
+        type: "paragraph",
+        text: "RSWL stands for Roadside Waitlist (also written as Roadside Station Waitlist). It applies to tickets booked from the train's originating station through to a smaller \"roadside\" stop further down the route — a station that doesn't have its own large seat allocation.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "RSWL tickets are allotted from a separate, smaller pool than GNWL, so they generally confirm less easily than a general-waitlist ticket for the same train.",
+          "You'll see RSWL specifically when your destination (or a mid-route drop-off point) is one of these smaller stations, not a major junction.",
+          "Like any waitlist, an RSWL ticket that's still unconfirmed after chart preparation is automatically cancelled — you cannot board on it.",
+        ],
+      },
+      { type: "heading", id: "what-is-rqwl", text: "RQWL: Request Waitlist" },
+      {
+        type: "paragraph",
+        text: "RQWL (Request Waitlist) applies when you're booking between two intermediate stations — neither the train's origin nor its final destination — for a journey that doesn't fall under any specific pooled or remote-location quota. It's generally considered one of the slowest-moving and least likely to confirm of all the waitlist types, because it only clears after every other queue ahead of it has been satisfied.",
+      },
+      { type: "heading", id: "what-is-gn-quota", text: "What is GN quota?" },
+      {
+        type: "paragraph",
+        text: "GN stands for General quota — the default, largest quota on every train, open to any passenger booking the standard way (as opposed to Tatkal, Ladies, Senior Citizen, Defence, or other special quotas). If you don't explicitly pick a different quota while booking on IRCTC, General is what you're booking into by default.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "General (GN) quota — the default, largest allocation on the train; this is what \"GNWL\" waitlist tickets are drawn from.",
+          "Tatkal (TQ) quota — a small, separate allocation released one day before travel, at a premium fare.",
+          "Ladies (LD), Senior Citizen (SR), Defence (DF) and a handful of other special quotas — each with their own eligibility rules and their own (usually much smaller) seat pool.",
+        ],
+      },
+      { type: "tip", text: "If a train shows no seats under General quota, it's always worth checking whether Ladies, Senior Citizen, or Tatkal quota still has room for your journey — these pools are booked separately and don't always run out at the same time." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
     slug: "waitlist-ticket-confirmation-chances-explained",
     title: "Waitlist ticket confirmation chances: how to read your WL number",
     excerpt:
-      "WL 8 and WL 80 are not the same bet. Here's how waitlist confirmation chances actually work, and what to do when your number looks risky.",
+      "WL 8 confirmation chances and WL 80 confirmation chances are not the same bet. Here's how waitlist ticket confirmation actually works, and what to do when your number looks risky.",
     coverImage: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "6 min read",
@@ -250,11 +320,14 @@ export const BLOG_POSTS: BlogPost[] = [
     keywords: [
       "waitlist confirmation chances",
       "wl ticket confirmation chances",
+      "wl 80 confirmation chances",
+      "wl8 confirmation chances",
       "railway confirmation chances calculator",
       "will my waitlist ticket confirm",
       "wl 30 confirm hoga ya nahi",
     ],
     relatedSlugs: [
+      "waitlist-confirmation-prediction-and-trends",
       "pnr-status-explained-cnf-rac-wl-meaning",
       "rac-vs-waitlist-difference-explained",
       "irctc-tatkal-booking-2026-timings-rules",
@@ -262,7 +335,7 @@ export const BLOG_POSTS: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "A waitlisted ticket isn't a rejection — most waitlisted tickets on Indian Railways do end up confirming, especially at lower numbers. But \"WL 8\" and \"WL 80\" are very different bets, and knowing roughly where the line is helps you decide whether to wait it out or make a backup plan.",
+        text: "A waitlisted ticket isn't a rejection — most waitlisted tickets on Indian Railways do end up confirming, especially at lower numbers. But WL 8 confirmation chances and WL 80 confirmation chances are very different bets, and knowing roughly where the line is helps you decide whether to wait it out or make a backup plan.",
       },
       { type: "heading", id: "rough-confirmation-bands", text: "Rough confirmation bands (not a guarantee)" },
       {
@@ -272,9 +345,9 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "checklist",
         items: [
-          "WL 1–15 on GNWL: confirms in the large majority of cases.",
+          "WL 1–15 on GNWL (this covers a WL 8-type ticket): confirms in the large majority of cases.",
           "WL 16–30: roughly a coin-flip to moderately favourable — worth watching closely.",
-          "WL 60 and above: confirmation becomes unlikely; treat it as a long shot, not a plan.",
+          "WL 60 and above (this covers a WL 80-type ticket): confirmation becomes unlikely; treat it as a long shot, not a plan.",
           "RAC: not really a \"chance\" at all — you're already guaranteed to travel, sharing a berth.",
         ],
       },
@@ -283,7 +356,7 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "paragraph",
         text: "Every cancellation nudges the queue forward — RAC passengers move to a full berth first, then waitlisted passengers move into RAC or confirmed slots. Cancellations cluster heavily in the final 24–48 hours before departure, as other travellers finalise their own plans, so a lot of movement often happens right before chart preparation.",
       },
-      { type: "tip", text: "Check your PNR status every day rather than once — a WL 40 dropping steadily to WL 12 over a week tells a very different story than one that hasn't moved at all." },
+      { type: "tip", text: "Check your PNR status every day rather than once — a WL 40 dropping steadily to WL 12 over a week tells a very different story than one that hasn't moved at all. Our guide to waitlist confirmation trends and history goes deeper on tracking this." },
       { type: "heading", id: "what-to-do-if-your-chances-look-low", text: "What to do if your chances look low" },
       {
         type: "checklist",
@@ -298,20 +371,94 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
   },
   {
+    slug: "waitlist-confirmation-prediction-and-trends",
+    title: "Waitlist confirmation prediction: how to read the trend, not just the number",
+    excerpt:
+      "Waiting list confirmation prediction isn't guesswork if you know what to watch. Here's how to read waitlist confirmation history and trends after chart preparation.",
+    coverImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "6 min read",
+    date: "2026-08-31",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "waiting list confirmation prediction",
+      "train waiting list confirmation history",
+      "waiting list trends",
+      "waiting list confirmation after chart preparation",
+      "wl23 meaning in train",
+      "will my wl ticket confirm calculator",
+    ],
+    relatedSlugs: [
+      "waitlist-ticket-confirmation-chances-explained",
+      "rswl-rqwl-gn-quota-explained",
+      "irctc-tatkal-booking-2026-timings-rules",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "A single WL number is a snapshot, not a prediction. If you're trying to work out whether your ticket will actually confirm, the trend over the days leading up to your trip tells you far more than the number does on any one day — and \"WL23\" simply means you're the 23rd person in that particular waitlist queue, nothing more sinister than that.",
+      },
+      { type: "heading", id: "why-a-single-snapshot-misleads", text: "Why a single snapshot misleads" },
+      {
+        type: "paragraph",
+        text: "Two tickets can both show WL 23 today and have completely different odds — one might have been WL 60 a week ago and be falling fast, the other might have been sitting at WL 25 for ten days with barely any movement. The direction and speed of movement is the real signal.",
+      },
+      { type: "heading", id: "how-to-track-your-own-confirmation-history", text: "How to track your own confirmation history" },
+      {
+        type: "checklist",
+        items: [
+          "Check your PNR status once a day, ideally at the same time, and note the number rather than just glancing and closing the app.",
+          "Most third-party PNR-status apps (and some train-status tools) show a short history graph of your own ticket's movement — use it instead of relying on memory.",
+          "Compare your number's movement against how many days are left, not just how many people are ahead of you — a WL 40 with two weeks to go is a very different situation from a WL 40 the night before departure.",
+        ],
+      },
+      { type: "heading", id: "what-moves-a-waitlist-and-when", text: "What actually moves a waitlist, and when" },
+      {
+        type: "paragraph",
+        text: "Cancellations are the only thing that clears a waitlist — there's no separate \"release\" of extra berths. Movement tends to cluster in two windows: a slow trickle in the days after booking opens (as people finalise plans), and a much sharper burst in the final 24–48 hours as indecisive travellers cancel ahead of the trip.",
+      },
+      { type: "heading", id: "after-chart-preparation", text: "What happens after chart preparation" },
+      {
+        type: "paragraph",
+        text: "Indian Railways typically prepares a first chart several hours before departure, followed by a final chart closer to departure time; RAC and waitlisted passengers can still move into vacated berths between the two. But once the final chart is out, any ticket still showing WL is automatically cancelled — a WL ticket cannot be used to board after this point, regardless of how close the number was.",
+      },
+      { type: "tip", text: "If your waitlist number hasn't moved at all three or four days out, that's a stronger signal to arrange a backup than the raw number itself — a stalled WL 20 can be riskier than a fast-falling WL 45." },
+      { type: "heading", id: "if-the-trend-looks-bad", text: "If the trend looks bad" },
+      {
+        type: "paragraph",
+        text: "Don't wait until the final chart to react. Check nearby trains, a different class on the same train, or a mixed-mode alternative a few days ahead of time, so you're not scrambling at the last minute if your ticket doesn't clear.",
+      },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
     slug: "rac-vs-waitlist-difference-explained",
     title: "RAC vs waitlist: what's the difference, and can you still travel?",
-    excerpt: "RAC and WL both mean \"no confirmed berth yet\" — but only one of them guarantees you'll actually board the train.",
+    excerpt:
+      "Is RAC and waiting list the same? No — here's the real difference between RAC and WL, and which one actually guarantees you'll board the train.",
     coverImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "4 min read",
     date: "2026-08-19",
     author: DEFAULT_AUTHOR,
-    keywords: ["rac vs waitlist", "can rac passenger travel", "rac ticket meaning", "difference between rac and wl"],
-    relatedSlugs: ["pnr-status-explained-cnf-rac-wl-meaning", "waitlist-ticket-confirmation-chances-explained"],
+    keywords: [
+      "rac vs waitlist",
+      "can rac passenger travel",
+      "rac ticket meaning",
+      "difference between rac and wl",
+      "difference between rac and waitlist",
+      "is rac and waiting list same",
+      "waiting list and rac",
+    ],
+    relatedSlugs: [
+      "pnr-status-explained-cnf-rac-wl-meaning",
+      "waitlist-ticket-confirmation-chances-explained",
+      "rswl-rqwl-gn-quota-explained",
+    ],
     content: [
       {
         type: "paragraph",
-        text: "RAC and Waitlist are easy to mix up because both show up when a train is full — but they mean very different things for whether you'll actually get on board.",
+        text: "RAC and Waitlist are easy to mix up because both show up when a train is full — but they mean very different things for whether you'll actually get on board. Short answer: no, RAC and waitlist are not the same.",
       },
       { type: "heading", id: "rac-means-you-are-travelling", text: "RAC means you're travelling" },
       {
@@ -338,21 +485,28 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "irctc-tatkal-booking-2026-timings-rules",
     title: "IRCTC Tatkal booking 2026: timings, rules and how to actually get a seat",
     excerpt:
-      "Tatkal opens at 10 AM for AC classes and 11 AM for non-AC, one day before travel — here's exactly how the 2026 rules work and how to book faster.",
+      "Tatkal timings for 2026: AC classes open at 10 AM, Sleeper and non-AC open at 11 AM, one day before travel. Here's exactly how the rules, quota, and seat availability work.",
     coverImage: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1600&h=900&fit=crop",
     category: "tips",
-    readTime: "7 min read",
+    readTime: "8 min read",
     date: "2026-08-23",
     author: DEFAULT_AUTHOR,
     keywords: [
       "tatkal booking time",
+      "tatkal timings",
       "irctc tatkal rules 2026",
       "tatkal ticket booking timing ac sleeper",
+      "tatkal non ac timing",
+      "tatkal timings for sleeper",
       "how to book tatkal ticket fast",
       "tatkal aadhaar otp",
+      "tatkal quota seats",
+      "tatkal seat availability",
+      "is first ac not available in tatkal",
     ],
     relatedSlugs: [
       "pnr-status-explained-cnf-rac-wl-meaning",
+      "rswl-rqwl-gn-quota-explained",
       "diwali-chhath-puja-train-booking-tips",
       "irctc-website-down-what-to-do",
     ],
@@ -366,9 +520,14 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "checklist",
         items: [
           "AC classes (1A, 2A, 3A, CC, EC): booking opens at 10:00 AM IST.",
-          "Sleeper (SL) and Second Sitting (2S): booking opens at 11:00 AM IST.",
+          "Sleeper (SL) and Second Sitting (2S) — the non-AC classes: booking opens at 11:00 AM IST.",
           "The window opens one day before the date of journey, counted from the train's origin station — not necessarily your own boarding station.",
         ],
+      },
+      { type: "heading", id: "which-classes-tatkal-does-and-does-not-cover", text: "Which classes Tatkal does — and doesn't — cover" },
+      {
+        type: "paragraph",
+        text: "Tatkal quota is not available in First AC (1A) or in Executive Chair Car on trains that don't run it as a separate Tatkal-eligible class — First AC is excluded from Tatkal booking entirely. Beyond that, Tatkal seat availability in any class depends on how many berths the train has allocated to the quota for that specific journey, which varies train to train and can sell out within minutes on popular routes.",
       },
       { type: "heading", id: "what-changed-recently", text: "What's changed recently" },
       {
@@ -390,6 +549,83 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "paragraph",
         text: "If Tatkal on your exact train is gone in seconds, check nearby departure stations or a connecting route — sometimes a train + bus or train + train combination has room even when the direct Tatkal quota doesn't.",
       },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "train-ticket-cancellation-refund-rules-2026",
+    title: "Train ticket cancellation and refund rules 2026: what you actually get back",
+    excerpt:
+      "IRCTC's 2026 cancellation rules changed the refund windows to 72, 24 and 8 hours before departure — here's exactly what you get back, by class and by ticket status.",
+    coverImage: "https://images.unsplash.com/photo-1545941962-1b6654eb8072?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "7 min read",
+    date: "2026-09-01",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "irctc cancellation charges 2026",
+      "train ticket refund policy",
+      "irctc refund rules",
+      "tdr filing guide",
+      "waitlist ticket refund",
+      "tatkal ticket refund",
+      "how much refund train ticket cancellation",
+    ],
+    relatedSlugs: [
+      "pnr-status-explained-cnf-rac-wl-meaning",
+      "irctc-tatkal-booking-2026-timings-rules",
+      "waitlist-ticket-confirmation-chances-explained",
+      "irctc-website-down-what-to-do",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Indian Railways revised its cancellation and refund rules from April 2026, extending every refund window — good news if you tend to cancel plans a day or two out, but the rules still depend heavily on your ticket status and how close to departure you cancel. Here's the current picture.",
+      },
+      { type: "heading", id: "the-2026-refund-windows", text: "The 2026 refund windows for confirmed tickets" },
+      {
+        type: "paragraph",
+        text: "The 2026 revision widened the old 48/12/4-hour cutoffs to 72/24/8 hours, giving passengers more breathing room to cancel without losing a large chunk of the fare.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "72+ hours before departure: full refund, minus a flat cancellation fee per passenger (roughly ₹60 for 2S up to ₹240+GST for 1A/EC, scaled by class).",
+          "72 to 24 hours before departure: 25% of the fare is deducted.",
+          "24 to 8 hours before departure: 50% of the fare is deducted.",
+          "Less than 8 hours before departure: no refund on a confirmed ticket.",
+        ],
+      },
+      { type: "tip", text: "The single biggest lever you have is cancelling before the 72-hour mark — miss it by even an hour and you move straight into the 25% deduction band." },
+      { type: "heading", id: "rac-and-waitlisted-tickets", text: "RAC and waitlisted tickets work differently" },
+      {
+        type: "paragraph",
+        text: "If your ticket is still fully waitlisted when the chart is prepared, it's cancelled automatically and refunded in full, minus a small clerkage charge per passenger — you don't need to do anything. If you choose to cancel a RAC or waitlisted ticket yourself before that point, only the clerkage charge applies, not the 72/24/8-hour deduction scale that governs confirmed tickets.",
+      },
+      { type: "heading", id: "tatkal-tickets-are-the-exception", text: "Tatkal tickets are the exception" },
+      {
+        type: "paragraph",
+        text: "A confirmed Tatkal ticket is non-refundable if you cancel it yourself — this hasn't changed under the 2026 revision. The one exception is a Tatkal ticket that never confirms and is still waitlisted at chart preparation: that portion is refunded automatically, just like a regular waitlisted ticket, minus the applicable clerkage charge.",
+      },
+      { type: "heading", id: "what-is-a-tdr-and-when-you-need-one", text: "What is a TDR, and when do you need one" },
+      {
+        type: "paragraph",
+        text: "TDR (Ticket Deposit Receipt) is the process for claiming a refund in situations the standard cancellation flow doesn't cover — the train being delayed by three hours or more, running in a lower class than booked, being cancelled by Railways after chart preparation, or you missing the train due to a genuine, documentable reason. TDR must be filed within the specified window (generally before or shortly after the train's actual departure, depending on the reason) through the IRCTC website or app, and it's reviewed rather than automatically approved — filing one doesn't guarantee the refund.",
+      },
+      { type: "heading", id: "if-railways-cancels-the-train", text: "If Railways cancels the train" },
+      {
+        type: "paragraph",
+        text: "If Indian Railways cancels your train outright, you get a full refund regardless of ticket type, class, or how close to departure the cancellation happens — this rule sits outside the normal time-window structure entirely.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Refunds are typically credited back to the original payment method within roughly 5–10 working days, though your bank's own processing time can add to that.",
+          "Cancellation charges are calculated per passenger, not per ticket — cancelling for one person on a multi-passenger PNR only deducts that person's share.",
+          "Some ticket types (Foreign Tourist Quota, and certain counter-booked tickets) can't be cancelled online and need a PRS counter visit instead.",
+        ],
+      },
+      { type: "tip", text: "Rules like these get revised periodically — always cross-check the current cancellation policy on irctc.co.in before relying on any specific number, including the ones here, if your trip is months away." },
       { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
     ],
   },
@@ -446,7 +682,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "senior-citizen-train-travel-india-guide",
     title: "Senior citizen train travel in India: concession status and lower berth priority (2026)",
     excerpt:
-      "The senior citizen fare concession has been suspended since March 2020 — here's the current 2026 status, plus the lower-berth and comfort benefits that are still in place.",
+      "Senior citizen railway concession status in 2026, plus how the lower berth senior citizen quota actually works when booking a reserved sleeper or AC ticket.",
     coverImage: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "6 min read",
@@ -456,9 +692,14 @@ export const BLOG_POSTS: BlogPost[] = [
       "senior citizen train concession 2026",
       "senior citizen railway concession status",
       "lower berth priority senior citizen",
+      "lower berth senior citizen quota",
       "indian railway senior citizen quota",
     ],
-    relatedSlugs: ["pnr-status-explained-cnf-rac-wl-meaning", "irctc-tatkal-booking-2026-timings-rules"],
+    relatedSlugs: [
+      "pnr-status-explained-cnf-rac-wl-meaning",
+      "rswl-rqwl-gn-quota-explained",
+      "irctc-tatkal-booking-2026-timings-rules",
+    ],
     content: [
       {
         type: "paragraph",
@@ -474,10 +715,15 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: "checklist",
         items: [
-          "Automatic lower-berth priority for senior citizens booking a reserved sleeper or AC class ticket — no separate request needed if age is entered correctly.",
+          "Automatic lower-berth priority for senior citizens booking a reserved sleeper or AC class ticket — no separate request needed if age is entered correctly under the Senior Citizen (SR) quota option.",
           "Station-level assistance, including wheelchair and porter support at major stations.",
           "Separate concessions for other categories (Divyangjan/persons with disabilities, patients with specific medical conditions, and students) that are unrelated to the general senior citizen concession and have their own eligibility rules.",
         ],
+      },
+      { type: "heading", id: "lower-berth-quota-in-practice", text: "How the lower berth senior citizen quota actually works" },
+      {
+        type: "paragraph",
+        text: "A small number of lower berths are earmarked per coach for senior citizens (and separately for pregnant women and passengers with disabilities). If you enter your age correctly while booking, the system tries to auto-allot one of these automatically — it isn't guaranteed on every train, since the earmarked pool is limited, but it's the default behaviour rather than something you need to specifically request.",
       },
       { type: "heading", id: "booking-tips", text: "Booking tips" },
       {
@@ -492,25 +738,39 @@ export const BLOG_POSTS: BlogPost[] = [
   /* ------------------------------------------------------------------ */
   {
     slug: "vande-bharat-express-routes-guide",
-    title: "Vande Bharat Express: full route guide and what makes it different",
+    title: "Vande Bharat Express: how many trains, full route list, and what makes it different",
     excerpt:
-      "Over 130 Vande Bharat trains now run across India, including the first Sleeper service — here's the full picture of routes, speed, and how to book smart.",
+      "How many Vande Bharat trains run in India? Over 160 services across 100+ routes as of 2026, including the first Sleeper — here's the full route list and how to book smart.",
     coverImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&h=900&fit=crop",
     category: "rail",
-    readTime: "7 min read",
-    date: "2026-08-15",
+    readTime: "8 min read",
+    date: "2026-08-31",
     author: DEFAULT_AUTHOR,
     keywords: [
       "vande bharat express routes list",
+      "vande bharat train route",
+      "vande bharat rail route",
+      "how many vande bharat express in india",
+      "vande bharat sleeper train route list",
       "vande bharat sleeper train",
       "vande bharat vs shatabdi vs rajdhani",
       "new vande bharat trains 2026",
     ],
-    relatedSlugs: ["delhi-to-jaipur-best-ways-to-plan-your-trip", "how-wayvia-finds-alternative-journeys"],
+    relatedSlugs: [
+      "rajdhani-vs-tejas-vs-vande-bharat-compared",
+      "rajdhani-express-routes-classes-guide",
+      "tejas-express-current-routes-guide",
+      "how-wayvia-finds-alternative-journeys",
+    ],
     content: [
       {
         type: "paragraph",
-        text: "Vande Bharat has gone from a single showcase train in 2019 to one of the backbones of India's premium rail network. As of 2026, over 130 Vande Bharat trains operate across more than 80 chair-car routes, plus the country's first Sleeper variant.",
+        text: "Vande Bharat has gone from a single showcase train in 2019 to one of the backbones of India's premium rail network. As of early 2026, more than 160 Vande Bharat services operate across upwards of 100 routes, plus the country's first Sleeper variant — and Indian Railways continues to add new corridors regularly, so exact counts shift month to month.",
+      },
+      { type: "heading", id: "how-many-vande-bharat-trains-are-there", text: "How many Vande Bharat trains are there right now?" },
+      {
+        type: "paragraph",
+        text: "The network has grown from a single Delhi–Varanasi service in 2019 to well over 160 trains today, spread across every major railway zone in the country. Because new routes are flagged off every few weeks, the most reliable way to confirm the current count for a specific corridor is IRCTC's train search rather than any fixed number — treat any \"as of\" figure, including this one, as a snapshot rather than a permanent total.",
       },
       { type: "heading", id: "chair-car-network", text: "The chair-car network" },
       {
@@ -522,6 +782,7 @@ export const BLOG_POSTS: BlogPost[] = [
         items: [
           "Popular corridors include New Delhi–Varanasi, New Delhi–Katra (Mata Vaishno Devi), Mumbai–Ahmedabad, Chennai–Bengaluru, and Howrah–New Jalpaiguri.",
           "The Howrah–New Jalpaiguri route is a favourite with travellers heading onward to Darjeeling.",
+          "South and East India have both seen steady additions, including Secunderabad–Visakhapatnam and Durg–Visakhapatnam services, alongside newer corridors into previously underserved cities like Ranchi.",
           "Newer additions, including a Jammu–Srinagar service, continue to extend the network into previously underserved corridors.",
         ],
       },
@@ -531,6 +792,182 @@ export const BLOG_POSTS: BlogPost[] = [
         text: "The first Vande Bharat Sleeper service, connecting Howrah and Kamakhya, began regular operation in January 2026 — India's first sleeper Vande Bharat and, for now, the only one you can actually book. It's aimed squarely at routes currently served by Rajdhani-class trains, with more sleeper corridors expected to follow as additional rakes clear testing.",
       },
       { type: "tip", text: "On popular Vande Bharat routes, especially around festival season, check your PNR status soon after booking — seats fill and waitlists move fast." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "rajdhani-express-routes-classes-guide",
+    title: "Rajdhani Express: routes, classes and what to know before you book",
+    excerpt:
+      "Rajdhani Express routes, classes and fare rules explained — India's original premium overnight train, with meals included and priority on the network.",
+    coverImage: "https://images.unsplash.com/photo-1580442374555-3def8fb41738?w=1600&h=900&fit=crop",
+    category: "rail",
+    readTime: "6 min read",
+    date: "2026-09-01",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "rajdhani express routes",
+      "rajdhani express classes",
+      "rajdhani express fare",
+      "is food included in rajdhani ticket",
+      "rajdhani express timetable",
+      "fastest rajdhani express",
+    ],
+    relatedSlugs: [
+      "rajdhani-vs-tejas-vs-vande-bharat-compared",
+      "tejas-express-current-routes-guide",
+      "vande-bharat-express-routes-guide",
+      "waitlist-ticket-confirmation-chances-explained",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Rajdhani Express has been connecting state capitals to Delhi since 1969, and it's still the benchmark for overnight rail travel in India — fully air-conditioned, given priority over most other trains on the network, and running with meals built into the fare rather than sold separately.",
+      },
+      { type: "heading", id: "what-makes-rajdhani-different", text: "What makes Rajdhani different" },
+      {
+        type: "paragraph",
+        text: "Unlike Vande Bharat or Tejas, which run chair-car style for daytime trips, every Rajdhani service is an overnight sleeper train with fully air-conditioned coaches — there's no unreserved or general-quota travel on a Rajdhani at all, and no non-AC classes.",
+      },
+      { type: "heading", id: "classes-on-rajdhani", text: "Classes on Rajdhani" },
+      {
+        type: "checklist",
+        items: [
+          "AC First Class (1A) — private lockable coupes, the most spacious and expensive option.",
+          "AC 2 Tier (2A) — open bays of four berths plus two side berths, with curtains for privacy.",
+          "AC 3 Tier (3A) — open bays of six berths plus two side berths, no curtains, the most affordable Rajdhani class.",
+        ],
+      },
+      { type: "heading", id: "meals-included-in-the-fare", text: "Meals are included in the fare" },
+      {
+        type: "paragraph",
+        text: "Rajdhani fares bundle in catering by default — tea, breakfast, lunch or dinner and snacks depending on the timing of your journey, served at your seat or berth. This is one of the clearest differences from a regular Mail/Express ticket, where food is always an optional, separate purchase.",
+      },
+      { type: "heading", id: "popular-rajdhani-routes", text: "Popular Rajdhani routes" },
+      {
+        type: "checklist",
+        items: [
+          "Mumbai (Central or CSMT)–New Delhi — the original and still one of the fastest Rajdhani corridors.",
+          "Howrah–New Delhi and Sealdah–New Delhi — the classic Kolkata-side connections.",
+          "Thiruvananthapuram, Chennai, Secunderabad and Bengaluru all run long-haul Rajdhani services into Delhi, some of the longest scheduled train journeys in the country.",
+          "Jammu Tawi–New Delhi — a shorter, high-frequency daily Rajdhani used heavily for onward travel to the Kashmir valley.",
+        ],
+      },
+      { type: "tip", text: "Rajdhani fares are noticeably higher than a regular Mail/Express ticket in the same class, partly because of the included catering and partly because of the priority scheduling — factor that into your budget, not just the travel time saved." },
+      { type: "heading", id: "booking-tips", text: "Booking tips" },
+      {
+        type: "paragraph",
+        text: "Rajdhani tickets open under the same 60-day advance reservation period as other trains, and on the busiest corridors (especially into Kolkata, Kerala and the Northeast around festival season) they can waitlist quickly. Booking as early in that window as you can is the single biggest lever you have over your odds of a confirmed seat.",
+      },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "tejas-express-current-routes-guide",
+    title: "Tejas Express: is it still running, and which routes are active in 2026?",
+    excerpt:
+      "Tejas Express current status for 2026 — India's first IRCTC-operated train is still running on two routes, after several others were suspended. Here's what's live and what changed.",
+    coverImage: "https://images.unsplash.com/photo-1637995735729-c43250f1ef47?w=1600&h=900&fit=crop",
+    category: "rail",
+    readTime: "5 min read",
+    date: "2026-09-01",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "tejas express current status",
+      "is tejas express running",
+      "tejas express routes 2026",
+      "tejas express vs vande bharat",
+      "irctc private train",
+    ],
+    relatedSlugs: [
+      "rajdhani-vs-tejas-vs-vande-bharat-compared",
+      "vande-bharat-express-routes-guide",
+      "rajdhani-express-routes-classes-guide",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Tejas Express launched in 2017 as India's first corporate-operated train, run by IRCTC (a subsidiary of Indian Railways) rather than the Railways directly — same tracks, locomotives and crew, but ticketing, catering and service standards handled separately, with a more airline-style experience: attendants, entertainment screens, and complimentary travel insurance.",
+      },
+      { type: "heading", id: "what-is-actually-running-now", text: "What's actually running now" },
+      {
+        type: "paragraph",
+        text: "As of 2026, IRCTC's corporate-run Tejas Express operates on two routes: Lucknow–New Delhi and Ahmedabad–Mumbai Central. Several other routes that were announced or trialled over the years — including Mumbai–Surat and a proposed New Delhi–Jalandhar service — were put on hold and haven't resumed. This has shifted over time due to occupancy and pandemic-era disruptions, so it's genuinely worth checking live running status before you plan around it, rather than assuming an older route list is still accurate.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Lucknow–New Delhi Tejas Express — around 6 hours, AC Executive Chair Car and AC Chair Car, no pantry car but on-board catering included.",
+          "Ahmedabad–Mumbai Central Tejas Express — around 6.5 hours, same class structure and catering setup.",
+          "Both are chair-car (seated) services, not overnight sleeper trains.",
+        ],
+      },
+      { type: "heading", id: "what-happened-to-the-wider-private-train-plan", text: "What happened to the wider private-train plan" },
+      {
+        type: "paragraph",
+        text: "Indian Railways originally floated a much larger plan to have private operators run around 150 modern trains across roughly 100 routes, with Tejas as the proof of concept. That broader bidding round drew limited interest from private players and never really took off — in practice, premium daytime rail travel investment has largely shifted to Indian Railways' own Vande Bharat programme instead, which has scaled far faster than Tejas ever did.",
+      },
+      { type: "tip", text: "If you're comparing a Tejas route against a Vande Bharat on the same corridor, check both — on several routes Vande Bharat has effectively taken over the premium daytime slot Tejas used to occupy, sometimes with better frequency." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "rajdhani-vs-tejas-vs-vande-bharat-compared",
+    title: "Rajdhani vs Tejas vs Vande Bharat: which premium train should you book?",
+    excerpt:
+      "Rajdhani vs Tejas vs Vande Bharat, compared honestly — overnight sleeper vs day chair car, network size, catering, and which one actually fits your trip.",
+    coverImage: "https://images.unsplash.com/photo-1685858874777-b87106319be7?w=1600&h=900&fit=crop",
+    category: "rail",
+    readTime: "6 min read",
+    date: "2026-09-01",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "rajdhani vs tejas vs vande bharat",
+      "difference between rajdhani and vande bharat",
+      "tejas vs vande bharat",
+      "best premium train india",
+      "rajdhani vs vande bharat which is better",
+    ],
+    relatedSlugs: [
+      "rajdhani-express-routes-classes-guide",
+      "tejas-express-current-routes-guide",
+      "vande-bharat-express-routes-guide",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "All three get called \"premium\" trains, but they're not really competing for the same trip. The honest answer to \"which is better\" depends almost entirely on whether you're travelling overnight or during the day, and how big the network is on your specific route.",
+      },
+      { type: "heading", id: "the-core-difference-day-vs-overnight", text: "The core difference: day trip vs. overnight" },
+      {
+        type: "checklist",
+        items: [
+          "Rajdhani — overnight sleeper only, fully AC (1A/2A/3A), meals included in the fare. Built for long-haul routes where you want to sleep through the distance.",
+          "Vande Bharat — daytime AC chair car (with one Sleeper route so far), self-propelled and quick off the mark, built for same-day city-to-city travel.",
+          "Tejas — daytime AC chair car like Vande Bharat, IRCTC-operated with airline-style service and included travel insurance, but currently limited to just two routes.",
+        ],
+      },
+      { type: "heading", id: "network-size-and-availability", text: "Network size and availability" },
+      {
+        type: "paragraph",
+        text: "This is where the three diverge sharply. Rajdhani has been running for over five decades and covers dozens of long-distance corridors into Delhi from almost every state capital. Vande Bharat has scaled to 160+ trains across 100+ routes in just a few years and keeps expanding. Tejas, by contrast, has shrunk from its original ambitions down to two active corporate-run routes — so for most journeys, the real choice in practice is between Rajdhani and Vande Bharat, not all three.",
+      },
+      { type: "heading", id: "cost-and-comfort", text: "Cost and comfort" },
+      {
+        type: "paragraph",
+        text: "Rajdhani fares include full catering across a long journey, which partly explains why they run higher than an equivalent-distance Vande Bharat chair-car fare — you're also paying for a berth to sleep on, not just a seat. Vande Bharat and Tejas fares are lower for a comparable distance but assume you're travelling for a matter of hours, not overnight.",
+      },
+      { type: "heading", id: "so-which-should-you-book", text: "So which should you book?" },
+      {
+        type: "checklist",
+        items: [
+          "Route is 700+ km and you'd rather sleep than sit: Rajdhani, if one runs on your route.",
+          "Route is under roughly 500–600 km and doable in a day: Vande Bharat, for speed and frequency.",
+          "Your route happens to be Lucknow–Delhi or Ahmedabad–Mumbai and you want the airline-style extras: Tejas is worth checking, but compare it against Vande Bharat on the same corridor first.",
+          "Unsure which trains actually run on your route: search live availability rather than assuming — Tejas coverage in particular has changed a lot over the past few years.",
+        ],
+      },
+      { type: "tip", text: "Don't assume Tejas exists on your route just because you've heard the name — as of 2026 it's down to two corridors. Vande Bharat and Rajdhani cover far more ground, so check those first for anything outside Lucknow–Delhi or Ahmedabad–Mumbai." },
       { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
     ],
   },
@@ -626,7 +1063,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "delhi-to-goa-7-ways-to-get-there",
     title: "Delhi to Goa: 7 ways to get there",
-    excerpt: "From direct trains to coastal routes, explore the best combinations for every kind of traveller.",
+    excerpt: "Delhi to Goa train, flight and bus options compared — from direct trains to coastal routes, the best combinations for every kind of traveller.",
     coverImage: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1600&h=900&fit=crop",
     category: "route-ideas",
     readTime: "8 min read",
@@ -738,7 +1175,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "delhi-to-jaipur-best-ways-to-plan-your-trip",
     title: "Delhi to Jaipur: Best ways to plan your trip",
-    excerpt: "A short, popular route with more options than you'd think.",
+    excerpt: "Delhi to Jaipur train timings compared to bus — a short, popular route with more options than you'd think.",
     coverImage: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
     category: "route-ideas",
     readTime: "5 min read",
