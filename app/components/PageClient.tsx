@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SearchForm, {
   ALL_SEARCH_MODES,
   SearchFormValues,
@@ -11,10 +11,11 @@ import MultiLegResults from "../components/MultiLegResults";
 import {
   DEFAULT_FILTERS,
   FilterState,
-  TransportFilter,
+  parseFiltersFromSearchParams,
 } from "../components/filters";
 import { SearchResponse, MultiSearchResponse, TripLeg } from "../types";
 import { todayIso } from "@/lib/date";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 const PAGE_SIZE = 10;
 
 export function PageInner() {
@@ -52,9 +53,15 @@ export function PageInner() {
   // previous trip's filters/tab/page.
   const [tripData, setTripData] = useState<MultiSearchResponse | null>(null);
   const [tripVersion, setTripVersion] = useState(0);
-  const [initialTransport, setInitialTransport] = useState<
-    TransportFilter | undefined
+  // Filters restored from the URL on mount (refresh, shared link, or the
+  // landing page's transport tab) — merged over DEFAULT_FILTERS by
+  // MultiLegResults. Only the fields actually present in the URL end up
+  // here; see parseFiltersFromSearchParams.
+  const [initialFilters, setInitialFilters] = useState<
+    Partial<FilterState> | undefined
   >(undefined);
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // Single-leg search — still hits the plain /api/search (simpler than the
@@ -171,23 +178,16 @@ export function PageInner() {
     const cls = searchParams.get("class");
     const quota = searchParams.get("quota");
     const modesRaw = searchParams.get("modes");
-    const transportRaw = searchParams.get("transport");
 
-    const VALID_TRANSPORTS: TransportFilter[] = [
-      "train",
-      "bus",
-      "flight",
-      "mixed",
-    ];
-    const transport: TransportFilter | null =
-      transportRaw &&
-      VALID_TRANSPORTS.includes(transportRaw.toLowerCase() as TransportFilter)
-        ? (transportRaw.toLowerCase() as TransportFilter)
-        : null;
+    // Every FilterState field the URL carries (sort, connections, transport,
+    // etc.) — from a refresh, a shared link, or the landing page's transport
+    // tab. Absent/invalid fields just aren't in the returned partial.
+    const parsedFilters = parseFiltersFromSearchParams(searchParams);
+    const hasFilters = Object.keys(parsedFilters).length > 0;
 
     // modes ONLY comes from an explicit ?modes= override. `transport` NEVER
     // narrows this — it's a pure client-side display filter, applied after
-    // the fact via initialTransport below. This keeps the backend call (and
+    // the fact via initialFilters below. This keeps the backend call (and
     // therefore its cache key) identical whether transport=train, transport=bus,
     // or no transport param at all — always the full mode set.
     const modes = modesRaw
@@ -200,7 +200,8 @@ export function PageInner() {
           )
       : null;
 
-    if (!from && !to && !date && !cls && !quota && !modes && !transport) return;
+    if (!from && !to && !date && !cls && !quota && !modes && !hasFilters)
+      return;
 
     const effective: SearchFormValues = {
       ...form,
@@ -212,13 +213,64 @@ export function PageInner() {
       ...(modes && modes.length > 0 ? { modes } : {}),
     };
     setForm(effective);
-    if (transport) setInitialTransport(transport);
+    if (hasFilters) setInitialFilters(parsedFilters);
 
     if (effective.from && effective.to && effective.date) {
       doSearch(effective, 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Keeps the address bar in sync with the search box as the person types —
+  // so refreshing the tab, or copying the URL, reproduces the same from/to/
+  // date/class/quota/modes instead of snapping back to the last submitted
+  // search. Debounced so it isn't replacing the URL on every keystroke.
+  // Skipped for multi-city trips: those live under ?mode=multi&legs=...,
+  // a different URL shape this effect doesn't own.
+  const formSyncKey = JSON.stringify({
+    from: form.from,
+    to: form.to,
+    date: form.date,
+    travelClass: form.travelClass,
+    quota: form.quota,
+    modes: form.modes,
+  });
+  const debouncedFormSyncKey = useDebouncedValue(formSyncKey, 400);
+
+  useEffect(() => {
+    if (extraStops.length > 0) return; // multi-city — different URL shape, left alone
+
+    const snapshot = JSON.parse(debouncedFormSyncKey) as Pick<
+      SearchFormValues,
+      "from" | "to" | "date" | "travelClass" | "quota" | "modes"
+    >;
+
+    const current = new URLSearchParams(searchParams.toString());
+    current.delete("mode");
+    current.delete("legs");
+
+    if (snapshot.from) current.set("from", snapshot.from);
+    else current.delete("from");
+    if (snapshot.to) current.set("to", snapshot.to);
+    else current.delete("to");
+    if (snapshot.date) current.set("date", snapshot.date);
+    else current.delete("date");
+    if (snapshot.travelClass) current.set("class", snapshot.travelClass);
+    else current.delete("class");
+    if (snapshot.quota) current.set("quota", snapshot.quota);
+    else current.delete("quota");
+
+    const modesJoined = snapshot.modes.join(",");
+    if (modesJoined && modesJoined !== ALL_SEARCH_MODES.join(","))
+      current.set("modes", modesJoined);
+    else current.delete("modes");
+
+    const qs = current.toString();
+    if (qs === searchParams.toString()) return; // nothing actually changed — don't touch history
+
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedFormSyncKey, extraStops.length]);
   return (
     <main className="mx-auto md:mx-10 px-5 pb-24 pt-10 sm:px-6">
       <SearchForm
@@ -263,7 +315,7 @@ export function PageInner() {
           maxHubs={form.maxHubs}
           maxConnections={form.maxConnections}
           pageSize={PAGE_SIZE}
-          initialTransport={initialTransport}
+          initialFilters={initialFilters}
         />
       )}
       <p className="mt-10 border-t border-border pt-5 text-[12px] leading-relaxed text-ink-dim">

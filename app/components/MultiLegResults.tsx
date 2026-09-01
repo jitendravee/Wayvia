@@ -15,7 +15,7 @@ import {
   maxFareInSet,
   tagFor,
   buildLeadList,
-  TransportFilter,
+  writeFiltersToSearchParams,
 } from "./filters";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
 import { useFillHeight } from "@/lib/hooks/useFillHeight";
@@ -29,7 +29,10 @@ interface Props {
   maxHubs: number;
   maxConnections: 1 | 2 | 3;
   pageSize: number;
-  initialTransport?: TransportFilter;
+  /** Filters restored from the URL (refresh, shared link, or the landing
+   *  page's transport tab) — merged over DEFAULT_FILTERS below. Only
+   *  fields actually present in the URL are set here. */
+  initialFilters?: Partial<FilterState>;
 }
 
 /**
@@ -85,7 +88,7 @@ export default function MultiLegResults({
   maxHubs,
   maxConnections,
   pageSize,
-  initialTransport,
+  initialFilters: initialFiltersProp,
 }: Props) {
   const [legs] = useState<TripLeg[]>(initial.legs);
   const router = useRouter();
@@ -95,9 +98,9 @@ export default function MultiLegResults({
   const initialFilters: FilterState = useMemo(
     () => ({
       ...DEFAULT_FILTERS,
-      transport: initialTransport ?? DEFAULT_FILTERS.transport,
+      ...(initialFiltersProp ?? {}),
     }),
-    [initialTransport],
+    [initialFiltersProp],
   );
 
   const [legStates, setLegStates] = useState<LegQueryState[]>(
@@ -122,29 +125,6 @@ export default function MultiLegResults({
       prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)),
     );
   }
-  useEffect(() => {
-    if (legs.length !== 1) return;
-    const liveTransport = legStates[0]?.filters.transport;
-    if (!liveTransport) return;
-
-    const current = new URLSearchParams(routerSearchParams.toString());
-    const currentlyInUrl = current.get("transport");
-    const desired = liveTransport === "any" ? null : liveTransport;
-
-    if (currentlyInUrl === desired) return; // already in sync, avoid a no-op replace
-
-    if (desired) current.set("transport", desired);
-    else current.delete("transport");
-
-    const qs = current.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [
-    legs.length,
-    legStates[0]?.filters.transport,
-    pathname,
-    router,
-    routerSearchParams,
-  ]);
 
   // Debounce only the two continuous slider filters (maxFare/maxDuration) —
   // every other filter (connections, transport, departure/arrival window,
@@ -184,21 +164,71 @@ export default function MultiLegResults({
     );
   });
 
+  // Keeps the address bar in sync with the active filter set (sort,
+  // connections, transport, departure/arrival window, confirmed-only,
+  // maxFare/maxDuration) — so refreshing the tab or copying the URL
+  // reproduces the same filtered view instead of resetting to defaults.
+  // Only meaningful for a single-leg trip (2+ legs each have their own,
+  // independent filter state that doesn't map onto one flat URL). Reads off
+  // searchParamsPerLeg[0] rather than legStates[0].filters directly so the
+  // URL reflects the *debounced* maxFare/maxDuration — the same values
+  // actually being queried — instead of updating on every slider tick.
+  useEffect(() => {
+    if (legs.length !== 1) return;
+    const params0 = searchParamsPerLeg[0];
+    if (!params0) return;
+
+    const liveFilters: FilterState = {
+      sort: params0.sort,
+      connections: params0.connections,
+      confirmedOnly: params0.confirmedOnly,
+      departure: params0.departure,
+      arrival: params0.arrival,
+      maxFare: params0.maxFare,
+      maxDuration: params0.maxDuration,
+      transport: params0.transport,
+    };
+
+    const current = new URLSearchParams(routerSearchParams.toString());
+    writeFiltersToSearchParams(current, liveFilters);
+
+    const qs = current.toString();
+    if (qs === routerSearchParams.toString()) return; // already in sync, avoid a no-op replace
+
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [legs.length, searchParamsPerLeg, pathname, router, routerSearchParams]);
+
   // Does this leg's current params still match exactly what PageClient's
   // initial fetch (doSearch/doMultiSearch — page 1, DEFAULT_FILTERS) sent?
   // If so, hydrate from the response already in hand instead of refetching
   // it on mount.
+  //
+  // IMPORTANT: this must compare against DEFAULT_FILTERS, not `initialFilters`.
+  // `initialFilters` seeds the *displayed* filter state (e.g. transport:
+  // "train" when arriving from the landing page's Train tab) — but
+  // PageClient's initial doSearch() call never actually sends a `transport`
+  // param, so the response in `initial.results[i]` was always fetched
+  // unfiltered (transport: "any" server-side), regardless of what the URL
+  // said. Comparing against `initialFilters.transport` instead of "any"
+  // made this falsely match whenever the live filter equalled the
+  // landing-page transport — which, since Train is the landing page's
+  // default mode, meant a Train-preselected search silently kept showing
+  // the unfiltered full-transport set forever (initialData counted as
+  // fresh for staleTime, so the correctly-scoped follow-up request never
+  // fired), while any other transport value correctly triggered a real
+  // fetch.
   function matchesInitialFetch(params: SearchParams, leg: TripLeg): boolean {
     return (
       params.page === 1 &&
-      params.sort === initialFilters.sort &&
-      params.connections === initialFilters.connections &&
-      params.confirmedOnly === initialFilters.confirmedOnly &&
-      params.departure === initialFilters.departure &&
-      params.arrival === initialFilters.arrival &&
-      params.maxFare === initialFilters.maxFare &&
-      params.maxDuration === initialFilters.maxDuration &&
-      params.transport === initialFilters.transport &&
+      params.sort === DEFAULT_FILTERS.sort &&
+      params.connections === DEFAULT_FILTERS.connections &&
+      params.confirmedOnly === DEFAULT_FILTERS.confirmedOnly &&
+      params.departure === DEFAULT_FILTERS.departure &&
+      params.arrival === DEFAULT_FILTERS.arrival &&
+      params.maxFare === DEFAULT_FILTERS.maxFare &&
+      params.maxDuration === DEFAULT_FILTERS.maxDuration &&
+      params.transport === DEFAULT_FILTERS.transport &&
       params.from === leg.from &&
       params.to === leg.to &&
       params.date === leg.date

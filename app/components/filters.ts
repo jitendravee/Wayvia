@@ -59,6 +59,76 @@ export const TRANSPORT_OPTIONS: { value: TransportFilter; label: string }[] = [
   { value: "flight", label: "Flight" },
   { value: "mixed", label: "Mix (multimodal)" },
 ];
+
+const VALID_SORT: SortKey[] = ["best", "cheapest", "fastest", "fewestChanges"];
+const VALID_CONNECTIONS: ConnectionFilter[] = ["any", "direct", "oneChange", "twoChanges", "threeChanges"];
+const VALID_WINDOW: DepartureWindow[] = ["any", "morning", "afternoon", "evening", "night"];
+const VALID_TRANSPORT: TransportFilter[] = ["any", "train", "bus", "flight", "mixed"];
+
+/**
+ * Reads whichever FilterState fields are present (and valid) in the URL —
+ * used to restore a person's filters after a refresh, or from a shared
+ * link. Fields that are absent or fail validation are simply left out of
+ * the returned partial; callers merge this over DEFAULT_FILTERS so a
+ * malformed/missing param can never produce an invalid FilterState.
+ */
+export function parseFiltersFromSearchParams(params: URLSearchParams): Partial<FilterState> {
+  const out: Partial<FilterState> = {};
+
+  const sort = params.get("sort");
+  if (sort && VALID_SORT.includes(sort as SortKey)) out.sort = sort as SortKey;
+
+  const connections = params.get("connections");
+  if (connections && VALID_CONNECTIONS.includes(connections as ConnectionFilter)) {
+    out.connections = connections as ConnectionFilter;
+  }
+
+  const confirmedOnly = params.get("confirmedOnly");
+  if (confirmedOnly !== null) out.confirmedOnly = confirmedOnly === "true";
+
+  const departure = params.get("departure");
+  if (departure && VALID_WINDOW.includes(departure as DepartureWindow)) out.departure = departure as DepartureWindow;
+
+  const arrival = params.get("arrival");
+  if (arrival && VALID_WINDOW.includes(arrival as DepartureWindow)) out.arrival = arrival as DepartureWindow;
+
+  const maxFare = params.get("maxFare");
+  if (maxFare !== null && maxFare !== "" && !Number.isNaN(Number(maxFare))) out.maxFare = Number(maxFare);
+
+  const maxDuration = params.get("maxDuration");
+  if (maxDuration !== null && maxDuration !== "" && !Number.isNaN(Number(maxDuration))) out.maxDuration = Number(maxDuration);
+
+  const transport = params.get("transport");
+  if (transport && VALID_TRANSPORT.includes(transport.toLowerCase() as TransportFilter)) {
+    out.transport = transport.toLowerCase() as TransportFilter;
+  }
+
+  return out;
+}
+
+/**
+ * Writes `filters` onto a URLSearchParams (mutates the instance passed in —
+ * callers typically pass a fresh copy of the current params so unrelated
+ * keys like from/to/date survive). Any field that's still at its
+ * DEFAULT_FILTERS value is deleted rather than written, so the URL only
+ * ever carries the filters someone actually changed — keeps shared links
+ * short and avoids every search ever carrying `sort=best&connections=any&...`.
+ */
+export function writeFiltersToSearchParams(params: URLSearchParams, filters: FilterState): void {
+  const setOrClear = (key: string, value: string, isDefault: boolean) => {
+    if (isDefault) params.delete(key);
+    else params.set(key, value);
+  };
+
+  setOrClear("sort", filters.sort, filters.sort === DEFAULT_FILTERS.sort);
+  setOrClear("connections", filters.connections, filters.connections === DEFAULT_FILTERS.connections);
+  setOrClear("confirmedOnly", String(filters.confirmedOnly), filters.confirmedOnly === DEFAULT_FILTERS.confirmedOnly);
+  setOrClear("departure", filters.departure, filters.departure === DEFAULT_FILTERS.departure);
+  setOrClear("arrival", filters.arrival, filters.arrival === DEFAULT_FILTERS.arrival);
+  setOrClear("maxFare", String(filters.maxFare), filters.maxFare === DEFAULT_FILTERS.maxFare);
+  setOrClear("maxDuration", String(filters.maxDuration), filters.maxDuration === DEFAULT_FILTERS.maxDuration);
+  setOrClear("transport", filters.transport, filters.transport === DEFAULT_FILTERS.transport);
+}
 export function journeySignature(j: AnnotatedJourney): string {
   return j.legs.map((l) => `${l.trainNo || l.trainName}-${l.depAbsMin}-${l.arrAbsMin}`).join("|");
 }
