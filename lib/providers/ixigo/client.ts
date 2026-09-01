@@ -20,6 +20,20 @@ const IXIGO_HEADERS = {
 const AUTOCOMPLETE_URL = "https://www.ixigo.com/abus-autocompleter/api/v1/results";
 const BUS_LIST_URL = "https://www.ixigo.com/wap/GetBusList";
 
+/**
+ * Circuit breaker for GetBusList. A single ixigo bus search can fan out to
+ * dozens of GetBusList calls (one per hub/candidate pair the generic graph
+ * search is trying), and ixigo will start returning 429s partway through a
+ * burst like that. Without this, every one of those calls still goes out
+ * over the network and waits for its own 429 response, which stacks up
+ * real wall-clock latency for no benefit — we already know the answer.
+ * Once we see a 429, short-circuit for a cooldown window and fail instantly
+ * (still throwing, so ixigoBusProvider's existing fail-soft catch behaves
+ * exactly as before — this only changes *how fast* it fails).
+ */
+const RATE_LIMIT_COOLDOWN_MS = 30_000;
+let rateLimitedUntil = 0;
+
 /** City/place search — same endpoint the ixigo.com search box itself calls. Never throws; a bad/empty query or a network hiccup just returns []. */
 export async function ixigoAutocomplete(query: string): Promise<IxigoAutocompleteResult[]> {
   const q = query.trim();
@@ -49,6 +63,10 @@ export async function ixigoAutocomplete(query: string): Promise<IxigoAutocomplet
  * decides for itself whether to fail soft.
  */
 export async function ixigoGetBusList(body: Record<string, unknown>): Promise<IxigoGetBusListResponse> {
+  if (Date.now() < rateLimitedUntil) {
+    throw new Error("ixigo GetBusList skipped: rate limited (cooling down after a recent 429)");
+  }
+
   const res = await fetch(BUS_LIST_URL, {
     method: "POST",
     headers: IXIGO_HEADERS,
@@ -56,6 +74,9 @@ export async function ixigoGetBusList(body: Record<string, unknown>): Promise<Ix
     cache: "no-store", // seat/fare data — never cache
   });
   if (!res.ok) {
+    if (res.status === 429) {
+      rateLimitedUntil = Date.now() + RATE_LIMIT_COOLDOWN_MS;
+    }
     throw new Error(`ixigo GetBusList failed with status ${res.status}`);
   }
   return (await res.json()) as IxigoGetBusListResponse;

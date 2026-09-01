@@ -1,7 +1,7 @@
 import { getTrainsOnDate } from "../erail/client";
 import type { BetweenStationEntry } from "../erail/prettify";
 import { getLiveStations, getDiscoveredStations } from "../erail/stationDirectory";
-import { rankedCandidateHubs, ScoredHub, Hub, DEFAULT_HUBS } from "./hubs";
+import { rankedCandidateHubs, ScoredHub, Hub, DEFAULT_HUBS, GeoPoint } from "./hubs";
 import { discoverHubsFromRoutes, RouteDerivedHub } from "./dynamicHubs";
 import type { Leg, JourneyCandidate, PartialCoverage } from "./types";
 
@@ -99,6 +99,19 @@ export interface DiscoverOptions {
   maxConnections?: 1 | 2 | 3;
   /** @deprecated use maxConnections >= 2 instead. Kept for backward compatibility. */
   forceTwoHub?: boolean;
+  /**
+   * The resolved origin/destination Place's real lat/lon (e.g. from
+   * GeoNames), when the caller has one. `from`/`to` throughout this file
+   * are bare station codes, which only carry coordinates if they happen
+   * to be one of the ~100 curated DEFAULT_HUBS junctions — passing the
+   * Place's actual coordinates here means hub-relevance scoring
+   * (lib/graph/hubs.ts's scoreHub) still works geographically for a small
+   * station that isn't a "hub" itself, instead of silently falling back
+   * to a neutral 0.5 for every candidate. See lib/transport/train.ts's
+   * trainMultiHopSearch, the only caller that currently sets these.
+   */
+  originCoords?: GeoPoint | null;
+  destCoords?: GeoPoint | null;
 }
 
 function isoToDDMMYYYY(iso: string): string {
@@ -222,7 +235,7 @@ export async function hubSearch(from: string, to: string, opts: DiscoverOptions)
   const maxTransfer = opts.maxTransferMin ?? 8 * 60;
 
   const pool = await buildHubPool();
-  const hubs = rankedCandidateHubs(from, to, opts.maxHubs ?? 10, pool);
+  const hubs = rankedCandidateHubs(from, to, opts.maxHubs ?? 10, pool, opts.originCoords, opts.destCoords);
   const legPairs = await fetchHubLegPairs(from, to, hubs, date);
   const candidates = connectLegPairs(legPairs, buffer, maxTransfer, "static");
 
@@ -240,9 +253,15 @@ export async function hubSearch(from: string, to: string, opts: DiscoverOptions)
  * forced to piggyback on the train engine's own hub search just to find
  * out which junctions exist.
  */
-export async function getHubCandidates(from: string, to: string, maxHubs = 10): Promise<ScoredHub[]> {
+export async function getHubCandidates(
+  from: string,
+  to: string,
+  maxHubs = 10,
+  originCoords?: GeoPoint | null,
+  destCoords?: GeoPoint | null
+): Promise<ScoredHub[]> {
   const pool = await buildHubPool();
-  return rankedCandidateHubs(from, to, maxHubs, pool);
+  return rankedCandidateHubs(from, to, maxHubs, pool, originCoords, destCoords);
 }
 
 /**
@@ -576,6 +595,8 @@ export async function discoverJourneys(from: string, to: string, opts: DiscoverO
   // alias (checkbox era) for anything still passing it.
   const maxConnections: 1 | 2 | 3 = opts.maxConnections ?? (opts.forceTwoHub ? 2 : 2);
 
+  console.log(`[TRAIN discoverJourneys] START ${from} -> ${to} date=${opts.date} maxConnections=${maxConnections} maxHubs=${opts.maxHubs}`);
+
   const [direct, hubResult] = await Promise.all([directSearch(from, to, opts), hubSearch(from, to, opts)]);
 
   let viaHub = dedupe(hubResult.candidates);
@@ -662,6 +683,12 @@ export async function discoverJourneys(from: string, to: string, opts: DiscoverO
     viaHub.reduce((n, c) => n + c.legs.length, 0) +
     viaTwoHub.reduce((n, c) => n + c.legs.length, 0) +
     viaThreeHub.reduce((n, c) => n + c.legs.length, 0);
+
+  console.log(
+    `[TRAIN discoverJourneys] DONE ${from} -> ${to}: direct=${direct.length} viaHub=${viaHub.length} ` +
+      `viaTwoHub=${viaTwoHub.length} viaThreeHub=${viaThreeHub.length} (runTierTwo=${runTierTwo}, ` +
+      `tier3Run=${maxConnections >= 3}, totalFound=${totalFound})`
+  );
 
   return {
     direct,

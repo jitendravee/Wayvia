@@ -159,7 +159,7 @@ export function buildAvlRequest(keys: string[]): { url: string; init: RequestIni
 export async function fetchAvailability(keys: string[]): Promise<AvlParsedResponse> {
   if (keys.length === 0) return { availability: new Map(), fares: new Map() };
   const { url, init } = buildAvlRequest(keys);
-  
+
   console.log("[ERAIL API] CALL");
   console.log("[ERAIL API] URL:", url);
   console.log("[ERAIL API] Method:", init.method);
@@ -179,8 +179,6 @@ export async function fetchAvailability(keys: string[]): Promise<AvlParsedRespon
   } catch {
     throw new Error(
       `s.erail.in/getvalue did not return valid JSON (status ${res.status}). ` +
-      `The request shape in buildAvlRequest() is a guess and likely doesn't match what the ` +
-      `real site sends — capture the real request from DevTools and update buildAvlRequest(). ` +
       `Raw response (first 300 chars): ${rawText.slice(0, 300)}`
     );
   }

@@ -57,32 +57,60 @@ const STATIC_SEED: Station[] = (() => {
 })();
 
 /**
+ * buildDirectory() used to redo this entire merge (and the caller redid the
+ * looksLikeStation filter over the whole result) on *every single*
+ * searchStations() call. That was fine back when station resolution mostly
+ * failed silently, but now that lib/journey/graphSearch.ts resolves a real
+ * station code for every leg of every candidate — often dozens of distinct
+ * codes per search — this became an O(directory size) scan repeated dozens
+ * of times per request. Cache the merged+filtered directory and only rebuild
+ * it when its inputs actually change (live asset refetched, or new stations
+ * discovered from real routes).
+ */
+let cachedDirectory: { key: string; stations: Station[]; byCode: Map<string, Station> } | null = null;
+
+/**
  * Builds the full directory this request should search against: curated
  * seed + hub list, live erail.in station asset (cached ~6h), and whatever
  * this server process has learned from real train routes since it started.
  * Never throws — a failed live fetch just means the directory is a bit
  * smaller for this request, not that search breaks.
  */
-async function buildDirectory(): Promise<Station[]> {
-  const byCode = new Map<string, Station>();
-  for (const s of STATIC_SEED) byCode.set(s.code, s);
-
+async function buildDirectory(): Promise<{ stations: Station[]; byCode: Map<string, Station> }> {
   let live: DirectoryStation[] = [];
   try {
     live = await getLiveStations();
   } catch {
     live = [];
   }
+  const discovered = getDiscoveredStations();
+
+  // getLiveStations()/getDiscoveredStations() are already cached/incremental themselves,
+  // so their lengths are a cheap, good-enough signal that the merged directory is stale.
+  const key = `${live.length}:${discovered.length}`;
+  if (cachedDirectory && cachedDirectory.key === key) return cachedDirectory;
+
+  const byCode = new Map<string, Station>();
+  for (const s of STATIC_SEED) byCode.set(s.code, s);
   for (const s of live) {
     // Curated entries already have nicer names — don't overwrite those, only fill gaps.
     if (!byCode.has(s.code)) byCode.set(s.code, s);
   }
-
-  for (const s of getDiscoveredStations()) {
+  for (const s of discovered) {
     if (!byCode.has(s.code)) byCode.set(s.code, s);
   }
 
-  return Array.from(byCode.values());
+  // Defense-in-depth: even though the live directory is already filtered at the
+  // source (see lib/erail/stationDirectory.ts), never let a train-shaped record
+  // (numeric code, "EXPRESS"/"MAIL"/etc in the name) reach the station search box —
+  // this is a *station* search, never a train search.
+  const stations = Array.from(byCode.values()).filter(looksLikeStation);
+
+  const byCodeUpper = new Map<string, Station>();
+  for (const s of stations) byCodeUpper.set(s.code.toUpperCase(), s);
+
+  cachedDirectory = { key, stations, byCode: byCodeUpper };
+  return cachedDirectory;
 }
 
 /**
@@ -94,11 +122,17 @@ export async function searchStations(query: string, limit = 8): Promise<Station[
   const q = query.trim().toUpperCase();
   if (!q) return [];
 
-  // Defense-in-depth: even though the live directory is already filtered at the
-  // source (see lib/erail/stationDirectory.ts), never let a train-shaped record
-  // (numeric code, "EXPRESS"/"MAIL"/etc in the name) reach the station search box —
-  // this is a *station* search, never a train search.
-  const directory = (await buildDirectory()).filter(looksLikeStation);
+  const { stations: directory, byCode } = await buildDirectory();
+
+  // Fast path for the single-best-match case (this is exactly what
+  // lib/journey/graphSearch.ts's resolvePlaceFromStationCode does, dozens of
+  // times per search, with an exact IR station code): an exact code match
+  // always scores highest (100) and wins alone anyway, so when limit is 1
+  // skip scoring the entire directory and look it up directly.
+  if (limit === 1) {
+    const exact = byCode.get(q);
+    if (exact) return [exact];
+  }
 
   const scored = directory
     .map((s) => {

@@ -14,21 +14,41 @@ import { scoreAndFilterConnections } from "./transportRanking";
 // Debug flag for graph search - set to true to enable detailed logging
 const DEBUG_GRAPH_SEARCH = true;
 
+// Station code -> resolved Place (or null for "confirmed unresolvable"), cached for
+// the life of the process. Without this, every leg of every edge query (often dozens
+// of train services to the same station) re-runs a station-directory search AND a
+// fresh getOrCreatePlace resolution for a code we've very likely already resolved —
+// that redundant work is what made searches slow once station resolution started
+// actually succeeding instead of silently failing.
+const stationCodePlaceCache = new Map<string, Promise<Place | null>>();
+
 // Helper function to resolve a station code to a Place object
-async function resolvePlaceFromStationCode(stationCode: string): Promise<Place | null> {
-  try {
-    const stations = await searchStations(stationCode, 1); // Get best match
-    if (stations.length === 0) return null;
-    const bestStation = stations[0];
-    const cityName = cityNameFromStationName(bestStation.name);
-    return await getOrCreatePlace(cityName);
-  } catch (err) {
-    if (DEBUG_GRAPH_SEARCH) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.log(`[GRAPH SEARCH] Failed to resolve place from station code ${stationCode}:`, message);
+function resolvePlaceFromStationCode(stationCode: string): Promise<Place | null> {
+  let pending = stationCodePlaceCache.get(stationCode);
+  if (pending) return pending;
+
+  pending = (async () => {
+    try {
+      const stations = await searchStations(stationCode, 1); // Get best match
+      if (stations.length === 0) return null; // genuinely no such station — safe to cache forever
+      const bestStation = stations[0];
+      const cityName = cityNameFromStationName(bestStation.name);
+      return await getOrCreatePlace(cityName);
+    } catch (err) {
+      // A thrown error here (network blip, provider timeout) says nothing about
+      // whether stationCode is resolvable — it's not "confirmed unresolvable".
+      // Evict it so a later call gets a fresh attempt instead of being
+      // permanently blacklisted for the life of the process.
+      stationCodePlaceCache.delete(stationCode);
+      if (DEBUG_GRAPH_SEARCH) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.log(`[GRAPH SEARCH] Failed to resolve place from station code ${stationCode}:`, message);
+      }
+      return null;
     }
-    return null;
-  }
+  })();
+  stationCodePlaceCache.set(stationCode, pending);
+  return pending;
 }
 
 /**
@@ -136,15 +156,21 @@ export async function multimodalGraphSearch(origin: Place, destination: Place, d
           const connectionsPromises = Array.from(targetPlaces).map(async (target) => {
             try {
               const legs = await fetchEdges(state.currentPlace, target, mode);
-              // Extract destination places from connections and resolve them to Place objects
-              const placePromises = legs.map(async (leg) => {
-                // leg.to is a string ID (station code), resolve it to a Place object
-                const placeId = leg.to;
-                const placeObj = await resolvePlaceFromStationCode(placeId);
-                return placeObj ? placeObj : null;
-              });
-              const resolvedPlaces = await Promise.all(placePromises);
-              return resolvedPlaces.filter((p): p is Place => p !== null);
+              // Resolve each *unique* destination station code once — many legs
+              // (e.g. dozens of trains) commonly share the same destination code,
+              // so mapping every leg through resolvePlaceFromStationCode individually
+              // was firing off redundant work on top of the cache lookups.
+              const uniqueCodes = Array.from(new Set(legs.map((leg) => leg.to)));
+              const codeToPlace = new Map<string, Place | null>();
+              await Promise.all(
+                uniqueCodes.map(async (code) => {
+                  codeToPlace.set(code, await resolvePlaceFromStationCode(code));
+                })
+              );
+              const resolvedPlaces = legs
+                .map((leg) => codeToPlace.get(leg.to) ?? null)
+                .filter((p): p is Place => p !== null);
+              return resolvedPlaces;
             } catch (err:any) {
               // Silently fail for individual targets to avoid stopping the whole search
               if (DEBUG_GRAPH_SEARCH) {

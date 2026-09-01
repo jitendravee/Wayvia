@@ -22,7 +22,8 @@ interface PlacesApiResponse {
  * "TypeError: Failed to fetch".
  *
  * This hook is kept for backward compatibility but now properly
- * implements debouncing and uses countries.dev as the sole source.
+ * implements debouncing and calls /api/places, which merges GeoNames with
+ * the erail station directory (see app/api/places/route.ts).
  * New code should use usePlaceSearch from '@/lib/hooks/usePlaceSearch'
  * instead.
  */

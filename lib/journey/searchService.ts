@@ -4,6 +4,7 @@ import { ScoredHub } from "../graph/hubs";
 import { ALL_MODES } from "../transport/registry";
 import { multimodalGraphSearch } from "./graphSearch";
 import { trainMultiHopSearch } from "../transport/train";
+import { tagLegs } from "../graph/discoverMultimodal";
 import type { SearchFilters } from "./filters";
 import { DEFAULT_TRANSFER_BUFFER_MIN } from "./filters";
 import type { JourneyCandidate, Mode } from "../graph/types";
@@ -55,33 +56,74 @@ export async function searchJourneyPlaceFirst(
   let partial: PartialCoverage[] = [];
 
   if (origin && destination) {
-    // --- Train's own multi-hop engine (if train is requested) ---
-    if (hasTrain) {
-      const trainOpts: DiscoverOptions = {
-        date: opts.date,
-        maxHubs: opts.maxHubs,
-        transferBufferMin: opts.transferBufferMin,
-        maxTransferMin: opts.maxTransferMin,
-        maxConnections: opts.maxConnections,
-        forceTwoHub: opts.forceTwoHub,
-      };
+    // --- Kick off train's own multi-hop engine AND the generic bounded
+    // Place-graph search (bus/flight/cross-mode) IN PARALLEL. These two
+    // are independent data sources (different providers, different APIs)
+    // and were previously awaited one after another, which meant a slow
+    // or rate-limited provider in the generic search (e.g. ixigo bus
+    // returning 429s) added its full latency ON TOP of the train search's
+    // latency instead of overlapping with it — from the frontend's point
+    // of view, a struggling bus provider made it look like train search
+    // itself had stalled, even though train results were ready long
+    // before the response was sent. Firing both at once means total
+    // latency is bounded by the slower of the two, not their sum, and a
+    // failing bus provider can no longer hold up train results.
+    const trainOpts: DiscoverOptions = {
+      date: opts.date,
+      maxHubs: opts.maxHubs,
+      transferBufferMin: opts.transferBufferMin,
+      maxTransferMin: opts.maxTransferMin,
+      maxConnections: opts.maxConnections,
+      forceTwoHub: opts.forceTwoHub,
+    };
 
-      const trainResult = await trainMultiHopSearch(origin, destination, trainOpts);
+    const genericFilters: SearchFilters = {
+      modes: requestedModes, // Include all modes to allow cross-mode chains
+      maxConnections: opts.maxConnections ?? 2,
+      transferBufferMin: opts.transferBufferMin ?? DEFAULT_TRANSFER_BUFFER_MIN,
+    };
+
+    console.log(`[IXIGO REQUEST #1]`);
+    console.log(`from: ${origin.name || origin.id}`);
+    console.log(`to: ${destination.name || destination.id}`);
+    console.log(`date: ${opts.date}`);
+    console.log(`purpose: initial-discovery`);
+    console.log(`graphDepth: 0`);
+    console.log(`currentPlace: ${origin.name || origin.id}`);
+    console.log(`targetPlace: ${destination.name || destination.id}`);
+    console.log(`---`);
+
+    const [trainResult, genericPaths] = await Promise.all([
+      hasTrain ? trainMultiHopSearch(origin, destination, trainOpts) : Promise.resolve(null),
+      multimodalGraphSearch(origin, destination, opts.date, genericFilters),
+    ]);
+
+    // --- Train's own multi-hop engine results (if train was requested) ---
+    if (hasTrain) {
       if (trainResult) {
+        // Apply tagLegs to ensure all train legs have correct mode
+        const taggedTrainResult = {
+          ...trainResult,
+          direct: trainResult.direct.map((c) => tagLegs(c, "train")),
+          viaHub: trainResult.viaHub.map((c) => tagLegs(c, "train")),
+          viaTwoHub: trainResult.viaTwoHub.map((c) => tagLegs(c, "train")),
+          viaThreeHub: trainResult.viaThreeHub.map((c) => tagLegs(c, "train"))
+        };
+
         // Merge train results
-    for (const candidate of trainResult.direct ?? []) {
+    for (const candidate of taggedTrainResult.direct ?? []) {
   direct.push(candidate);
 }
 
-for (const candidate of trainResult.viaHub ?? []) {
+for (const candidate of taggedTrainResult.viaHub ?? []) {
   viaHub.push(candidate);
 }
 
-for (const candidate of trainResult.viaTwoHub ?? []) {
+for (const candidate of taggedTrainResult.viaTwoHub ?? []) {
   viaTwoHub.push(candidate);
 }
 
-for (const candidate of trainResult.viaThreeHub ?? []) {
+for (const candidate of taggedTrainResult.viaThreeHub ?? []) {
   viaThreeHub.push(candidate);
 }
 
@@ -90,7 +132,7 @@ for (const item of trainResult.partial ?? []) {
 }
 
         // Count modes from train results
-        for (const leg of [...trainResult.direct, ...trainResult.viaHub, ...trainResult.viaTwoHub, ...trainResult.viaThreeHub].flatMap(c => c.legs)) {
+        for (const leg of [...taggedTrainResult.direct, ...taggedTrainResult.viaHub, ...taggedTrainResult.viaTwoHub, ...taggedTrainResult.viaThreeHub].flatMap(c => c.legs)) {
           bump(leg.mode, 1);
         }
 
@@ -104,30 +146,9 @@ for (const item of trainResult.partial ?? []) {
       }
     }
 
-    // --- Generic bounded Place-graph search for non-train modes and cross-mode chains ---
-    // We always run the generic search to catch cross-mode journeys (e.g., bus->train, train->bus)
-    // and to handle non-train modes
-    const genericFilters: SearchFilters = {
-      modes: requestedModes, // Include all modes to allow cross-mode chains
-      maxConnections: opts.maxConnections ?? 2,
-      transferBufferMin: opts.transferBufferMin ?? DEFAULT_TRANSFER_BUFFER_MIN,
-    };
-
-    // Local counter for tracking the initial discovery request
-let initialRequestCounter = 0;
-initialRequestCounter++;
-console.log(`[IXIGO REQUEST #${initialRequestCounter}]`);
-console.log(`from: ${origin.name || origin.id}`);
-console.log(`to: ${destination.name || destination.id}`);
-console.log(`date: ${opts.date}`);
-console.log(`purpose: initial-discovery`);
-console.log(`graphDepth: 0`);
-console.log(`currentPlace: ${origin.name || origin.id}`);
-console.log(`targetPlace: ${destination.name || destination.id}`);
-console.log(`---`);
-
-const genericPaths = await multimodalGraphSearch(origin, destination, opts.date, genericFilters);
-
+    // --- Generic bounded Place-graph search results (bus/flight/cross-mode) ---
+    // We always run this to catch cross-mode journeys (e.g., bus->train, train->bus)
+    // and to handle non-train modes. (Fired in parallel with the train engine above.)
     for (const path of genericPaths) {
       // Count modes for modesAvailable and candidatesByMode
       for (const leg of path.legs) {
@@ -150,11 +171,16 @@ const genericPaths = await multimodalGraphSearch(origin, destination, opts.date,
     // Get hub candidates using station codes if available, otherwise use empty array for debug view.
     let genericHubs: ScoredHub[] = [];
     if (origin.railway?.stations?.length && destination.railway?.stations?.length) {
-      // Use the first station from each place for hub candidate generation
+      // Use the first station from each place for hub candidate generation,
+      // but score against the resolved Place's real coordinates (not just a
+      // DEFAULT_HUBS code lookup) — see lib/transport/train.ts's
+      // trainMultiHopSearch for the same reasoning.
       genericHubs = await getHubCandidates(
         origin.railway.stations[0].code,
         destination.railway.stations[0].code,
-        5
+        5,
+        origin.hasCoords ? { lat: origin.latitude, lon: origin.longitude } : null,
+        destination.hasCoords ? { lat: destination.latitude, lon: destination.longitude } : null
       );
     }
     const genericHubsExplored = genericHubs.map((h) => ({ code: h.code, name: h.name, relevance: h.relevance, source: "static/live" }));
@@ -219,9 +245,6 @@ function dedupeJourneyCandidates(candidates: JourneyCandidate[]): JourneyCandida
   return result;
 }
 
-function tagLegs(c: JourneyCandidate, mode: Mode): JourneyCandidate {
-  return { ...c, legs: c.legs.map((l) => ({ ...l, mode, source: l.source ?? "live" })) };
-}
 
 function emptyGraphResult(): GraphDiscoveryResult {
   return {

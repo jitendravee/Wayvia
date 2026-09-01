@@ -164,17 +164,37 @@ export interface ScoredHub extends Hub {
   detourRatio: number | null;
 }
 
+export interface GeoPoint {
+  lat: number;
+  lon: number;
+}
+
 /**
  * Scores a hub for a given origin -> destination pair by how much of a
  * detour it represents (viaDistance / directDistance). A hub that sits
  * roughly "on the way" scores near 1; a hub that requires backtracking
- * scores low. If we don't have coordinates for the origin or destination
- * (they're not in DEFAULT_HUBS — e.g. a small station), we fall back to a
- * neutral score of 0.5 for every hub rather than guessing.
+ * scores low.
+ *
+ * Coordinate resolution order for the origin/destination themselves:
+ *   1. `originCoords`/`destCoords`, if the caller passed them — this is
+ *      the resolved Place's real lat/lon (e.g. from GeoNames), so a small
+ *      station that isn't one of the curated DEFAULT_HUBS junctions still
+ *      gets real geographic scoring instead of a shrug.
+ *   2. Fall back to a DEFAULT_HUBS lookup by station code, for callers
+ *      that only have a code and no Place (kept for backward
+ *      compatibility with existing call sites).
+ *   3. If neither is available, every hub scores a neutral 0.5 rather
+ *      than guessing.
  */
-export function scoreHub(hub: Hub, origin: string, destination: string): ScoredHub {
-  const originStn = HUBS_BY_CODE.get(origin.toUpperCase());
-  const destStn = HUBS_BY_CODE.get(destination.toUpperCase());
+export function scoreHub(
+  hub: Hub,
+  origin: string,
+  destination: string,
+  originCoords?: GeoPoint | null,
+  destCoords?: GeoPoint | null
+): ScoredHub {
+  const originStn = originCoords ?? HUBS_BY_CODE.get(origin.toUpperCase());
+  const destStn = destCoords ?? HUBS_BY_CODE.get(destination.toUpperCase());
 
   // Hubs merged in from the live directory or route-topology discovery don't carry real
   // coordinates (lat/lon 0,0 is the sentinel — off the coast of Africa, never a real station).
@@ -209,7 +229,14 @@ export function scoreHub(hub: Hub, origin: string, destination: string): ScoredH
  * score as a neutral 0.5 via the "no geo data" branch in scoreHub, which
  * keeps them eligible without letting them crowd out well-scored geo hubs.
  */
-export function rankedCandidateHubs(from: string, to: string, max = 10, hubs: Hub[] = DEFAULT_HUBS): ScoredHub[] {
+export function rankedCandidateHubs(
+  from: string,
+  to: string,
+  max = 10,
+  hubs: Hub[] = DEFAULT_HUBS,
+  originCoords?: GeoPoint | null,
+  destCoords?: GeoPoint | null
+): ScoredHub[] {
   const f = from.toUpperCase();
   const t = to.toUpperCase();
   // De-dupe by code first (a merged pool can contain the same station from multiple sources).
@@ -218,7 +245,7 @@ export function rankedCandidateHubs(from: string, to: string, max = 10, hubs: Hu
 
   return Array.from(byCode.values())
     .filter((h) => h.code !== f && h.code !== t)
-    .map((h) => scoreHub(h, f, t))
+    .map((h) => scoreHub(h, f, t, originCoords, destCoords))
     .filter((h) => h.relevance > 0)
     .sort((a, b) => b.relevance - a.relevance)
     .slice(0, max);
