@@ -241,7 +241,7 @@ export function SegmentCard({ leg }: { leg: AnnotatedLeg }) {
   const Icon = MODE_ICON[leg.mode];
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-white p-4 shadow-sm">
+    <div className="flex min-w-0  flex-col gap-3 rounded-xl border border-border bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <span className="flex items-center gap-1.5 rounded-lg bg-violet-soft px-2 py-1 font-mono text-[11px] font-bold text-violet-dark">
           <Icon size={13} />#{leg.trainNo || leg.mode.toUpperCase()}
