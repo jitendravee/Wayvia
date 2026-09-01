@@ -595,6 +595,8 @@ export async function discoverJourneys(from: string, to: string, opts: DiscoverO
   // alias (checkbox era) for anything still passing it.
   const maxConnections: 1 | 2 | 3 = opts.maxConnections ?? (opts.forceTwoHub ? 2 : 2);
 
+  console.log(`[TRAIN discoverJourneys] START ${from} -> ${to} date=${opts.date} maxConnections=${maxConnections} maxHubs=${opts.maxHubs}`);
+
   const [direct, hubResult] = await Promise.all([directSearch(from, to, opts), hubSearch(from, to, opts)]);
 
   let viaHub = dedupe(hubResult.candidates);
@@ -681,6 +683,12 @@ export async function discoverJourneys(from: string, to: string, opts: DiscoverO
     viaHub.reduce((n, c) => n + c.legs.length, 0) +
     viaTwoHub.reduce((n, c) => n + c.legs.length, 0) +
     viaThreeHub.reduce((n, c) => n + c.legs.length, 0);
+
+  console.log(
+    `[TRAIN discoverJourneys] DONE ${from} -> ${to}: direct=${direct.length} viaHub=${viaHub.length} ` +
+      `viaTwoHub=${viaTwoHub.length} viaThreeHub=${viaThreeHub.length} (runTierTwo=${runTierTwo}, ` +
+      `tier3Run=${maxConnections >= 3}, totalFound=${totalFound})`
+  );
 
   return {
     direct,

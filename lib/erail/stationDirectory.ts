@@ -71,7 +71,7 @@ export function looksLikeStation(rec: { code: string; name: string }): boolean {
   return true;
 }
 
-const STATION_LIST_URL = "https://erail.in/js5/IRTrains.js";
+const STATION_LIST_URL = "https://erail.in/js5/IRStations.js";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h — this is a near-static asset
 
 let liveCache: { stations: DirectoryStation[]; fetchedAt: number } | null = null;
@@ -101,9 +101,10 @@ function tryJsonShape(text: string): DirectoryStation[] | null {
   const out: DirectoryStation[] = [];
   for (const item of arr) {
     if (typeof item === "string") {
-      // e.g. "NDLS - NEW DELHI" or "NDLS~NEW DELHI"
-      const m = item.match(/^\s*([A-Z0-9]{2,6})\s*[-~]\s*(.+?)\s*$/i);
-      if (m) out.push({ code: m[1].toUpperCase(), name: titleCase(m[2]) });
+      // Confirmed real shape: "NAME - CODE", e.g. "ROHTAK JN - ROK", "BABRALA - BBA".
+      // The code is always the short alphanumeric token after the last " - ".
+      const m = item.match(/^\s*(.+?)\s*-\s*([A-Za-z0-9]{2,8})\s*$/);
+      if (m) out.push({ code: m[2].toUpperCase(), name: titleCase(m[1]) });
       continue;
     }
     if (!item || typeof item !== "object") continue;
@@ -135,8 +136,8 @@ function tryJsLiteralShape(text: string): DirectoryStation[] | null {
       if (!name || !/[A-Za-z]/.test(name)) continue;
       out.push({ code, name: titleCase(name), state: fields[idx + 2] });
     } else {
-      const m = lit.match(/^([A-Z0-9]{2,6})\s*-\s*(.+)$/);
-      if (m) out.push({ code: m[1], name: titleCase(m[2]) });
+      const m = lit.match(/^(.+?)\s*-\s*([A-Za-z0-9]{2,8})$/);
+      if (m) out.push({ code: m[2].toUpperCase(), name: titleCase(m[1]) });
     }
   }
   const filtered = out.filter(looksLikeStation);
