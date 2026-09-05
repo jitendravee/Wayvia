@@ -11,6 +11,18 @@
  * and considered by generateMetadata. Every post's `excerpt` also doubles
  * as its meta description, so it's written to read naturally AND lead with
  * the primary keyword phrase.
+ *
+ * 2026-09-05 content pass: added a cluster of posts targeting high-intent,
+ * currently under-served Indian-rail search queries (chart preparation
+ * timing, Vikalp scheme, Premium Tatkal vs Tatkal, child ticket rules,
+ * duplicate/lost ticket rules, UTS unreserved-ticket app, and passenger
+ * rights). These sit alongside the existing PNR/waitlist/Tatkal cluster
+ * and cross-link into it via relatedSlugs so search + internal linking
+ * reinforce each other. Facts were checked against multiple current
+ * sources at time of writing; Indian Railways rules (refund windows,
+ * chart timing, quotas) get revised periodically, so each post keeps a
+ * light "verify on irctc.co.in" caveat rather than over-committing to a
+ * single number that may drift.
  */
 
 export type BlogCategory =
@@ -110,6 +122,7 @@ export const BLOG_POSTS: BlogPost[] = [
     relatedSlugs: [
       "pnr-status-explained-cnf-rac-wl-meaning",
       "waitlist-ticket-confirmation-chances-explained",
+      "vikalp-scheme-alternate-train-explained",
       "delhi-to-goa-7-ways-to-get-there",
       "how-to-find-cheaper-flight-train-combos",
     ],
@@ -196,6 +209,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "rswl-rqwl-gn-quota-explained",
       "waitlist-ticket-confirmation-chances-explained",
       "rac-vs-waitlist-difference-explained",
+      "chart-preparation-time-explained-first-second-chart",
       "train-ticket-cancellation-refund-rules-2026",
     ],
     content: [
@@ -239,7 +253,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "One important rule: once the chart is prepared — typically a few hours before departure — any ticket still showing WL is automatically cancelled and refunded (minus a small clerkage charge). A ticket that says CAN or is still WL after chart preparation means you cannot board that train.",
+        text: "One important rule: once the chart is prepared — typically a few hours before departure — any ticket still showing WL is automatically cancelled and refunded (minus a small clerkage charge). A ticket that says CAN or is still WL after chart preparation means you cannot board that train. Our chart preparation guide walks through exactly when that happens for your train.",
       },
       { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
     ],
@@ -328,6 +342,7 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
     relatedSlugs: [
       "waitlist-confirmation-prediction-and-trends",
+      "vikalp-scheme-alternate-train-explained",
       "pnr-status-explained-cnf-rac-wl-meaning",
       "rac-vs-waitlist-difference-explained",
       "irctc-tatkal-booking-2026-timings-rules",
@@ -363,7 +378,7 @@ export const BLOG_POSTS: BlogPost[] = [
         items: [
           "Check a different class on the same train — 3AC might be waitlisted while Sleeper still has room.",
           "Check nearby trains on the same route and date.",
-          "Look at the Vikalp scheme, which can auto-shift you to an alternate train with available seats.",
+          "Opt into the Vikalp scheme, which can auto-shift you to an alternate train with available seats — see our Vikalp guide for how to set it up.",
           "Keep a Tatkal attempt, a bus, or a flight as your realistic backup — not your first choice, but a safety net.",
         ],
       },
@@ -391,6 +406,7 @@ export const BLOG_POSTS: BlogPost[] = [
     relatedSlugs: [
       "waitlist-ticket-confirmation-chances-explained",
       "rswl-rqwl-gn-quota-explained",
+      "chart-preparation-time-explained-first-second-chart",
       "irctc-tatkal-booking-2026-timings-rules",
     ],
     content: [
@@ -420,13 +436,13 @@ export const BLOG_POSTS: BlogPost[] = [
       { type: "heading", id: "after-chart-preparation", text: "What happens after chart preparation" },
       {
         type: "paragraph",
-        text: "Indian Railways typically prepares a first chart several hours before departure, followed by a final chart closer to departure time; RAC and waitlisted passengers can still move into vacated berths between the two. But once the final chart is out, any ticket still showing WL is automatically cancelled — a WL ticket cannot be used to board after this point, regardless of how close the number was.",
+        text: "Indian Railways typically prepares a first chart some hours before departure, followed by a final chart much closer to departure time; RAC and waitlisted passengers can still move into vacated berths between the two. But once the final chart is out, any ticket still showing WL is automatically cancelled — a WL ticket cannot be used to board after this point, regardless of how close the number was. Our chart preparation guide has the fuller breakdown of both windows.",
       },
       { type: "tip", text: "If your waitlist number hasn't moved at all three or four days out, that's a stronger signal to arrange a backup than the raw number itself — a stalled WL 20 can be riskier than a fast-falling WL 45." },
       { type: "heading", id: "if-the-trend-looks-bad", text: "If the trend looks bad" },
       {
         type: "paragraph",
-        text: "Don't wait until the final chart to react. Check nearby trains, a different class on the same train, or a mixed-mode alternative a few days ahead of time, so you're not scrambling at the last minute if your ticket doesn't clear.",
+        text: "Don't wait until the final chart to react. Check nearby trains, a different class on the same train, opt into Vikalp, or a mixed-mode alternative a few days ahead of time, so you're not scrambling at the last minute if your ticket doesn't clear.",
       },
       { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
     ],
@@ -505,6 +521,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "is first ac not available in tatkal",
     ],
     relatedSlugs: [
+      "premium-tatkal-vs-tatkal-difference",
       "pnr-status-explained-cnf-rac-wl-meaning",
       "rswl-rqwl-gn-quota-explained",
       "diwali-chhath-puja-train-booking-tips",
@@ -547,8 +564,391 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "If Tatkal on your exact train is gone in seconds, check nearby departure stations or a connecting route — sometimes a train + bus or train + train combination has room even when the direct Tatkal quota doesn't.",
+        text: "If Tatkal on your exact train is gone in seconds, check nearby departure stations or a connecting route — sometimes a train + bus or train + train combination has room even when the direct Tatkal quota doesn't. If it's the pricing that's the problem rather than availability, it's worth comparing against Premium Tatkal before you assume the seat is gone entirely.",
       },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "premium-tatkal-vs-tatkal-difference",
+    title: "Tatkal vs Premium Tatkal: which one should you actually book?",
+    excerpt:
+      "The difference between Tatkal and Premium Tatkal isn't just the price — it's refund rules, confirmation odds, and how the fare behaves as seats sell out. Here's the honest breakdown.",
+    coverImage: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "6 min read",
+    date: "2026-09-02",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "tatkal vs premium tatkal",
+      "difference between tatkal and premium tatkal",
+      "premium tatkal refund rules",
+      "premium tatkal booking timing",
+      "is premium tatkal refundable",
+      "premium tatkal price increase",
+    ],
+    relatedSlugs: [
+      "irctc-tatkal-booking-2026-timings-rules",
+      "waitlist-ticket-confirmation-chances-explained",
+      "train-ticket-cancellation-refund-rules-2026",
+      "pnr-status-explained-cnf-rac-wl-meaning",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Tatkal and Premium Tatkal open at the same time, on the same day, for the same trains — which is exactly why people confuse them. But once you look past the shared timing, they behave quite differently, especially around price and refunds.",
+      },
+      { type: "heading", id: "same-window-different-pricing", text: "Same booking window, different pricing model" },
+      {
+        type: "paragraph",
+        text: "Both quotas open one day before the date of journey, from the train's origin station: 10:00 AM for AC classes, 11:00 AM for Sleeper and Second Sitting. Regular Tatkal charges a fixed, pre-set extra fare on top of the base ticket price. Premium Tatkal instead uses a dynamic, demand-based fare that starts around the Tatkal rate and climbs as more seats in that quota get booked — similar in spirit to how flight prices move.",
+      },
+      { type: "heading", id: "confirmed-seat-vs-waitlist-risk", text: "Confirmed seat vs. waitlist risk" },
+      {
+        type: "paragraph",
+        text: "Regular Tatkal can and does waitlist once its allocation runs out — you might end up with a TQWL ticket and no guarantee of travel. Premium Tatkal, by design, only sells confirmed berths; once the quota's seats are gone, the option simply disappears from booking rather than offering you a waitlisted ticket. That's the trade-off: you're paying a rising fare specifically to avoid the waitlist.",
+      },
+      { type: "heading", id: "refund-rules-the-part-that-trips-people-up", text: "Refund rules — the part that trips people up" },
+      {
+        type: "checklist",
+        items: [
+          "Confirmed regular Tatkal ticket, cancelled by you: no refund, except if the train itself is cancelled or delayed 3+ hours (claimable via TDR).",
+          "Confirmed Premium Tatkal ticket, cancelled by you: no refund under essentially any circumstance other than the train being cancelled by Railways.",
+          "A Tatkal or Premium Tatkal ticket that stays waitlisted and never confirms by chart preparation: refunded automatically, just like a regular waitlisted ticket, minus a small clerkage charge.",
+        ],
+      },
+      { type: "tip", text: "Because Premium Tatkal can't waitlist, there's no version of \"it might still confirm later\" — if you book it and then need to cancel, treat that money as spent. Only choose it when the trip is genuinely locked in." },
+      { type: "heading", id: "so-which-one-should-you-pick", text: "So which one should you pick?" },
+      {
+        type: "checklist",
+        items: [
+          "Budget matters more than certainty, and you can tolerate a waitlist: try regular Tatkal first.",
+          "You absolutely must travel and can't risk a waitlisted seat: Premium Tatkal, if it's still showing availability.",
+          "Regular Tatkal already waitlisted the moment you tried: check Premium Tatkal immediately — its fare is lowest right when the quota opens and climbs from there.",
+          "Neither has room at all: compare nearby stations, a connecting route, or a different mode for the same date.",
+        ],
+      },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "vikalp-scheme-alternate-train-explained",
+    title: "What is the Vikalp scheme? How IRCTC's free alternate-train upgrade works",
+    excerpt:
+      "Vikalp scheme explained: how the Alternate Train Accommodation Scheme (ATAS) can move your waitlisted ticket to a confirmed seat on a different train — for free.",
+    coverImage: "https://images.unsplash.com/photo-1685858874777-b87106319be7?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "5 min read",
+    date: "2026-09-03",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "vikalp scheme irctc",
+      "alternate train accommodation scheme",
+      "vikalp scheme kya hai",
+      "how to opt vikalp scheme",
+      "vikalp scheme confirmed seat",
+      "atas irctc full form",
+    ],
+    relatedSlugs: [
+      "waitlist-ticket-confirmation-chances-explained",
+      "waitlist-confirmation-prediction-and-trends",
+      "chart-preparation-time-explained-first-second-chart",
+      "pnr-status-explained-cnf-rac-wl-meaning",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Most waitlisted passengers only find out about Vikalp after they've already given up on a train — which is a shame, because it's a free, official Indian Railways scheme built specifically for this situation.",
+      },
+      { type: "heading", id: "what-vikalp-actually-is", text: "What Vikalp actually is" },
+      {
+        type: "paragraph",
+        text: "Vikalp — short for the Alternate Train Accommodation Scheme (ATAS) — automatically looks for vacant berths on other trains running the same route around the same time, and shifts eligible waitlisted passengers into them at chart preparation. It costs nothing extra, even if you end up moved onto a premium train like a Rajdhani or Shatabdi.",
+      },
+      { type: "heading", id: "how-it-works-step-by-step", text: "How it works, step by step" },
+      {
+        type: "checklist",
+        items: [
+          "Opt into Vikalp while booking your ticket, or later from your booking history — but only before chart preparation.",
+          "Choose up to a handful of alternate trains you'd be willing to travel on instead.",
+          "If your original ticket is still fully waitlisted at chart time, the system checks those alternate trains for vacant seats.",
+          "If a seat is found, you're allotted it — your original PNR is cancelled and a brand-new PNR is generated for the alternate train.",
+        ],
+      },
+      { type: "heading", id: "what-vikalp-does-not-do", text: "What Vikalp doesn't do" },
+      {
+        type: "paragraph",
+        text: "It isn't a guarantee — you're only in the running if one of your chosen alternate trains actually has a vacant berth. You also don't get to pick the exact seat or coach, and once you're moved, there's no reverting to your original train even if it later clears its own waitlist.",
+      },
+      { type: "tip", text: "Select alternate trains spread across a wider time window (not just the one departing an hour later) — the more genuinely different options you give the system, the better your odds of it finding a vacant seat." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "chart-preparation-time-explained-first-second-chart",
+    title: "Chart preparation time explained: what happens to your ticket, and when",
+    excerpt:
+      "Chart preparation time confuses almost every train traveller at some point. Here's when the first and final charts are typically prepared, and exactly what changes for CNF, RAC and WL tickets.",
+    coverImage: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "6 min read",
+    date: "2026-09-04",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "chart preparation time",
+      "irctc chart preparation time",
+      "first chart second chart timing",
+      "reservation chart kab banta hai",
+      "current booking after chart preparation",
+      "what happens to waitlist ticket after chart preparation",
+    ],
+    relatedSlugs: [
+      "pnr-status-explained-cnf-rac-wl-meaning",
+      "waitlist-confirmation-prediction-and-trends",
+      "vikalp-scheme-alternate-train-explained",
+      "train-ticket-cancellation-refund-rules-2026",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "\"Chart preparation\" is the moment Indian Railways finalises who's actually travelling on a train — and it's the single biggest turning point for anyone sitting on a waitlisted or RAC ticket. Here's what it means in practice.",
+      },
+      { type: "heading", id: "two-charts-not-one", text: "There are two charts, not one" },
+      {
+        type: "paragraph",
+        text: "Every train gets a first (main) chart, followed later by a second (final) chart. As a general rule of thumb, the first chart is prepared a few hours before departure from the originating station — earlier in the evening for trains that leave very early the next morning — and the final chart is prepared shortly before departure, updating for last-minute cancellations and current bookings. The exact windows have been revised by Indian Railways more than once in recent years, so treat this as the general pattern rather than a fixed number, and check your PNR status close to departure for your specific train.",
+      },
+      { type: "heading", id: "what-changes-at-each-chart", text: "What changes for CNF, RAC and WL at each chart" },
+      {
+        type: "checklist",
+        items: [
+          "CNF (Confirmed) — nothing changes for you; your coach and berth were already assigned at booking.",
+          "RAC — you can already board and share a berth; at chart time, RAC passengers move into any full berth that's opened up through cancellations, ahead of anyone still on the waitlist.",
+          "WL (Waitlisted) e-ticket — if it's still not confirmed or RAC by the first chart, it can still move at the final chart as more cancellations come in. If it's still fully waitlisted after the final chart, it's automatically cancelled and refunded, minus a small clerkage charge — you cannot board on it.",
+        ],
+      },
+      { type: "heading", id: "current-booking-after-the-chart", text: "\"Current booking\" after the chart" },
+      {
+        type: "paragraph",
+        text: "Once the first chart is out, any berths that remain vacant (or open up from cancellations) become available again as \"current\" bookings — through IRCTC, the app, or a reservation counter — right up until shortly before departure. This is worth checking if your search shows WL for the full route but you're flexible about boarding partway along it: seats can appear on a shorter segment even when the full origin-to-destination search doesn't show any.",
+      },
+      { type: "tip", text: "If your ticket is fully waitlisted going into chart preparation, don't wait passively — opt into the Vikalp scheme in advance, and have a backup train, bus, or flight ready so you're not scrambling in the final hour." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "child-ticket-rules-indian-railways",
+    title: "Child train ticket rules in India: age limits, half fare, and berth rules",
+    excerpt:
+      "Do kids need a train ticket in India? Here's exactly when children travel free, when half fare applies, and when a full adult ticket with a berth is required.",
+    coverImage: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "5 min read",
+    date: "2026-09-04",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "child ticket rules indian railway",
+      "train ticket for child age",
+      "half ticket railway rules",
+      "child fare train india",
+      "do kids need train ticket",
+      "nosb ticket meaning",
+    ],
+    relatedSlugs: [
+      "senior-citizen-train-travel-india-guide",
+      "train-passenger-rights-you-should-know",
+      "irctc-tatkal-booking-2026-timings-rules",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Booking for a family trip is where child fare rules trip up even experienced travellers — one wrong option during checkout and you've either overpaid or under-ticketed your child. Indian Railways splits children into three age bands, and each works differently.",
+      },
+      { type: "heading", id: "under-5-free-but-no-berth", text: "Under 5: free, but no separate berth" },
+      {
+        type: "paragraph",
+        text: "Children under 5 years old travel completely free — no ticket is required at all. The condition: they don't get their own seat or berth and are expected to share with the accompanying adult. If you specifically want a dedicated berth for a child under 5, you'll be charged the full adult fare for it.",
+      },
+      { type: "heading", id: "5-to-under-12-your-choice", text: "5 to under 12: half fare or full fare, your choice" },
+      {
+        type: "paragraph",
+        text: "This is the band most people get wrong. You have two options at booking: pick \"No Seat/No Berth\" (often shown as NOSB) and pay roughly half the adult fare, with the child sharing your berth — or request a dedicated berth and pay the full adult fare, same as for yourself.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Half fare (NOSB): child shares your berth, no separate seat allotted.",
+          "Full fare: child gets their own confirmed berth, treated the same as an adult passenger for allocation purposes.",
+          "Changing your mind after booking generally isn't simple — switching a half-fare, no-berth ticket to a full-fare berth ticket usually means cancelling and rebooking, subject to availability.",
+        ],
+      },
+      { type: "heading", id: "12-and-above-always-adult-fare", text: "12 and above: always treated as an adult" },
+      {
+        type: "paragraph",
+        text: "Once a child turns 12, Indian Railways treats them exactly like an adult passenger — full fare, own berth, no half-price option of any kind.",
+      },
+      { type: "tip", text: "Carry a valid age proof for children you've booked at a discounted or free fare — Aadhaar, a birth certificate, or a school ID. TTEs are authorised to ask for it, and misrepresenting a child's age to save on fare can mean an on-the-spot penalty." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "lost-or-damaged-train-ticket-duplicate-ticket-rules",
+    title: "Lost or torn train ticket? Duplicate ticket rules and charges explained",
+    excerpt:
+      "Lost your train ticket, or is it torn beyond recognition? Here's exactly what to do — and what it costs — depending on whether you booked an e-ticket or a counter ticket.",
+    coverImage: "https://images.unsplash.com/photo-1545941962-1b6654eb8072?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "5 min read",
+    date: "2026-09-05",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "duplicate train ticket rules",
+      "lost train ticket what to do",
+      "torn train ticket replacement",
+      "how to get duplicate irctc ticket",
+      "lost e-ticket train travel",
+      "railway ticket lost fine",
+    ],
+    relatedSlugs: [
+      "train-passenger-rights-you-should-know",
+      "irctc-website-down-what-to-do",
+      "train-ticket-cancellation-refund-rules-2026",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "What you do about a lost or damaged train ticket depends heavily on whether you booked online (an e-ticket) or from a physical counter (a PRS/window ticket) — the two are treated very differently.",
+      },
+      { type: "heading", id: "lost-an-e-ticket-booked-online", text: "Lost an e-ticket booked online" },
+      {
+        type: "paragraph",
+        text: "This is the easier case. An e-ticket doesn't have a single physical original the way a counter ticket does, so there's no \"duplicate ticket fee\" to pay. Log back into your IRCTC account and pull it up from your booking history to reprint or re-download it, or simply show your PNR and a valid photo ID to the TTE on board.",
+      },
+      { type: "heading", id: "lost-a-counter-prs-ticket", text: "Lost a counter (PRS) ticket" },
+      {
+        type: "paragraph",
+        text: "Counter tickets are treated as physical financial documents, so a screenshot or photo of one isn't valid for travel — you need an official duplicate. Head to a computerised reservation counter, explain the loss in writing to the Chief Reservation Supervisor, and show a valid ID.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Reported before chart preparation: a duplicate confirmed or RAC ticket can usually be issued for a small flat fee per passenger.",
+          "Reported after chart preparation: a duplicate can still be issued, but generally for a higher fee (a percentage of the original fare) rather than a flat charge.",
+          "A lost RAC ticket after the final chart: railways typically won't issue a duplicate or process a refund for it at that point — treat this window as your last chance to sort it out.",
+          "A torn or mutilated (but still identifiable) ticket: can usually be exchanged for a duplicate at a reservation counter without the same loss-reporting process.",
+        ],
+      },
+      { type: "tip", text: "If you realise you've lost a ticket while already on the train, tell the TTE immediately and show your ID — sorting it proactively is far better than being found without a valid ticket during a routine check, which can mean paying the fare afresh plus a penalty." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "uts-app-unreserved-ticket-booking-guide",
+    title: "UTS app: how to book unreserved and platform tickets from your phone",
+    excerpt:
+      "Skip the ticket-counter queue: the UTS app lets you book unreserved (general class), season, and platform tickets on Indian Railways straight from your smartphone.",
+    coverImage: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "5 min read",
+    date: "2026-09-05",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "uts app train ticket booking",
+      "unreserved ticket app",
+      "platform ticket app booking",
+      "general ticket booking online india",
+      "uts app kya hai",
+      "book unreserved ticket without queue",
+    ],
+    relatedSlugs: [
+      "irctc-website-down-what-to-do",
+      "train-vs-flight-vs-bus-how-to-choose",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "If your journey doesn't need a reserved berth — a short unreserved (general/second class) hop, a platform ticket, or a season pass — you don't need to queue at a counter at all. UTS, Indian Railways' official Unreserved Ticketing System app, handles all three from your phone.",
+      },
+      { type: "heading", id: "what-you-can-and-cannot-book-on-uts", text: "What you can — and can't — book on UTS" },
+      {
+        type: "checklist",
+        items: [
+          "Unreserved (general/second class) point-to-point journey tickets.",
+          "Season tickets (monthly and longer passes for regular commuters).",
+          "Platform tickets, if you're within the app's set radius of the station.",
+          "Not available: Sleeper, AC, or any other reserved-berth class — UTS is strictly for unreserved travel.",
+        ],
+      },
+      { type: "heading", id: "paper-vs-paperless-mode", text: "Paper vs. paperless mode" },
+      {
+        type: "paragraph",
+        text: "In paperless mode, the app checks your location via GPS to confirm you're near the station or track before letting you book, and your journey needs to start within a set window after booking (the app shows a live countdown, so rely on that rather than a fixed number) — after which you'll need to travel or rebook. In paper mode, you still need to print the ticket at an ATVM or counter kiosk before boarding.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Register with your mobile number, name, gender and date of birth; you'll receive an OTP/MPIN to complete setup.",
+          "Once a paperless ticket is booked, you can show it to the TTE straight from the app, even without an internet connection at that moment.",
+          "Paperless tickets generally can't be cancelled once booked, so double-check your journey details before confirming.",
+        ],
+      },
+      { type: "tip", text: "For a platform ticket when you're just seeing someone off (not travelling yourself), UTS is usually the fastest option — no counter queue, and it's valid the moment it's issued." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "train-passenger-rights-you-should-know",
+    title: "Train passenger rights in India that most people don't know about",
+    excerpt:
+      "From a one-hour grace period if you miss your train to refunds for a broken AC, here are the Indian Railways passenger rights that rarely get mentioned — but can genuinely save your trip.",
+    coverImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "6 min read",
+    date: "2026-09-05",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "indian railway passenger rights",
+      "tte rules after 10pm",
+      "train delay refund rules",
+      "ac coach not working refund",
+      "missed train reserved seat rule",
+      "railway passenger rights india",
+    ],
+    relatedSlugs: [
+      "train-ticket-cancellation-refund-rules-2026",
+      "senior-citizen-train-travel-india-guide",
+      "lost-or-damaged-train-ticket-duplicate-ticket-rules",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Indian Railways carries millions of passengers a day, and along with that scale comes a set of passenger-protection rules that hardly anyone actually knows about until they need them. A few are worth keeping in your back pocket.",
+      },
+      { type: "heading", id: "tte-cannot-check-tickets-after-10pm", text: "TTEs generally can't check tickets after 10 PM" },
+      {
+        type: "paragraph",
+        text: "Ticket verification is meant to be completed before 10 PM, so a TTE shouldn't be waking sleeping passengers for routine checks after that — unless you board the train after 10 PM yourself, in which case your ticket is checked at boarding.",
+      },
+      { type: "heading", id: "if-you-miss-the-train-at-boarding", text: "If you miss the train at your boarding station" },
+      {
+        type: "paragraph",
+        text: "Missing your train doesn't automatically forfeit your reserved seat. Your berth can't be reallocated to another passenger for at least one hour, or until the train passes the next two stops — whichever comes first — which means you may be able to board at the next station and still claim your original seat.",
+      },
+      { type: "heading", id: "ac-not-working-en-route", text: "If the AC isn't working" },
+      {
+        type: "paragraph",
+        text: "Travelling in an AC class where the air conditioning fails partway through the journey entitles you to a refund covering the fare difference for the distance or duration it wasn't functioning — this is a genuine, claimable right, not just a complaint you can raise.",
+      },
+      { type: "heading", id: "big-delays-and-cut-short-journeys", text: "Big delays and journeys cut short" },
+      {
+        type: "checklist",
+        items: [
+          "If your train is delayed more than three hours and you decide not to travel at all, you're entitled to a full refund (filed as a TDR).",
+          "If the journey is terminated early due to a natural calamity or a technical issue with no alternative arrangement offered, you get a full refund; if an alternate train is offered and you decline it, the fare is adjusted for the distance actually travelled.",
+          "If Indian Railways cancels your train outright, you get a full refund regardless of ticket type or how close to departure the cancellation happens.",
+        ],
+      },
+      { type: "tip", text: "None of these rights are automatic paperwork-free refunds in every case — several (delay refunds, AC-failure refunds) need a TDR filed through IRCTC. Keep your PNR and any TTE acknowledgment handy, since that's usually what supports the claim." },
       { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
     ],
   },
@@ -574,7 +974,11 @@ export const BLOG_POSTS: BlogPost[] = [
     relatedSlugs: [
       "pnr-status-explained-cnf-rac-wl-meaning",
       "irctc-tatkal-booking-2026-timings-rules",
+      "premium-tatkal-vs-tatkal-difference",
       "waitlist-ticket-confirmation-chances-explained",
+      "chart-preparation-time-explained-first-second-chart",
+      "lost-or-damaged-train-ticket-duplicate-ticket-rules",
+      "train-passenger-rights-you-should-know",
       "irctc-website-down-what-to-do",
     ],
     content: [
@@ -602,10 +1006,10 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "paragraph",
         text: "If your ticket is still fully waitlisted when the chart is prepared, it's cancelled automatically and refunded in full, minus a small clerkage charge per passenger — you don't need to do anything. If you choose to cancel a RAC or waitlisted ticket yourself before that point, only the clerkage charge applies, not the 72/24/8-hour deduction scale that governs confirmed tickets.",
       },
-      { type: "heading", id: "tatkal-tickets-are-the-exception", text: "Tatkal tickets are the exception" },
+      { type: "heading", id: "tatkal-tickets-are-the-exception", text: "Tatkal and Premium Tatkal tickets are the exception" },
       {
         type: "paragraph",
-        text: "A confirmed Tatkal ticket is non-refundable if you cancel it yourself — this hasn't changed under the 2026 revision. The one exception is a Tatkal ticket that never confirms and is still waitlisted at chart preparation: that portion is refunded automatically, just like a regular waitlisted ticket, minus the applicable clerkage charge.",
+        text: "A confirmed Tatkal ticket is non-refundable if you cancel it yourself — this hasn't changed under the 2026 revision, and Premium Tatkal is stricter still. The one exception for regular Tatkal is a ticket that never confirms and is still waitlisted at chart preparation: that portion is refunded automatically, just like a regular waitlisted ticket, minus the applicable clerkage charge.",
       },
       { type: "heading", id: "what-is-a-tdr-and-when-you-need-one", text: "What is a TDR, and when do you need one" },
       {
@@ -649,6 +1053,7 @@ export const BLOG_POSTS: BlogPost[] = [
     relatedSlugs: [
       "irctc-tatkal-booking-2026-timings-rules",
       "waitlist-ticket-confirmation-chances-explained",
+      "vikalp-scheme-alternate-train-explained",
       "irctc-website-down-what-to-do",
     ],
     content: [
@@ -673,7 +1078,7 @@ export const BLOG_POSTS: BlogPost[] = [
       { type: "heading", id: "if-general-quota-is-already-gone", text: "If general quota is already gone" },
       {
         type: "paragraph",
-        text: "Watch for special or Suvidha trains (numbered in the 0XXXX series) that Indian Railways typically adds during festival peaks — they're announced closer to the date and often have a separate, less crowded booking window. Tatkal remains a backup for the day before travel, though on the busiest festival corridors even that clears out fast.",
+        text: "Watch for special or Suvidha trains (numbered in the 0XXXX series) that Indian Railways typically adds during festival peaks — they're announced closer to the date and often have a separate, less crowded booking window. Opting into Vikalp for your existing waitlisted booking, and keeping Tatkal as a day-before backup, both remain useful even after the main window has closed.",
       },
       { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
     ],
@@ -699,6 +1104,8 @@ export const BLOG_POSTS: BlogPost[] = [
       "pnr-status-explained-cnf-rac-wl-meaning",
       "rswl-rqwl-gn-quota-explained",
       "irctc-tatkal-booking-2026-timings-rules",
+      "child-ticket-rules-indian-railways",
+      "train-passenger-rights-you-should-know",
     ],
     content: [
       {
@@ -987,7 +1394,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "irctc booking failed payment deducted",
       "irctc server slow tatkal",
     ],
-    relatedSlugs: ["irctc-tatkal-booking-2026-timings-rules", "diwali-chhath-puja-train-booking-tips"],
+    relatedSlugs: ["irctc-tatkal-booking-2026-timings-rules", "diwali-chhath-puja-train-booking-tips", "uts-app-unreserved-ticket-booking-guide"],
     content: [
       {
         type: "paragraph",
@@ -1027,7 +1434,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "cheapest way to travel india",
       "fastest way to travel long distance india",
     ],
-    relatedSlugs: ["how-to-find-cheaper-flight-train-combos", "how-wayvia-finds-alternative-journeys"],
+    relatedSlugs: ["how-to-find-cheaper-flight-train-combos", "how-wayvia-finds-alternative-journeys", "uts-app-unreserved-ticket-booking-guide"],
     content: [
       {
         type: "paragraph",
