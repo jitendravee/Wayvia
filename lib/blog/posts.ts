@@ -23,6 +23,17 @@
  * chart timing, quotas) get revised periodically, so each post keeps a
  * light "verify on irctc.co.in" caveat rather than over-committing to a
  * single number that may drift.
+ *
+ * 2026-09-06 content pass: added an India Fort Travel cluster — a pillar
+ * "best forts in India" guide plus route-specific posts (Rajasthan fort
+ * circuit, Amer Fort access guide, Jaipur fort circuit, forts near Delhi,
+ * fort trips by train) — deliberately cross-linked into the existing
+ * PNR/WL/Vikalp cluster, since anyone planning a Rajasthan fort trip is a
+ * near-certain match for "is my train to Jaipur/Jodhpur going to
+ * confirm" searches. Specific ticket prices, exact timings and jeep/taxi
+ * fares are intentionally left out or kept general — these change often
+ * and should be verified against official sources (ASI/state tourism
+ * sites) close to publish, rather than hard-coded here.
  */
 
 export type BlogCategory =
@@ -123,6 +134,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "pnr-status-explained-cnf-rac-wl-meaning",
       "waitlist-ticket-confirmation-chances-explained",
       "vikalp-scheme-alternate-train-explained",
+      "fort-trip-train-waitlisted-alternative-routes",
       "delhi-to-goa-7-ways-to-get-there",
       "how-to-find-cheaper-flight-train-combos",
     ],
@@ -1141,6 +1153,516 @@ export const BLOG_POSTS: BlogPost[] = [
   },
 
   /* ------------------------------------------------------------------ */
+  /* India Fort Travel cluster — a pillar guide plus route-specific       */
+  /* posts, deliberately cross-linked into the PNR/WL/Vikalp cluster      */
+  /* above, since a lot of fort-trip searches (Jaipur, Jodhpur, Udaipur)  */
+  /* overlap heavily with "will my train confirm" searches.               */
+  /* ------------------------------------------------------------------ */
+  {
+    slug: "best-forts-in-india-to-visit",
+    title: "Best forts in India to visit: history, routes and travel tips",
+    excerpt:
+      "The best forts in India, from Rajasthan's UNESCO hill forts to Golconda and the Maratha forts of Maharashtra — with practical notes on how to actually get to each one.",
+    coverImage: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
+    category: "route-ideas",
+    readTime: "9 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "best forts in india",
+      "famous forts in india",
+      "historical forts in india",
+      "top forts to visit in india",
+      "most beautiful forts in india",
+      "unesco forts in india",
+      "hill forts in india",
+      "forts in india for a weekend trip",
+    ],
+    relatedSlugs: [
+      "rajasthan-fort-tour-route",
+      "best-fort-trips-in-india-by-train",
+      "best-forts-near-delhi-for-weekend-trip",
+      "how-to-reach-amer-fort-from-jaipur",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "India's forts range from single hilltop citadels you can see in an afternoon to entire fortified cities you could spend a full day exploring. This is a starting map of the best-known ones, grouped by region, with a pointer to a deeper guide for each cluster.",
+      },
+      { type: "heading", id: "rajasthan-the-heaviest-concentration", text: "Rajasthan: the heaviest concentration" },
+      {
+        type: "paragraph",
+        text: "Rajasthan is home to the Hill Forts of Rajasthan, a UNESCO World Heritage listing covering six forts: Chittorgarh, Kumbhalgarh, Ranthambore (Sawai Madhopur), Gagron (Jhalawar), Amber/Amer (Jaipur), and Jaisalmer. Together they cover roughly a thousand years of Rajput military and courtly architecture.",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Amer Fort, Jaipur — the most visited of the six, a short trip from the city and easy to combine with Jaigarh and Nahargarh forts.",
+          "Mehrangarh Fort, Jodhpur — not part of the UNESCO listing but one of India's most dramatic hill forts, towering over the Blue City.",
+          "Jaisalmer Fort — a rare \"living fort\" with homes, shops and temples still inside its walls, deep in the Thar Desert.",
+          "Chittorgarh Fort — one of India's largest forts by area, associated with Rajput history and several well-known sieges.",
+          "Kumbhalgarh Fort — famous for its massive perimeter wall, often described as one of the longest continuous walls in the world.",
+        ],
+      },
+      { type: "tip", text: "If Rajasthan is your main draw, our dedicated Rajasthan fort tour route guide covers the full Jaipur–Jodhpur–Udaipur–Jaisalmer circuit with transport options for each leg." },
+      { type: "heading", id: "delhi-and-agra", text: "Delhi and Agra" },
+      {
+        type: "checklist",
+        items: [
+          "Red Fort, Delhi — the Mughal seat of power for two centuries, right in the heart of Old Delhi.",
+          "Agra Fort — the Mughal fort that predates the Taj Mahal, an easy add-on to any Agra day trip.",
+          "Purana Qila, Delhi — older and quieter than the Red Fort, worth an hour if you're already in the city.",
+        ],
+      },
+      { type: "heading", id: "central-and-south-india", text: "Central and South India" },
+      {
+        type: "checklist",
+        items: [
+          "Gwalior Fort — a hilltop fort in Madhya Pradesh, an easy stop on the Delhi–Gwalior rail corridor.",
+          "Golconda Fort, Hyderabad — famous for its acoustics and its history as a diamond-trading centre.",
+          "Bekal Fort, Kerala — a coastal fort on the Arabian Sea, a very different setting from the desert forts of Rajasthan.",
+        ],
+      },
+      { type: "heading", id: "maharashtra-hill-forts", text: "Maharashtra's hill forts" },
+      {
+        type: "paragraph",
+        text: "Maharashtra has a completely different fort culture — dozens of Maratha-era hill forts around Mumbai and Pune, many reached by trekking rather than by road all the way to the top. Sinhagad, Raigad, Rajgad and Lohagad are among the most popular for a day trip from either city.",
+      },
+      { type: "heading", id: "how-to-actually-get-to-these", text: "How to actually get to these" },
+      {
+        type: "paragraph",
+        text: "Most forts sit some distance from the nearest railway station, so the realistic journey is almost always a train or flight into the nearest city, followed by a local bus, taxi, or (for the Maharashtra forts) a trek. Our fort-trips-by-train guide breaks down the nearest useful station for each major fort.",
+      },
+      { type: "tip", text: "Fort entry fees, opening hours, and local jeep or taxi fares change fairly often — treat any specific number you read (including elsewhere on this site) as a starting estimate and confirm it close to your travel date." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "rajasthan-fort-tour-route",
+    title: "Rajasthan fort tour route: Jaipur, Jodhpur, Udaipur and Jaisalmer itinerary",
+    excerpt:
+      "A practical Rajasthan fort tour route from Jaipur to Jodhpur, Udaipur and Jaisalmer, with train, bus and car options for every leg of the circuit.",
+    coverImage: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
+    category: "route-ideas",
+    readTime: "9 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "rajasthan fort tour route",
+      "rajasthan fort tour itinerary",
+      "rajasthan forts road trip",
+      "rajasthan fort circuit by train",
+      "jaipur jodhpur udaipur fort itinerary",
+      "rajasthan heritage tour itinerary",
+      "7 day rajasthan fort tour",
+    ],
+    relatedSlugs: [
+      "best-forts-in-india-to-visit",
+      "jaipur-fort-circuit-amer-jaigarh-nahargarh",
+      "how-to-reach-amer-fort-from-jaipur",
+      "best-fort-trips-in-india-by-train",
+      "wl-80-confirmation-chances-fort-trip",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Rajasthan's forts are spread across a state roughly the size of a small country, so the route you pick matters as much as the list of forts on it. Here's a practical circuit, plus a shorter version if you're tighter on time.",
+      },
+      { type: "heading", id: "the-full-circuit", text: "The full circuit: Jaipur → Jodhpur → Udaipur → Jaisalmer" },
+      {
+        type: "paragraph",
+        text: "This is the route that covers the most UNESCO-listed hill forts in one trip, roughly in this order: Jaipur (Amer Fort), an optional stop at Ajmer/Pushkar, Jodhpur (Mehrangarh Fort), Kumbhalgarh, Udaipur, Chittorgarh, and Jaisalmer. Doing it justice comfortably takes 8–10 days if you want a day at each major stop rather than a rushed pass-through.",
+      },
+      { type: "heading", id: "the-shorter-version", text: "The shorter version: Jaipur → Jodhpur → Udaipur" },
+      {
+        type: "paragraph",
+        text: "If Jaisalmer's distance is the sticking point, dropping it gives you a tighter, still very complete circuit covering Amer Fort, Mehrangarh Fort, and Udaipur's palace-and-lake city (with Kumbhalgarh and Chittorgarh as day trips from Udaipur). This version is realistic in 5–6 days.",
+      },
+      { type: "heading", id: "leg-by-leg-transport-options", text: "Leg-by-leg transport options" },
+      {
+        type: "checklist",
+        items: [
+          "Delhi to Jaipur — train, bus or flight; the fastest trains cover it in well under 5 hours, making this the easiest entry point into the circuit.",
+          "Jaipur to Jodhpur — a direct train or an overnight bus; the train is generally the more comfortable choice for this stretch.",
+          "Jodhpur to Udaipur — mostly a bus or car journey, since direct train options are limited; the road route passes close to Kumbhalgarh, which is worth timing your travel around.",
+          "Udaipur to Chittorgarh — an easy train or car day trip, doable as a there-and-back from Udaipur without changing hotels.",
+          "Udaipur to Jaisalmer — the longest leg by far; a direct train or a flight connection through Jodhpur is usually more realistic than driving straight through.",
+          "Jaisalmer back to Delhi — flight or train, depending on how much time is left in your trip.",
+        ],
+      },
+      { type: "tip", text: "Rather than locking into one mode for the whole circuit, mix train for the longer legs and car or bus for the shorter, scenery-heavy stretches like Jodhpur–Udaipur — it's usually both cheaper and more comfortable than an all-road or all-rail trip." },
+      { type: "heading", id: "booking-the-train-legs", text: "Booking the train legs" },
+      {
+        type: "paragraph",
+        text: "Jaipur, Jodhpur and Udaipur are all well-connected, high-demand routes, especially in the October–March travel season — book as early in the 60-day advance reservation window as you can. If a leg still shows up waitlisted close to your date, check our guide on what a WL number actually means for a Rajasthan trip before assuming you need to rebook everything.",
+      },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "how-to-reach-amer-fort-from-jaipur",
+    title: "How to reach Amer Fort from Jaipur: bus, taxi, car and visit guide",
+    excerpt:
+      "Amer Fort is a short trip from central Jaipur — here's how to actually get there by bus, taxi or car, how much time to keep, and how to combine it with Jaigarh Fort.",
+    coverImage: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
+    category: "route-ideas",
+    readTime: "6 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "how to reach amer fort from jaipur",
+      "jaipur to amer fort distance",
+      "jaipur to amer fort bus",
+      "amer fort by bus",
+      "amer fort route",
+      "amer fort and jaigarh fort itinerary",
+      "amer fort travel guide",
+    ],
+    relatedSlugs: [
+      "jaipur-fort-circuit-amer-jaigarh-nahargarh",
+      "rajasthan-fort-tour-route",
+      "delhi-to-jaipur-best-ways-to-plan-your-trip",
+      "best-forts-in-india-to-visit",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Amer Fort sits just outside central Jaipur, which makes it one of the easiest major forts in India to combine with a short city stay rather than needing a whole separate trip.",
+      },
+      { type: "heading", id: "distance-and-general-travel-time", text: "Distance and general travel time" },
+      {
+        type: "paragraph",
+        text: "Amer Fort is roughly 11 km from central Jaipur, and the trip typically takes somewhere in the 30–45 minute range by road depending on traffic and your exact starting point in the city.",
+      },
+      { type: "heading", id: "ways-to-get-there", text: "Ways to get there" },
+      {
+        type: "checklist",
+        items: [
+          "Local bus — the cheapest option, with regular services running from central Jaipur toward Amer; ask locally or check current routes, since numbers and stops can change.",
+          "App-based taxi or a pre-paid taxi from the station/airport — the most convenient door-to-door option, especially if you're combining Amer with Jaigarh Fort in the same trip.",
+          "Auto-rickshaw — negotiable and flexible for a one-way trip, less ideal if you want the driver to wait through your visit.",
+          "Rental car or self-drive — worth it if you're also planning to see Jaigarh Fort and the Jal Mahal viewpoint on the way back.",
+          "Organised half-day or full-day tour — bundles Amer with Jaigarh and sometimes Nahargarh, useful if you'd rather not plan transport yourself.",
+        ],
+      },
+      { type: "heading", id: "how-much-time-to-keep", text: "How much time to keep" },
+      {
+        type: "paragraph",
+        text: "Give yourself at least half a day for Amer Fort alone if you want to walk it properly rather than rush through — it's a large complex with courtyards, palace rooms and viewpoints spread across several levels. If you're combining it with Jaigarh Fort (a short uphill drive away) and Panna Meena ka Kund on the way in, plan for closer to a full day.",
+      },
+      { type: "tip", text: "Start early — Amer Fort gets significantly busier by mid-morning, both with visitors and with heat during the warmer months, and an early start also leaves more of the day for Jaigarh Fort or a Nahargarh Fort sunset afterward." },
+      { type: "heading", id: "what-to-carry", text: "What to carry" },
+      {
+        type: "checklist",
+        items: [
+          "Comfortable walking shoes — there's a lot of uneven stone flooring and stairs throughout the complex.",
+          "Water and sun protection, especially outside the winter months.",
+          "Cash in small denominations for local transport and minor purchases, alongside your usual digital payment options.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "For a fuller day plan that strings Amer together with Jaigarh and Nahargarh forts, see our Jaipur fort circuit guide. And since exact ticket prices, timings, and taxi fares shift over time, it's worth a quick check against current official information shortly before you go rather than relying on any single source, including this one.",
+      },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "jaipur-fort-circuit-amer-jaigarh-nahargarh",
+    title: "Jaipur fort circuit: Amer, Jaigarh and Nahargarh in one day",
+    excerpt:
+      "A practical one-day route linking Amer Fort, Jaigarh Fort and a Nahargarh Fort sunset — Jaipur's three major forts, in a sensible order.",
+    coverImage: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
+    category: "route-ideas",
+    readTime: "6 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "jaipur fort circuit",
+      "amer jaigarh nahargarh fort itinerary",
+      "jaipur forts tour",
+      "forts near jaipur",
+      "jaipur one day fort tour",
+      "amer fort to jaigarh fort",
+      "nahargarh fort sunset",
+    ],
+    relatedSlugs: [
+      "how-to-reach-amer-fort-from-jaipur",
+      "rajasthan-fort-tour-route",
+      "best-forts-in-india-to-visit",
+      "delhi-to-jaipur-best-ways-to-plan-your-trip",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Jaipur has three major forts within a short drive of each other, and doing all three in a well-planned order turns into one of the better single days you can spend in Rajasthan.",
+      },
+      { type: "heading", id: "a-sensible-order-for-the-day", text: "A sensible order for the day" },
+      {
+        type: "checklist",
+        items: [
+          "Start at Panna Meena ka Kund — a stepwell just below Amer, worth ten quiet minutes before the crowds arrive at the fort itself.",
+          "Amer Fort — arrive early; this is the largest of the three and deserves the most time.",
+          "Jagat Shiromani Temple — a short stop in Amer town, easy to fold in between Amer and Jaigarh.",
+          "Jaigarh Fort — connected to Amer by a short uphill road, home to sweeping views over the whole complex.",
+          "Jal Mahal viewpoint — a quick photo stop on the way back into the city, right on the lake.",
+          "Nahargarh Fort — save this for late afternoon; it's best known for sunset views over Jaipur.",
+        ],
+      },
+      { type: "heading", id: "getting-between-the-stops", text: "Getting between the stops" },
+      {
+        type: "paragraph",
+        text: "A car or taxi for the full day is the simplest way to do this circuit, since the stops aren't really walkable between each other (Amer to Jaigarh is a short drive, and Nahargarh is on the opposite side of the city). If you'd rather use public transport, buses run toward Amer, but you'll likely still need a taxi or auto for the Jaigarh and Nahargarh legs.",
+      },
+      { type: "tip", text: "If you only have time for two of the three, pair Amer with Nahargarh — Amer for the history and scale in the morning, Nahargarh for the sunset over the city in the evening — and treat Jaigarh as the one to add back in if your schedule allows." },
+      { type: "heading", id: "practical-notes", text: "Practical notes" },
+      {
+        type: "paragraph",
+        text: "This circuit works well as a single day if you start early, but it's a genuinely full day, not a leisurely one — build in buffer time, especially around midday heat outside the cooler months. See our Amer Fort access guide for more detail on the first and longest stop.",
+      },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "best-forts-near-delhi-for-weekend-trip",
+    title: "Best forts near Delhi for a weekend trip",
+    excerpt:
+      "From the Red Fort in the city itself to Neemrana, Alwar and Gwalior a few hours out — the best forts within weekend-trip range of Delhi, by route.",
+    coverImage: "https://images.unsplash.com/photo-1545941962-1b6654eb8072?w=1600&h=900&fit=crop",
+    category: "route-ideas",
+    readTime: "6 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "forts near delhi",
+      "forts near delhi for one day trip",
+      "best forts near delhi",
+      "delhi to neemrana fort",
+      "delhi to gwalior fort",
+      "weekend trips from delhi",
+      "forts near delhi by train",
+    ],
+    relatedSlugs: [
+      "best-forts-in-india-to-visit",
+      "delhi-to-jaipur-best-ways-to-plan-your-trip",
+      "best-fort-trips-in-india-by-train",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Delhi's own forts are worth an afternoon on their own, but the real appeal for a weekend trip is what's within a few hours' reach — a genuinely wide spread of fort styles without needing to fly anywhere.",
+      },
+      { type: "heading", id: "in-the-city-itself", text: "In the city itself" },
+      {
+        type: "checklist",
+        items: [
+          "Red Fort — the Mughal seat of power in Old Delhi, worth two to three hours including the museum galleries inside.",
+          "Purana Qila — quieter and less crowded than the Red Fort, near the zoo and Humayun's Tomb if you want to combine stops.",
+        ],
+      },
+      { type: "heading", id: "a-half-day-out", text: "A half-day out" },
+      {
+        type: "checklist",
+        items: [
+          "Neemrana Fort, Rajasthan — now partly a heritage hotel, a popular half-day or overnight escape from Delhi.",
+        ],
+      },
+      { type: "heading", id: "a-full-day-or-overnight-trip", text: "A full day or overnight trip" },
+      {
+        type: "checklist",
+        items: [
+          "Agra Fort — usually paired with the Taj Mahal on a Delhi–Agra day trip, well served by fast trains.",
+          "Alwar and Bala Qila, Rajasthan — a less-visited hill fort with good views, further off the main tourist trail.",
+          "Deeg Fort and Palace, Rajasthan — known more for its palace and water gardens than for military architecture.",
+        ],
+      },
+      { type: "heading", id: "a-proper-weekend-trip", text: "A proper weekend trip" },
+      {
+        type: "checklist",
+        items: [
+          "Gwalior Fort, Madhya Pradesh — a hilltop fort well connected to Delhi by train, comfortably doable as an overnight trip.",
+        ],
+      },
+      { type: "tip", text: "Delhi–Agra and Delhi–Jaipur are both fast, high-frequency train corridors, which makes those two the easiest forts to bolt onto a weekend without much planning. Neemrana and Alwar work better with a car, since train connections are thinner." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "best-fort-trips-in-india-by-train",
+    title: "Best fort trips in India by train: routes, stations and how to plan them",
+    excerpt:
+      "Which station gets you closest to which fort? A practical guide to reaching India's major forts by train, from Agra and Jaipur to Gwalior and Golconda.",
+    coverImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&h=900&fit=crop",
+    category: "route-ideas",
+    readTime: "7 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "fort trips in india by train",
+      "forts in india accessible by train",
+      "forts near railway stations",
+      "india fort tour by train",
+      "train routes to forts",
+      "rajasthan forts by train",
+      "delhi agra fort train route",
+    ],
+    relatedSlugs: [
+      "best-forts-in-india-to-visit",
+      "rajasthan-fort-tour-route",
+      "waitlist-ticket-confirmation-chances-explained",
+      "pnr-status-explained-cnf-rac-wl-meaning",
+      "wl-80-confirmation-chances-fort-trip",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "Most of India's best-known forts sit close enough to a well-connected railway station that a train-based trip is genuinely practical — you just need to know which station to book to, and what's left to sort out once you arrive.",
+      },
+      { type: "heading", id: "fort-by-fort-nearest-station", text: "Fort by fort: nearest useful station" },
+      {
+        type: "checklist",
+        items: [
+          "Agra Fort → Agra Cantt or Agra Fort station — an easy Delhi–Agra day trip on any of the fast morning trains.",
+          "Amer Fort → Jaipur Junction — from there it's a local bus, taxi, or auto for the last stretch out to the fort.",
+          "Mehrangarh Fort → Jodhpur Junction — the fort towers over the city, an easy taxi or auto ride from the station.",
+          "Chittorgarh Fort → Chittorgarh station — a compact station-to-fort trip, easily doable as a day stop.",
+          "Gwalior Fort → Gwalior station — well connected to Delhi by several daily trains, comfortable as an overnight trip.",
+          "Golconda Fort → Hyderabad's Secunderabad or Hyderabad Deccan stations — from there, metro plus a short taxi ride covers the rest.",
+          "Sinhagad Fort → Pune Junction — the station gets you into the city; the fort itself needs a road transfer (and some walking or a jeep) from there.",
+        ],
+      },
+      { type: "heading", id: "train-plus-last-mile-is-the-norm", text: "Train + last-mile transport is the norm, not the exception" },
+      {
+        type: "paragraph",
+        text: "Almost none of these forts sit directly next to a station — the realistic plan for every one of them is a train (or flight) into the nearest city, then a local bus, taxi, auto, or short trek for the final stretch. Budget that last leg into your day rather than assuming the fort is walkable from the platform.",
+      },
+      { type: "tip", text: "For the Rajasthan forts especially, book your train leg as early in the advance reservation window as you reasonably can — Jaipur, Jodhpur and Agra are all high-demand corridors, particularly October through March." },
+      { type: "heading", id: "if-your-train-is-waitlisted", text: "If your train to a fort city is waitlisted" },
+      {
+        type: "paragraph",
+        text: "A waitlisted ticket to Jaipur, Jodhpur, or Agra doesn't have to derail a fort trip — see our guide on reading a WL number and our fully-booked-train guide for the same fallback options (alternate trains, Vikalp, nearby stations, or a mixed-mode connection) that apply to any Indian rail journey.",
+      },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "wl-80-confirmation-chances-fort-trip",
+    title: "WL 80 confirmation chances for a fort trip: what to do if your train is waitlisted",
+    excerpt:
+      "Booked a train to Jaipur, Jodhpur or Agra for a fort trip and it's sitting at WL 80? Here's what that actually means, and what to do about it.",
+    coverImage: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "5 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "wl 80 confirmation chances",
+      "wl 80 will confirm or not",
+      "wl 80 train ticket confirmation",
+      "waitlisted ticket for rajasthan trip",
+      "train ticket waitlist for jaipur",
+      "wl 80 jaipur ticket",
+      "alternative route if train is waitlisted",
+    ],
+    relatedSlugs: [
+      "waitlist-ticket-confirmation-chances-explained",
+      "vikalp-scheme-alternate-train-explained",
+      "rajasthan-fort-tour-route",
+      "fort-trip-train-waitlisted-alternative-routes",
+      "rac-vs-waitlist-difference-explained",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "If you booked a train to Jaipur, Jodhpur, Udaipur or Agra for a fort trip and it's showing WL 80, the honest answer is: that's a long shot on its own, but it's not the end of the trip. Here's how to actually think about it.",
+      },
+      { type: "heading", id: "why-wl-80-alone-does-not-tell-you-much", text: "Why WL 80 on its own doesn't tell you much" },
+      {
+        type: "paragraph",
+        text: "The number is just your position in the queue on that specific waitlist — it doesn't tell you the class, the quota (GNWL, RLWL, PQWL or TQWL), the season, or how fast that particular train's waitlist tends to move. See our full guide to reading a WL number for how these bands generally play out — but treat any general band as illustrative, not a prediction for your exact ticket.",
+      },
+      { type: "heading", id: "what-actually-changes-the-odds", text: "What actually changes the odds for a Rajasthan or Agra trip" },
+      {
+        type: "checklist",
+        items: [
+          "Which quota you're on — a GNWL 80 clears very differently from an RLWL 80 or a TQWL 80 on the same train.",
+          "Season — festival months and the peak October–March travel window into Rajasthan move much slower than the off-season.",
+          "Class — 3AC waitlists on popular Jaipur and Jodhpur trains are often longer than Sleeper on the same route.",
+          "Route — the most heavily booked trains on Delhi–Jaipur–Jodhpur have deep waitlists precisely because they're the most convenient; a slightly less convenient train can have real availability.",
+        ],
+      },
+      { type: "heading", id: "what-to-do-if-you-are-heading-to-jaipur-jodhpur-udaipur-or-agra", text: "What to do if you're heading to Jaipur, Jodhpur, Udaipur or Agra" },
+      {
+        type: "checklist",
+        items: [
+          "Check nearby stations — a change in boarding station can put you on a different quota entirely.",
+          "Opt into the Vikalp scheme so the system automatically checks alternate trains on the same route for a vacant seat.",
+          "Check a different class on the same train, or a different train on the same date.",
+          "Keep a bus, flight, or a mixed train-plus-bus route as a genuine backup rather than a last-minute panic option.",
+        ],
+      },
+      { type: "tip", text: "Track the number daily rather than checking once — a WL 80 that's dropped to WL 30 over a week is a very different situation from a WL 80 that hasn't moved in ten days. Our waitlist trend guide covers this in more detail." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+  {
+    slug: "fort-trip-train-waitlisted-alternative-routes",
+    title: "Train waitlisted for your fort trip? Alternative routes that still work",
+    excerpt:
+      "A waitlisted train doesn't have to cancel your Rajasthan or Agra fort trip. Here are the practical alternative routes and backups worth checking first.",
+    coverImage: "https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=1600&h=900&fit=crop",
+    category: "tips",
+    readTime: "6 min read",
+    date: "2026-09-06",
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "train waitlisted alternative route",
+      "train ticket not confirmed for trip",
+      "alternative route when train is full",
+      "jaipur train waitlist alternative",
+      "rajasthan train ticket not available",
+      "how to reach jaipur when trains are full",
+    ],
+    relatedSlugs: [
+      "what-to-do-when-your-train-is-fully-booked",
+      "wl-80-confirmation-chances-fort-trip",
+      "vikalp-scheme-alternate-train-explained",
+      "rajasthan-fort-tour-route",
+    ],
+    content: [
+      {
+        type: "paragraph",
+        text: "A fort trip planned around a fixed date is exactly the kind of journey where a waitlisted train stings the most — you can't easily shift the whole itinerary, but you also don't want to overpay in a panic. Here's the order worth checking things in.",
+      },
+      { type: "heading", id: "start-with-the-same-station", text: "1. Start with the same route, different options" },
+      {
+        type: "checklist",
+        items: [
+          "Check a different class on the same train — Sleeper or 3AC availability doesn't always run out at the same time.",
+          "Check other trains on the same date to the same city — Jaipur, Jodhpur and Agra are all served by more than one useful train.",
+          "Opt into the Vikalp scheme on your existing waitlisted ticket so the system can auto-shift you to a vacant seat on an alternate train at chart time.",
+        ],
+      },
+      { type: "heading", id: "widen-the-search-a-little", text: "2. Widen the search a little" },
+      {
+        type: "checklist",
+        items: [
+          "Try a nearby departure or arrival station — a slightly different boarding point can put you on an entirely different, less crowded quota.",
+          "Consider a connecting route — train to a nearby hub plus a shorter bus or train leg on to your fort-city destination.",
+          "For longer routes like Delhi–Jaisalmer, check whether a flight into Jodhpur plus a shorter onward train or car leg beats waiting on a long-haul waitlist.",
+        ],
+      },
+      { type: "heading", id: "keep-a-genuine-backup", text: "3. Keep a genuine backup, not a last-minute scramble" },
+      {
+        type: "paragraph",
+        text: "An overnight AC sleeper bus is a realistic backup on most Delhi–Rajasthan and Agra routes, and often has more last-minute availability than trains during the busiest season. If your date is fixed and non-negotiable, book the backup a few days ahead rather than waiting for the final chart to confirm one way or the other.",
+      },
+      { type: "tip", text: "This is exactly the situation our general \"what to do when your train is fully booked\" guide is written for — the same fallback options apply whether you're headed to a fort circuit or anywhere else on the network." },
+      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+    ],
+  },
+
+  /* ------------------------------------------------------------------ */
   /* Rail knowledge / product-adjacent content                           */
   /* ------------------------------------------------------------------ */
   {
@@ -1589,6 +2111,11 @@ export const BLOG_POSTS: BlogPost[] = [
     date: "2026-08-16",
     author: DEFAULT_AUTHOR,
     keywords: ["delhi to jaipur train", "delhi jaipur fastest train", "delhi to jaipur bus vs train"],
+    relatedSlugs: [
+      "how-to-reach-amer-fort-from-jaipur",
+      "jaipur-fort-circuit-amer-jaigarh-nahargarh",
+      "rajasthan-fort-tour-route",
+    ],
     content: [
       {
         type: "paragraph",
