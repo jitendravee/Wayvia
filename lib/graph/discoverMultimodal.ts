@@ -30,7 +30,7 @@ const MAX_THREE_LEG_HUBS = 3;
 /** Minimum minutes between arriving on one leg and departing on the next, when the two legs are different modes (bus/flight boarding tends to need more buffer than a same-station train-to-train change). Used whenever the caller didn't set transferBufferMin. */
 const CROSS_MODE_BUFFER_MIN = 30;
 
-export function tagLegs(c: JourneyCandidate, mode: Mode): JourneyCandidate {
+function tagLegs(c: JourneyCandidate, mode: Mode): JourneyCandidate {
   return { ...c, legs: c.legs.map((l) => ({ ...l, mode, source: l.source ?? "live" })) };
 }
 

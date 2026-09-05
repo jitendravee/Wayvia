@@ -117,14 +117,7 @@ function DestinationCard({ dest }: { dest: Destination }) {
   const router = useRouter();
 
   function handleClick() {
-    const date = new Date();
-    date.setMonth(date.getMonth() + 1);
-
-    const formattedDate = date.toISOString().split("T")[0];
-
-    router.push(
-      `/journey-planner?from=${dest.from.name}&to=${dest.to.name}&date=${formattedDate}`,
-    );
+    router.push(`/journey-planner?from=${dest.from.code}&to=${dest.to.code}`);
   }
 
   return (
@@ -132,14 +125,14 @@ function DestinationCard({ dest }: { dest: Destination }) {
       type="button"
       data-card
       onClick={handleClick}
-      className="group cursor-pointer relative  aspect-[3/4] w-full shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-[68vw] sm:max-w-[240px] lg:w-[260px]"
+      className="group relative aspect-[3/4] w-full shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-md sm:w-[68vw] sm:max-w-[240px] lg:w-[260px]"
     >
       <Image
         src={dest.image}
         alt={`${dest.from.name} to ${dest.to.name}`}
         fill
         sizes="(min-width: 1024px) 260px, (min-width: 640px) 220px, 100vw"
-        className=" object-cover transition-transform duration-500 group-hover:scale-105"
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
 

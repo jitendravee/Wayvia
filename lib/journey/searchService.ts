@@ -4,7 +4,6 @@ import { ScoredHub } from "../graph/hubs";
 import { ALL_MODES } from "../transport/registry";
 import { multimodalGraphSearch } from "./graphSearch";
 import { trainMultiHopSearch } from "../transport/train";
-import { tagLegs } from "../graph/discoverMultimodal";
 import type { SearchFilters } from "./filters";
 import { DEFAULT_TRANSFER_BUFFER_MIN } from "./filters";
 import type { JourneyCandidate, Mode } from "../graph/types";
@@ -101,29 +100,20 @@ export async function searchJourneyPlaceFirst(
     // --- Train's own multi-hop engine results (if train was requested) ---
     if (hasTrain) {
       if (trainResult) {
-        // Apply tagLegs to ensure all train legs have correct mode
-        const taggedTrainResult = {
-          ...trainResult,
-          direct: trainResult.direct.map((c) => tagLegs(c, "train")),
-          viaHub: trainResult.viaHub.map((c) => tagLegs(c, "train")),
-          viaTwoHub: trainResult.viaTwoHub.map((c) => tagLegs(c, "train")),
-          viaThreeHub: trainResult.viaThreeHub.map((c) => tagLegs(c, "train"))
-        };
-
         // Merge train results
-    for (const candidate of taggedTrainResult.direct ?? []) {
+    for (const candidate of trainResult.direct ?? []) {
   direct.push(candidate);
 }
 
-for (const candidate of taggedTrainResult.viaHub ?? []) {
+for (const candidate of trainResult.viaHub ?? []) {
   viaHub.push(candidate);
 }
 
-for (const candidate of taggedTrainResult.viaTwoHub ?? []) {
+for (const candidate of trainResult.viaTwoHub ?? []) {
   viaTwoHub.push(candidate);
 }
 
-for (const candidate of taggedTrainResult.viaThreeHub ?? []) {
+for (const candidate of trainResult.viaThreeHub ?? []) {
   viaThreeHub.push(candidate);
 }
 
@@ -132,7 +122,7 @@ for (const item of trainResult.partial ?? []) {
 }
 
         // Count modes from train results
-        for (const leg of [...taggedTrainResult.direct, ...taggedTrainResult.viaHub, ...taggedTrainResult.viaTwoHub, ...taggedTrainResult.viaThreeHub].flatMap(c => c.legs)) {
+        for (const leg of [...trainResult.direct, ...trainResult.viaHub, ...trainResult.viaTwoHub, ...trainResult.viaThreeHub].flatMap(c => c.legs)) {
           bump(leg.mode, 1);
         }
 
@@ -245,6 +235,9 @@ function dedupeJourneyCandidates(candidates: JourneyCandidate[]): JourneyCandida
   return result;
 }
 
+function tagLegs(c: JourneyCandidate, mode: Mode): JourneyCandidate {
+  return { ...c, legs: c.legs.map((l) => ({ ...l, mode, source: l.source ?? "live" })) };
+}
 
 function emptyGraphResult(): GraphDiscoveryResult {
   return {

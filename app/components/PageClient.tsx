@@ -200,8 +200,7 @@ export function PageInner() {
           )
       : null;
 
-    if (!from && !to && !date && !cls && !quota && !modes && !hasFilters)
-      return;
+    if (!from && !to && !date && !cls && !quota && !modes && !hasFilters) return;
 
     const effective: SearchFormValues = {
       ...form,
