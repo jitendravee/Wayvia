@@ -36,11 +36,13 @@ export function generateWhatsAppOverview(journey: AnnotatedJourney): string {
   // Build a direct search URL so recipient can open the exact route
   const fromCode = journey.legs[0]?.from;
   const toCode = journey.legs[journey.legs.length - 1]?.to;
-  const date = journey.legs[0]?.date;
-  const deepLink =
-    fromCode && toCode
-      ? `${siteBase}/journey-planner?from=${fromCode}&to=${toCode}${date ? `&date=${date}` : ""}`
-      : `${siteBase}/journey-planner`;
+
+  let deepLink = `${siteBase}/journey-planner`;
+  if (typeof window !== "undefined" && window.location.search) {
+    deepLink = `${siteBase}/journey-planner${window.location.search}`;
+  } else if (fromCode && toCode) {
+    deepLink = `${siteBase}/journey-planner?from=${fromCode}&to=${toCode}`;
+  }
 
   let text = `🚆 *${origin} ➔ ${dest} Journey Itinerary*\n`;
   if (hubs) {
