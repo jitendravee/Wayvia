@@ -13,6 +13,7 @@ import type { AnnotatedJourney, AnnotatedLeg, Mode } from "../types";
 import { Badge, StatusBadge } from "./Badge";
 import { durationLabel } from "./status";
 import { ChevronDownIcon, ClockIcon, JunctionIcon, WalletIcon } from "./Icons";
+import JourneyShareButton from "./JourneyShareButton";
 
 const RouteMap = dynamic(() => import("./RouteMap"), {
   ssr: false,
@@ -427,17 +428,21 @@ export default function JourneyCard({
             {journey.legs.length} segment{journey.legs.length > 1 ? "s" : ""}
           </button>
 
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            className="flex items-center gap-1.5 rounded-lg bg-violet px-4 py-2 font-display text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-dark"
-          >
-            {expanded ? "Hide details" : "View details"}
-            <ArrowRight
-              size={14}
-              className={`transition-transform ${expanded ? "rotate-90" : ""}`}
-            />
-          </button>
+          <div className="flex items-center gap-2">
+            <JourneyShareButton journey={journey} />
+
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="flex items-center gap-1.5 rounded-lg bg-violet px-3.5 py-1.5 font-display text-[12px] font-semibold text-white transition-colors hover:bg-violet-dark sm:px-4 sm:py-2 sm:text-[12.5px]"
+            >
+              {expanded ? "Hide details" : "View details"}
+              <ArrowRight
+                size={14}
+                className={`transition-transform ${expanded ? "rotate-90" : ""}`}
+              />
+            </button>
+          </div>
         </div>
 
         {expanded && (
