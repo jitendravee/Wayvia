@@ -110,14 +110,16 @@ export interface BlogPost {
   relatedSlugs?: string[];
   /** Target search phrases this post is written for — wire into generateMetadata's `keywords` field. */
   keywords?: string[];
+  /** Structured Q&A pairs used for user-facing FAQ accordions and Schema.org FAQPage rich snippets. */
+  faqs?: { question: string; answer: string }[];
 }
 
 export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "what-to-do-when-your-train-is-fully-booked",
-    title: "What to do when your train is fully booked",
+    title: "Train Fully Booked? 6 Smart Hacks to Get Confirmed Seats (2026 Guide)",
     excerpt:
-      "Smart alternatives, fallback routes and insider tips to help you reach your destination — even when plans change.",
+      "Direct trains waitlisted or sold out? Learn how junction hub transfers, split ticketing, Vikalp, and train+bus combos unlock confirmed seats fast.",
     coverImage: "https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "7 min read",
@@ -129,6 +131,9 @@ export const BLOG_POSTS: BlogPost[] = [
       "alternative when train tickets not available",
       "no seats available train india",
       "how to travel when train is waitlisted",
+      "how to get confirmed train ticket when full",
+      "connecting train routes india",
+      "train ticket hacks 2026",
     ],
     relatedSlugs: [
       "pnr-status-explained-cnf-rac-wl-meaning",
@@ -137,6 +142,28 @@ export const BLOG_POSTS: BlogPost[] = [
       "fort-trip-train-waitlisted-alternative-routes",
       "delhi-to-goa-7-ways-to-get-there",
       "how-to-find-cheaper-flight-train-combos",
+    ],
+    faqs: [
+      {
+        question: "Can I travel on a train if my ticket is still on the waiting list?",
+        answer:
+          "If you have an online e-ticket that remains on the waiting list after final chart preparation, you cannot legally board the train; IRCTC automatically cancels it and issues a refund. If you purchased a physical counter ticket from a railway station, you are permitted to travel in unreserved/general coaches.",
+      },
+      {
+        question: "What is split ticketing on Indian Railways?",
+        answer:
+          "Split ticketing involves booking two separate tickets for the same overall journey (e.g. Station A to Hub B, and Hub B to Station C). Because individual legs draw from different station quotas, seats are frequently available on both sub-legs even when direct tickets between A and C are sold out.",
+      },
+      {
+        question: "How does connecting through a junction station help?",
+        answer:
+          "Major junction stations (such as Vadodara, Kota, Kanpur, Itarsi, and Nagpur) receive higher quota allocations and handle multiple intersecting train lines. Connecting via a hub gives you access to dozens of alternative schedules with confirmed berths.",
+      },
+      {
+        question: "What should I do if Tatkal tickets are also sold out?",
+        answer:
+          "If Tatkal is fully booked, use Wayvia's journey planner to search for connecting train routes or multi-modal options (Express Train + AC Sleeper Bus). Combining a fast train to a nearby regional hub with a reliable bus service often gets you there on time at comparable fares.",
+      },
     ],
     content: [
       {
@@ -199,9 +226,9 @@ export const BLOG_POSTS: BlogPost[] = [
   /* ------------------------------------------------------------------ */
   {
     slug: "pnr-status-explained-cnf-rac-wl-meaning",
-    title: "PNR status explained: what CNF, RAC, WL, GNWL, PQWL, RLWL and TQWL mean",
+    title: "PNR Status Codes Explained (2026): CNF, RAC, WL, GNWL, PQWL & RLWL Meaning",
     excerpt:
-      "PNR status meaning, explained simply: what CNF, RAC, WL, GNWL, PQWL, RLWL and TQWL actually mean on your ticket, and how to check your status.",
+      "Demystifying PNR status codes: discover what CNF, RAC, GNWL, PQWL, RLWL, and TQWL mean, which waitlist has the highest confirmation chance, and how to check your status.",
     coverImage: "https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "6 min read",
@@ -216,6 +243,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "tqwl meaning railway",
       "what is gn quota in railway",
       "what is roadside waitlist",
+      "pnr confirmation probability",
     ],
     relatedSlugs: [
       "rswl-rqwl-gn-quota-explained",
@@ -223,6 +251,33 @@ export const BLOG_POSTS: BlogPost[] = [
       "rac-vs-waitlist-difference-explained",
       "chart-preparation-time-explained-first-second-chart",
       "train-ticket-cancellation-refund-rules-2026",
+    ],
+    faqs: [
+      {
+        question: "What is the difference between GNWL and RLWL?",
+        answer:
+          "GNWL (General Waitlist) applies when you book from originating station to destination and has the highest probability of confirming because it pulls from all cancellations across the train. RLWL (Remote Location Waitlist) is tied to a specific intermediate station and only moves when passengers in that designated quota cancel.",
+      },
+      {
+        question: "Can I travel on a train with an RAC ticket?",
+        answer:
+          "Yes. With an RAC (Reservation Against Cancellation) status, you are legally permitted to board the train. You receive a guaranteed sitting seat (shared side-lower berth) and will be upgraded to a full sleeper berth if confirmed passengers cancel before or after chart preparation.",
+      },
+      {
+        question: "Why do PQWL tickets rarely get confirmed?",
+        answer:
+          "PQWL (Pooled Quota Waitlist) covers smaller intermediate station pairs sharing a tiny pool of seats. Because the quota size is very limited and fewer passengers cancel between those exact stops, PQWL has among the lowest confirmation chances in Indian Railways.",
+      },
+      {
+        question: "What does CNF with no coach or seat number mean?",
+        answer:
+          "In First AC (1A) and Executive Class (EC), confirmed tickets display 'CNF' without a berth number because berth allocation is determined by manual charting based on VIP, family, and gender preferences. Your confirmed berth is assigned when the first chart is prepared 4 hours before departure.",
+      },
+      {
+        question: "How can I check live PNR status and visual seat layout?",
+        answer:
+          "Use Wayvia's PNR Status tool. Simply enter your 10-digit PNR to see your current booking status, coach position, berth allotment, and an interactive visual coach layout.",
+      },
     ],
     content: [
       {
@@ -468,9 +523,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "waitlist-confirmation-prediction-and-trends",
-    title: "Waiting List Confirmation Prediction 2026: Read the Trend, Not Just the Number",
+    title: "Train Waiting List Confirmation Prediction (2026): Read the Trend, Not Just the Number",
     excerpt:
-      "WL trend > snapshot. See how to read waitlist confirmation history, factors that move WL, PNR prediction % meaning, and what to do when trend looks bad. 2026 guide.",
+      "Will your waitlist ticket confirm? Learn how to evaluate confirmation probability, read WL movement trends, and discover confirmed alternative routes when the trend stalls.",
     coverImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "9 min read",
@@ -485,6 +540,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "will my wl ticket confirm calculator",
       "wl confirmation probability meaning",
       "factors affecting wl confirmation",
+      "pnr waitlist prediction accuracy",
     ],
     relatedSlugs: [
       "waitlist-ticket-confirmation-chances-explained",
@@ -495,6 +551,28 @@ export const BLOG_POSTS: BlogPost[] = [
       "vikalp-scheme-alternate-train-explained",
       "irctc-tatkal-booking-2026-timings-rules",
       "what-to-do-when-your-train-is-fully-booked",
+    ],
+    faqs: [
+      {
+        question: "How accurate are PNR waitlist prediction percentages?",
+        answer:
+          "PNR predictions use historical cancellation data on identical routes, days, and seasons. While an 85%+ prediction is generally reliable during off-peak times, unexpected factors like festival rush, holiday weekends, or track maintenance can cause predictions to fail. Always track your daily drop rate.",
+      },
+      {
+        question: "What causes a waitlist number to stay stuck without moving?",
+        answer:
+          "Waitlists often freeze between 5 to 20 days prior to departure because travellers have booked their confirmed plans and are not yet cancelling. The fastest acceleration occurs in the final 24 to 48 hours before departure when unconfirmed travel plans are cancelled.",
+      },
+      {
+        question: "At what waitlist number should I consider booking an alternative route?",
+        answer:
+          "For Sleeper class, any GNWL above 40 (or RLWL/PQWL above 15) with fewer than 7 days left has a low probability of confirmation. For AC classes (3A/2A), any WL above 20 inside 7 days should trigger a search for alternative connecting routes.",
+      },
+      {
+        question: "How does Wayvia find confirmed seats when my direct train is waitlisted?",
+        answer:
+          "Wayvia's engine searches connecting journeys through intermediate junction stations (e.g. connecting via Vadodara, Kota, or Nagpur) and checks live seat availability on each leg, often uncovering confirmed seats on the exact same travel day.",
+      },
     ],
     content: [
       {
@@ -754,9 +832,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
     {
     slug: "irctc-tatkal-booking-2026-timings-rules",
-    title: "IRCTC Tatkal Booking 2026: Timings, Quota Seats & How to Get a Seat Fast",
+    title: "IRCTC Tatkal Booking 2026: Timings, Rules & How to Get Confirmed Berths",
     excerpt:
-      "Tatkal timings 2026: AC 10 AM, SL 11 AM. See quota seats, Premium Tatkal vs Tatkal, Aadhaar OTP rules, refund policy and a step-by-step booking guide.",
+      "Tatkal timings 2026: AC opens at 10:00 AM, Sleeper at 11:00 AM. Master list tricks, fastest payment methods, refund rules, and what to do when Tatkal sells out.",
     coverImage: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "10 min read",
@@ -772,7 +850,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "premium tatkal vs tatkal",
       "how to book tatkal ticket fast",
       "tatkal aadhaar otp",
-      "is first ac not available in tatkal",
+      "tatkal payment hacks",
       "tatkal wl refund",
     ],
     relatedSlugs: [
@@ -783,6 +861,33 @@ export const BLOG_POSTS: BlogPost[] = [
       "irctc-website-down-what-to-do",
       "waitlist-ticket-confirmation-chances-explained",
       "vikalp-scheme-alternate-train-explained",
+    ],
+    faqs: [
+      {
+        question: "What time does Tatkal ticket booking open on IRCTC?",
+        answer:
+          "AC classes (2A, 3A, 3E, CC, EC) open at 10:00 AM IST. Non-AC classes (Sleeper and 2S) open at 11:00 AM IST, exactly one day prior to the train's scheduled departure date from originating station.",
+      },
+      {
+        question: "Can I get a refund if I cancel a confirmed Tatkal ticket?",
+        answer:
+          "No refund is granted on cancellation of confirmed Tatkal tickets under Indian Railways rules, except in cases where the train is officially cancelled or delayed by more than 3 hours.",
+      },
+      {
+        question: "What happens if my Tatkal ticket remains waitlisted (TQWL)?",
+        answer:
+          "If a Tatkal e-ticket stays in TQWL status after final chart preparation, it is automatically cancelled and the fare is refunded directly to your original payment account minus a clerkage fee of ₹60+GST.",
+      },
+      {
+        question: "What is the fastest payment method for booking Tatkal tickets?",
+        answer:
+          "Using IRCTC iMudra or pre-authorized UPI AutoPay is the fastest method, bypassing bank OTP delays and completing checkout within 15–20 seconds before quota exhaust.",
+      },
+      {
+        question: "What should I do if Tatkal tickets are fully booked within 1 minute?",
+        answer:
+          "Do not panic or cancel your travel. Use Wayvia's journey recovery search to check for connecting trains via hub junctions (like Kota, Vadodara, Kanpur) or train + bus combinations that offer confirmed seats on your travel day.",
+      },
     ],
     content: [
       {
@@ -978,9 +1083,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "vikalp-scheme-alternate-train-explained",
-    title: "What is the Vikalp scheme? How IRCTC's free alternate-train upgrade works",
+    title: "IRCTC Vikalp Scheme Explained (2026): Free Confirmed Train Upgrade Rules",
     excerpt:
-      "Vikalp scheme explained: how the Alternate Train Accommodation Scheme (ATAS) can move your waitlisted ticket to a confirmed seat on a different train — for free.",
+      "Discover how IRCTC's Vikalp Scheme (ATAS) transfers waitlisted passengers to confirmed berths on alternate trains for free. Complete rules, eligibility, and FAQs.",
     coverImage: "https://images.unsplash.com/photo-1685858874777-b87106319be7?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "5 min read",
@@ -993,12 +1098,35 @@ export const BLOG_POSTS: BlogPost[] = [
       "how to opt vikalp scheme",
       "vikalp scheme confirmed seat",
       "atas irctc full form",
+      "vikalp scheme rules 2026",
     ],
     relatedSlugs: [
       "waitlist-ticket-confirmation-chances-explained",
       "waitlist-confirmation-prediction-and-trends",
       "chart-preparation-time-explained-first-second-chart",
       "pnr-status-explained-cnf-rac-wl-meaning",
+    ],
+    faqs: [
+      {
+        question: "Do I have to pay extra fare if Vikalp allots a seat on Rajdhani or higher category train?",
+        answer:
+          "No. Under Indian Railways Vikalp rules, no extra fare or Tatkal charge is levied, even if you are shifted to a premium train like Rajdhani, Shatabdi, or Vande Bharat. Similarly, no refund is provided if the alternate train has a lower fare.",
+      },
+      {
+        question: "Can I choose my coach or berth in the Vikalp scheme?",
+        answer:
+          "No. Seat and coach allotment on the alternate train is automated and based strictly on vacancy availability at chart preparation time.",
+      },
+      {
+        question: "When is the latest I can opt into Vikalp on IRCTC?",
+        answer:
+          "You can opt into Vikalp either at the time of ticket booking or later via IRCTC's 'Booked Ticket History' page anytime before the preparation of the first chart.",
+      },
+      {
+        question: "What happens if no seat is available on my chosen Vikalp alternate trains?",
+        answer:
+          "If no seat is available on any of your selected alternate trains and your original ticket remains waitlisted after chart preparation, your original ticket is auto-cancelled and a full refund is initiated as usual.",
+      },
     ],
     content: [
       {
@@ -1031,9 +1159,9 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "chart-preparation-time-explained-first-second-chart",
-    title: "Chart preparation time explained: what happens to your ticket, and when",
+    title: "IRCTC Chart Preparation Time (2026): First & Second Chart Timings & Rules",
     excerpt:
-      "Chart preparation time confuses almost every train traveller at some point. Here's when the first and final charts are typically prepared, and exactly what changes for CNF, RAC and WL tickets.",
+      "When is the train reservation chart prepared? Discover verified timings for morning & night trains, 1st chart (4 hrs before) vs 2nd chart (30 mins before), and WL/RAC rules.",
     coverImage: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1600&h=900&fit=crop",
     category: "tips",
     readTime: "6 min read",
@@ -1044,14 +1172,43 @@ export const BLOG_POSTS: BlogPost[] = [
       "irctc chart preparation time",
       "first chart second chart timing",
       "reservation chart kab banta hai",
+      "train chart preparation time for morning trains",
       "current booking after chart preparation",
       "what happens to waitlist ticket after chart preparation",
+      "chart preparation rules 2026",
     ],
     relatedSlugs: [
       "pnr-status-explained-cnf-rac-wl-meaning",
       "waitlist-confirmation-prediction-and-trends",
       "vikalp-scheme-alternate-train-explained",
       "train-ticket-cancellation-refund-rules-2026",
+    ],
+    faqs: [
+      {
+        question: "At what time is the first train reservation chart prepared?",
+        answer:
+          "The first reservation chart is prepared at least 4 hours before the scheduled departure of the train from its originating station. For morning trains departing before 11:00 AM, the first chart is prepared at 8:00 PM the previous night.",
+      },
+      {
+        question: "When is the second and final reservation chart prepared?",
+        answer:
+          "The second and final chart is prepared 30 to 45 minutes before train departure. It accounts for last-minute cancellations, VIP allocations, and current booking counter tickets purchased after the first chart.",
+      },
+      {
+        question: "Can I travel on the train if my e-ticket remains on the waiting list after charting?",
+        answer:
+          "No. Waitlisted online e-tickets are automatically cancelled by IRCTC once the final chart is printed, and a refund is initiated. Travelling on a waitlisted e-ticket is treated as ticketless travel under Indian Railways rules.",
+      },
+      {
+        question: "What happens to an RAC ticket if it does not confirm to a full berth?",
+        answer:
+          "An RAC ticket holder is legally entitled to board the train and travel in their allotted coach. You will be assigned a seat (sharing a side-lower berth with another RAC passenger).",
+      },
+      {
+        question: "Can I book a ticket after the first chart is prepared?",
+        answer:
+          "Yes. Any vacant berths remaining after the first chart are released into 'Current Booking'. You can book these directly on the IRCTC website or app with instant confirmation right up until 30 minutes before departure.",
+      },
     ],
     content: [
       {

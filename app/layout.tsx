@@ -20,21 +20,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = "https://wayvia.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://wayvia.xyz";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Wayvia — Live Train Running Status & PNR Status",
+    default: "Wayvia — Smart Train Journey Planner & Alternative Routes",
     template: "%s | Wayvia",
   },
   description:
-    "Wayvia gives you live Indian Railways train running status and PNR status. Search any train by number or name to see its current location, delay, next stop, and full station-wise schedule — plus instant PNR confirmation checks with a visual seat map.",
+    "Find confirmed train seats, connecting routes via junction hubs, and bus alternatives when direct trains are waitlisted. Live Indian Railways running status and PNR confirmation checks with visual seat maps.",
   keywords: [
+    "train journey planner",
+    "waitlist ticket alternative routes",
+    "connecting trains india",
+    "confirmed train ticket options",
     "train running status",
     "live train status",
     "PNR status",
     "PNR check",
+    "train seat availability",
     "spot your train",
     "Indian railway running status",
     "train current location",
@@ -44,15 +49,15 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: "Wayvia",
-    title: "Wayvia — Live Train Running Status & PNR Status",
+    title: "Wayvia — Smart Train Journey Planner & Alternative Routes",
     description:
-      "See exactly where your train is, how delayed it is, and what's next — plus instant PNR confirmation checks with a visual seat map.",
+      "Find confirmed train seats and connecting routes when direct trains are full. Plus live train running status and instant PNR checks with seat layouts.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Wayvia — Live Train Running Status & PNR Status",
+    title: "Wayvia — Smart Train Journey Planner & Alternative Routes",
     description:
-      "See exactly where your train is, right now — plus instant PNR confirmation checks.",
+      "Discover smarter train routes, connecting junctions, and bus alternatives when direct trains are full.",
   },
   alternates: {
     canonical: SITE_URL,

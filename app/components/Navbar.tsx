@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const LINKS = [
+  { href: "/journey-planner", label: "Find a Way" },
+  { href: "/routes", label: "Routes" },
   { href: "/running-status", label: "Running Status" },
   { href: "/pnr-status", label: "PNR Status" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export default function Navbar() {

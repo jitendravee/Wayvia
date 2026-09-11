@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+const base = process.env.NEXT_PUBLIC_SITE_URL || "https://wayvia.xyz";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -7,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/"],
     },
-    sitemap: "https://www.wayvia.xyz/sitemap.xml",
+    sitemap: `${base}/sitemap.xml`,
   };
 }

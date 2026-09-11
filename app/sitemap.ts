@@ -1,17 +1,27 @@
 import type { MetadataRoute } from "next";
 import { POPULAR_TRAINS } from "@/lib/trains";
+import { POPULAR_ROUTES } from "@/lib/popularRoutes";
 import { BLOG_POSTS } from "@/lib/blog/posts";
 
-const base = "https://wayvia.xyz";
+const base = process.env.NEXT_PUBLIC_SITE_URL || "https://wayvia.xyz";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "daily", priority: 1 },
+    { url: `${base}/journey-planner`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/running-status`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/pnr-status`, changeFrequency: "daily", priority: 0.9 },
-    // The blog index itself — separate from the per-post entries below.
+    { url: `${base}/routes`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/blog`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${base}/how-it-works`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/about`, changeFrequency: "monthly", priority: 0.5 },
   ];
+
+  const routePages: MetadataRoute.Sitemap = POPULAR_ROUTES.map((r) => ({
+    url: `${base}/routes/${r.slug}`,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
 
   const trainPages: MetadataRoute.Sitemap = POPULAR_TRAINS.map((t) => ({
     url: `${base}/running-status/${t.trainNo}`,
@@ -35,5 +45,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: post.featured ? 0.7 : 0.6,
   }));
 
-  return [...staticPages, ...trainPages, ...blogPages];
+  return [...staticPages, ...routePages, ...trainPages, ...blogPages];
 }
