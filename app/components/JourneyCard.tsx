@@ -307,21 +307,32 @@ export default function JourneyCard({
   journey,
   tag,
   rank,
+  isHighlighted = false,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   journey: AnnotatedJourney;
   tag?: string;
   /** Optional 1-based position in the results list — renders the numbered badge from the reference design. Pass `rank={i + 1}` from wherever this is mapped over a list. */
   rank?: number;
+  isHighlighted?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }) {
   const isBest = tag === BEST_OVERALL_TAG;
   const [showMap, setShowMap] = useState(false);
   const [expanded, setExpanded] = useState(true);
   return (
     <div
-      className={`group relative w-full min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg ${
-        isBest
-          ? "border-violet-ring shadow-violet-soft/50 ring-1 ring-violet-ring"
-          : "border-border"
+      id={rank !== undefined ? `journey-card-${rank}` : undefined}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={`group relative w-full min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg scroll-mt-24 ${
+        isHighlighted
+          ? "border-blue-500 ring-2 ring-blue-500/40 shadow-md -translate-y-0.5"
+          : isBest
+            ? "border-violet-ring shadow-violet-soft/50 ring-1 ring-violet-ring"
+            : "border-border"
       }`}
     >
       {isBest && (

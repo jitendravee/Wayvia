@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
+import { useEffect, useMemo, useRef, useCallback } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Polyline,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -14,70 +20,191 @@ export interface MapPoint {
   meta?: string;
 }
 
-function divIcon(html: string, size: [number, number], anchor: [number, number]) {
-  return L.divIcon({ html, className: "wv-icon-reset", iconSize: size, iconAnchor: anchor });
+function cleanStationName(name: string, code: string): string {
+  if (!name || name === code) return code;
+  return name
+    .replace(/\b(JN|JUNCTION|TERMINUS|TERMINAL|CANTT|CENTRAL|MAIN)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function pinIconHtml(color: string) {
+/* ------------------------------------------------------------------ */
+/* HTML Markers matching the Reference Design                          */
+/* ------------------------------------------------------------------ */
+
+function originIconHtml(label: string) {
   return `
-    <div class="wv-pin-wrap">
-      <span class="wv-pin-pulse" style="background:${color}"></span>
-      <span class="wv-pin" style="background:${color}">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
-          <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-          <circle cx="12" cy="9.5" r="2.2" stroke="white" stroke-width="2"/>
+    <div class="wv-marker-container">
+      <div class="wv-ring-origin">
+        <div class="wv-ring-origin-outer"></div>
+        <div class="wv-ring-origin-inner"></div>
+      </div>
+      <div class="wv-station-label wv-label-top">${label}</div>
+    </div>`;
+}
+
+function destIconHtml(label: string) {
+  return `
+    <div class="wv-marker-container">
+      <div class="wv-ring-dest">
+        <div class="wv-ring-dest-outer"></div>
+        <div class="wv-ring-dest-inner"></div>
+      </div>
+      <div class="wv-station-label wv-label-bottom">${label}</div>
+    </div>`;
+}
+
+function intermediateStopHtml(label: string) {
+  return `
+    <div class="wv-marker-container">
+      <div class="wv-ring-stop"></div>
+      <div class="wv-station-label wv-label-right">${label}</div>
+    </div>`;
+}
+
+function trainMarkerHtml() {
+  return `
+    <div class="wv-train-pill">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="3" width="16" height="15" rx="3" />
+        <path d="M4 11h16M8 3v8M16 3v8" />
+        <circle cx="8" cy="15" r="1" fill="currentColor" />
+        <circle cx="16" cy="15" r="1" fill="currentColor" />
+      </svg>
+    </div>`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Custom Zoom & Recenter Controls                                    */
+/* ------------------------------------------------------------------ */
+
+function CustomFloatingControls({ onRecenter }: { onRecenter: () => void }) {
+  const map = useMap();
+
+  return (
+    <div className="absolute bottom-4 left-4 z-[1000] flex flex-col gap-2 pointer-events-auto select-none">
+      <div className="flex flex-col items-center bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-slate-200/80 overflow-hidden">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            map.zoomIn();
+          }}
+          className="w-8 h-8 flex items-center justify-center text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors text-lg font-light active:bg-slate-100"
+          title="Zoom in"
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+        <div className="w-5 h-[1px] bg-slate-100" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            map.zoomOut();
+          }}
+          className="w-8 h-8 flex items-center justify-center text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors text-lg font-light active:bg-slate-100"
+          title="Zoom out"
+          aria-label="Zoom out"
+        >
+          −
+        </button>
+        <div className="w-5 h-[1px] bg-slate-100" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRecenter();
+          }}
+          className="w-8 h-8 flex items-center justify-center text-slate-600 hover:text-blue-600 hover:bg-slate-50 transition-colors active:bg-slate-100"
+          title="Recenter route"
+          aria-label="Recenter route"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="7" />
+            <line x1="12" y1="2" x2="12" y2="6" />
+            <line x1="12" y1="18" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="6" y2="12" />
+            <line x1="18" y1="12" x2="22" y2="12" />
+          </svg>
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRecenter();
+        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-slate-200/80 text-[10.5px] font-semibold text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-all active:scale-95"
+        title="Recenter route"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="12"
+          height="12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-slate-500"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
         </svg>
-      </span>
-    </div>`;
-}
-
-function junctionIconHtml() {
-  return `
-    <div class="wv-junction">
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none">
-        <path d="M12 3v6M12 15v6M6 9l6 3 6-3M6 15l6-3 6 3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>`;
-}
-
-function trainIconHtml() {
-  return `
-    <div class="wv-train">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-        <rect x="5" y="4" width="14" height="12" rx="3" stroke="white" stroke-width="2"/>
-        <path d="M5 11h14M9 4v12M15 4v12" stroke="white" stroke-width="1.6"/>
-        <circle cx="8.5" cy="19" r="1.2" fill="white"/>
-        <circle cx="15.5" cy="19" r="1.2" fill="white"/>
-      </svg>
-    </div>`;
+        Recenter
+      </button>
+    </div>
+  );
 }
 
 function FitBounds({ points }: { points: MapPoint[] }) {
   const map = useMap();
   useEffect(() => {
     if (points.length < 2) return;
-    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lon] as [number, number]));
+    const bounds = L.latLngBounds(
+      points.map((p) => [p.lat, p.lon] as [number, number]),
+    );
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: 9 });
   }, [points, map]);
   return null;
 }
 
-/** Glides a train marker leg-by-leg along the real route, looping continuously. */
+/** Glides a modern train badge leg-by-leg along the route */
 function AnimatedTrain({ points }: { points: MapPoint[] }) {
   const map = useMap();
   const markerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
     if (points.length < 2) return;
-    const icon = divIcon(trainIconHtml(), [26, 26], [13, 13]);
-    const marker = L.marker([points[0].lat, points[0].lon], { icon, zIndexOffset: 1000, interactive: false }).addTo(map);
+    const icon = L.divIcon({
+      html: trainMarkerHtml(),
+      className: "wv-icon-reset",
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
+    });
+    const marker = L.marker([points[0].lat, points[0].lon], {
+      icon,
+      zIndexOffset: 1000,
+      interactive: false,
+    }).addTo(map);
     markerRef.current = marker;
 
     let raf = 0;
     let leg = 0;
     let t0 = performance.now();
-    const legDurationMs = 2400;
-    const pauseMs = 500;
+    const legDurationMs = 2800;
+    const pauseMs = 600;
     let pausing = false;
 
     function frame(now: number) {
@@ -95,8 +222,15 @@ function AnimatedTrain({ points }: { points: MapPoint[] }) {
       }
 
       const progress = Math.min(1, (now - t0) / legDurationMs);
-      const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-      marker.setLatLng([a.lat + (b.lat - a.lat) * eased, a.lon + (b.lon - a.lon) * eased]);
+      const eased =
+        progress < 0.5
+          ? 2 * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+      marker.setLatLng([
+        a.lat + (b.lat - a.lat) * eased,
+        a.lon + (b.lon - a.lon) * eased,
+      ]);
 
       if (progress >= 1) {
         leg = (leg + 1) % (points.length - 1);
@@ -118,9 +252,26 @@ function AnimatedTrain({ points }: { points: MapPoint[] }) {
 }
 
 export default function LeafletMap({ points }: { points: MapPoint[] }) {
+  const mapRef = useRef<L.Map | null>(null);
+
   const center = useMemo<[number, number]>(() => {
     if (points.length === 0) return [22.5, 79];
-    return [points.reduce((s, p) => s + p.lat, 0) / points.length, points.reduce((s, p) => s + p.lon, 0) / points.length];
+    return [
+      points.reduce((s, p) => s + p.lat, 0) / points.length,
+      points.reduce((s, p) => s + p.lon, 0) / points.length,
+    ];
+  }, [points]);
+
+  const handleRecenter = useCallback(() => {
+    if (!mapRef.current || points.length < 2) return;
+    const bounds = L.latLngBounds(
+      points.map((p) => [p.lat, p.lon] as [number, number]),
+    );
+    mapRef.current.fitBounds(bounds, {
+      padding: [48, 48],
+      maxZoom: 9,
+      animate: true,
+    });
   }, [points]);
 
   if (points.length < 2) return null;
@@ -128,76 +279,213 @@ export default function LeafletMap({ points }: { points: MapPoint[] }) {
   const path = points.map((p) => [p.lat, p.lon]) as [number, number][];
 
   return (
-    <div className="relative isolate h-[360px] w-full overflow-hidden">
-      <MapContainer center={center} zoom={6} scrollWheelZoom={false} className="h-full w-full">
+    <div className="relative isolate h-[360px] w-full overflow-hidden select-none bg-[#e8f4fc]">
+      <MapContainer
+        center={center}
+        zoom={6}
+        scrollWheelZoom={false}
+        zoomControl={false}
+        className="h-full w-full"
+        ref={(m) => {
+          if (m) mapRef.current = m;
+        }}
+      >
+        {/* CartoDB Voyager clean pastel tiles */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          subdomains="abcd"
+          maxZoom={19}
         />
 
-        <Polyline positions={path} pathOptions={{ color: "#7c5cff", weight: 3, opacity: 0.3 }} />
-        <Polyline positions={path} pathOptions={{ color: "#7c5cff", weight: 3, dashArray: "1 10", className: "wv-flow-line" }} />
+        {/* Outer subtle glow line */}
+        <Polyline
+          positions={path}
+          pathOptions={{
+            color: "#93c5fd",
+            weight: 8,
+            opacity: 0.45,
+            lineCap: "round",
+            lineJoin: "round",
+          }}
+        />
 
-        {points.map((p, i) => (
-          <Marker
-            key={`${p.code}-${i}`}
-            position={[p.lat, p.lon]}
-            icon={
-              p.kind === "junction"
-                ? divIcon(junctionIconHtml(), [24, 24], [12, 12])
-                : divIcon(pinIconHtml(p.kind === "origin" ? "#16a34a" : "#7c5cff"), [30, 38], [15, 36])
-            }
-          />
-        ))}
+        {/* Solid royal blue route polyline matching screenshot */}
+        <Polyline
+          positions={path}
+          pathOptions={{
+            color: "#2563eb",
+            weight: 4.5,
+            opacity: 1,
+            lineCap: "round",
+            lineJoin: "round",
+          }}
+        />
+
+        {/* Stations along the route */}
+        {points.map((p, i) => {
+          const isOrigin = p.kind === "origin";
+          const isDest = p.kind === "destination";
+          const cleanName = cleanStationName(p.name, p.code);
+
+          let iconHtml = "";
+          let iconSize: [number, number] = [12, 12];
+          let iconAnchor: [number, number] = [6, 6];
+
+          if (isOrigin) {
+            iconHtml = originIconHtml(cleanName);
+            iconSize = [24, 24];
+            iconAnchor = [12, 12];
+          } else if (isDest) {
+            iconHtml = destIconHtml(cleanName);
+            iconSize = [24, 24];
+            iconAnchor = [12, 12];
+          } else {
+            iconHtml = intermediateStopHtml(cleanName);
+            iconSize = [12, 12];
+            iconAnchor = [6, 6];
+          }
+
+          return (
+            <Marker
+              key={`${p.code}-${i}`}
+              position={[p.lat, p.lon]}
+              icon={L.divIcon({
+                html: iconHtml,
+                className: "wv-icon-reset",
+                iconSize,
+                iconAnchor,
+              })}
+            />
+          );
+        })}
 
         <AnimatedTrain points={points} />
         <FitBounds points={points} />
+        <CustomFloatingControls onRecenter={handleRecenter} />
       </MapContainer>
 
-      <div className="pointer-events-none absolute bottom-2 left-2 flex flex-wrap gap-1.5">
-        {points.map((p, i) => (
-          <span
-            key={`${p.code}-lbl-${i}`}
-            className="rounded-full border border-white/60 bg-white/90 px-2 py-0.5 font-mono text-[10px] font-semibold text-ink shadow-sm backdrop-blur"
-          >
-            {p.code}
-          </span>
-        ))}
-      </div>
-
+      {/* CSS Styles */}
       <style>{`
-        .wv-icon-reset { background: transparent; border: none; }
-        .wv-pin-wrap { position: relative; width: 30px; height: 38px; }
-        .wv-pin {
-          position: absolute; left: 50%; top: 0;
-          width: 26px; height: 26px; border-radius: 50% 50% 50% 0;
-          display: flex; align-items: center; justify-content: center;
-          transform: translateX(-50%) rotate(-45deg);
-          box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+        .wv-icon-reset {
+          background: transparent !important;
+          border: none !important;
         }
-        .wv-pin svg { transform: rotate(45deg); }
-        .wv-pin-pulse {
-          position: absolute; left: 50%; top: 11px; transform: translate(-50%, -50%);
-          width: 14px; height: 14px; border-radius: 50%; opacity: 0.55;
-          animation: wvPulse 1.8s ease-out infinite;
+
+        .wv-marker-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        @keyframes wvPulse {
-          0% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; }
-          100% { transform: translate(-50%, -50%) scale(3.4); opacity: 0; }
+
+        /* Origin double-ring */
+        .wv-ring-origin {
+          position: relative;
+          width: 22px;
+          height: 22px;
         }
-        .wv-junction {
-          width: 22px; height: 22px; border-radius: 50%;
-          background: #6b7280; display: flex; align-items: center; justify-content: center;
-          border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        .wv-ring-origin-outer {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: rgba(37, 99, 235, 0.25);
+          border: 2px solid #2563eb;
+          box-shadow: 0 0 10px rgba(37, 99, 235, 0.35);
         }
-        .wv-train {
-          width: 24px; height: 24px; border-radius: 50%;
-          background: #7c5cff; display: flex; align-items: center; justify-content: center;
-          border: 2px solid white; box-shadow: 0 2px 8px rgba(124,92,255,0.6);
+        .wv-ring-origin-inner {
+          position: absolute;
+          inset: 5px;
+          border-radius: 50%;
+          background: #2563eb;
+          border: 2px solid #ffffff;
         }
-        .wv-flow-line path { animation: wvDash 1s linear infinite; }
-        @keyframes wvDash { to { stroke-dashoffset: -22; } }
-        .leaflet-container { background: #eef1f8; font-family: inherit; }
+
+        /* Destination double-ring */
+        .wv-ring-dest {
+          position: relative;
+          width: 22px;
+          height: 22px;
+        }
+        .wv-ring-dest-outer {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: rgba(139, 92, 246, 0.25);
+          border: 2.5px solid #8b5cf6;
+          box-shadow: 0 0 10px rgba(139, 92, 246, 0.35);
+        }
+        .wv-ring-dest-inner {
+          position: absolute;
+          inset: 5px;
+          border-radius: 50%;
+          background: #8b5cf6;
+          border: 2px solid #ffffff;
+        }
+
+        /* Intermediate hollow ring */
+        .wv-ring-stop {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 2.5px solid #2563eb;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Station Text Labels */
+        .wv-station-label {
+          position: absolute;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #1e293b;
+          white-space: nowrap;
+          pointer-events: none;
+          text-shadow:
+            -1.5px -1.5px 0 #fff,  
+             1.5px -1.5px 0 #fff,
+            -1.5px  1.5px 0 #fff,
+             1.5px  1.5px 0 #fff,
+             0 0 5px #fff,
+             0 0 8px #fff;
+        }
+        .wv-label-top {
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        .wv-label-bottom {
+          top: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        .wv-label-right {
+          left: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        /* Train Pill */
+        .wv-train-pill {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #2563eb;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+        }
+
+        .leaflet-container {
+          background: #e8f4fc;
+          font-family: inherit;
+        }
       `}</style>
     </div>
   );

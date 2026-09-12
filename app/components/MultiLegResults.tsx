@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { List, MapPinned } from "lucide-react";
 import JourneyCard from "./JourneyCard";
 import OverviewMap from "./OverviewMap";
 import PartialMatchCard from "./PartialMatchCard";
@@ -296,6 +297,8 @@ function LegPanel({
   const page = data.pagination?.page ?? 1;
 
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
+  const [selectedRank, setSelectedRank] = useState<number | null>(null);
+  const [hoveredRank, setHoveredRank] = useState<number | null>(null);
 
   const fareCeiling = useMemo(
     () => (ranked ? maxFareInSet(ranked.all) : 0),
@@ -392,16 +395,51 @@ function LegPanel({
       {ranked && (
         <>
           {hasMap && (
-            <div className="mb-3 flex gap-1 rounded-full border border-border bg-surface-alt p-1 md:hidden">
-              {/* ...list/map toggle buttons unchanged... */}
+            <div className="mb-4 flex items-center justify-center md:hidden">
+              <div className="inline-flex rounded-full border border-border bg-surface-alt p-1 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setMobileView("list")}
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[11.5px] font-semibold transition-all ${
+                    mobileView === "list"
+                      ? "bg-white text-ink shadow-xs"
+                      : "text-ink-muted hover:text-ink"
+                  }`}
+                >
+                  <List
+                    size={13}
+                    className={
+                      mobileView === "list" ? "text-violet" : "text-ink-dim"
+                    }
+                  />
+                  List ({displayList.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileView("map")}
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[11.5px] font-semibold transition-all ${
+                    mobileView === "map"
+                      ? "bg-white text-ink shadow-xs"
+                      : "text-ink-muted hover:text-ink"
+                  }`}
+                >
+                  <MapPinned
+                    size={13}
+                    className={
+                      mobileView === "map" ? "text-violet" : "text-ink-dim"
+                    }
+                  />
+                  Map Overview
+                </button>
+              </div>
             </div>
           )}
 
-          <div className="flex flex-col gap-4 md:flex-row md:items-start">
+          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:items-start">
             <div
               className={`w-full ${
-                hasMap && mobileView !== "list" ? "hidden md:block" : ""
-              }`}
+                hasMap ? "lg:col-span-7 xl:col-span-7" : "lg:col-span-12"
+              } ${hasMap && mobileView !== "list" ? "hidden md:block" : ""}`}
             >
               <div className="space-y-3">
                 {displayList.map(({ journey, tag }, i) => (
@@ -410,6 +448,9 @@ function LegPanel({
                     journey={journey}
                     tag={tag}
                     rank={i + 1}
+                    isHighlighted={(hoveredRank ?? selectedRank) === i + 1}
+                    onMouseEnter={() => setHoveredRank(i + 1)}
+                    onMouseLeave={() => setHoveredRank(null)}
                   />
                 ))}
               </div>
@@ -433,11 +474,24 @@ function LegPanel({
 
             {hasMap && (
               <div
-                className={`w-full md:w-auto md:sticky md:top-24 md:self-start ${
+                className={`w-full lg:col-span-5 xl:col-span-5 lg:sticky lg:top-24 ${
                   mobileView !== "map" ? "hidden md:block" : ""
                 }`}
               >
-                <OverviewMap entries={data.mapOverview!} />
+                <OverviewMap
+                  entries={data.mapOverview!}
+                  activeRouteRank={hoveredRank ?? selectedRank}
+                  onSelectRouteRank={(rank) => {
+                    setSelectedRank(rank);
+                    const el = document.getElementById(`journey-card-${rank}`);
+                    if (el) {
+                      el.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                    }
+                  }}
+                />
               </div>
             )}
           </div>

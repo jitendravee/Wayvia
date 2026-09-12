@@ -7,6 +7,7 @@ import SearchForm, {
 } from "../components/SearchForm";
 import { StopEntry } from "../components/JourneyStopsForm";
 import NarrativeBanner from "../components/NarrativeBanner";
+import SearchProgressLoader from "../components/SearchProgressLoader";
 import MultiLegResults from "../components/MultiLegResults";
 import {
   DEFAULT_FILTERS,
@@ -55,43 +56,126 @@ export function PageInner() {
   const [initialTransport, setInitialTransport] = useState<
     TransportFilter | undefined
   >(undefined);
+  const [progressState, setProgressState] = useState<{
+    step: number;
+    liveDetail?: string;
+    hubs?: string[];
+  }>({
+    step: 0,
+  });
   const searchParams = useSearchParams();
 
-  // Single-leg search — still hits the plain /api/search (simpler than the
-  // multi endpoint's array wrapping for the common case), then wraps the
-  // one result into the same MultiSearchResponse shape everything renders
-  // from.
+  // Single-leg search — streams realtime progress from /api/search/stream,
+  // falling back seamlessly to standard /api/search if streaming is unavailable.
   async function doSearch(effective: SearchFormValues, targetPage = 1) {
     setLoading(true);
+    setTripData(null);
     setError(null);
+    setProgressState({
+      step: 0,
+      liveDetail: `Searching direct routes between ${effective.from.toUpperCase()} and ${effective.to.toUpperCase()}...`,
+    });
+
+    const params = new URLSearchParams({
+      from: effective.from,
+      to: effective.to,
+      date: effective.date,
+      class: effective.travelClass,
+      quota: effective.quota,
+      maxHubs: String(effective.maxHubs),
+      maxConnections: String(effective.maxConnections),
+      page: String(targetPage),
+      pageSize: String(PAGE_SIZE),
+      modes: effective.modes.join(","),
+    });
+
     try {
-      const params = new URLSearchParams({
-        from: effective.from,
-        to: effective.to,
-        date: effective.date,
-        class: effective.travelClass,
-        quota: effective.quota,
-        maxHubs: String(effective.maxHubs),
-        maxConnections: String(effective.maxConnections),
-        page: String(targetPage),
-        pageSize: String(PAGE_SIZE),
-        modes: effective.modes.join(","),
-        // modes: "train",
-      });
-      const res = await fetch(`/api/search?${params}`);
-      const json: SearchResponse = await res.json();
-      if (!res.ok)
-        throw new Error(json.error || `Request failed (${res.status})`);
-      setTripData({
-        legs: [
-          { from: effective.from, to: effective.to, date: effective.date },
-        ],
-        results: [json],
-      });
-      setTripVersion((v) => v + 1);
+      let receivedComplete = false;
+
+      // Try streaming endpoint for realtime status updates
+      try {
+        const res = await fetch(`/api/search/stream?${params}`);
+        if (res.ok && res.body) {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            const parts = buffer.split("\n\n");
+            buffer = parts.pop() ?? "";
+
+            for (const part of parts) {
+              const line = part.trim();
+              if (line.startsWith("data:")) {
+                try {
+                  const data = JSON.parse(line.slice(5).trim());
+                  if (data.error) {
+                    throw new Error(data.error);
+                  }
+                  if (data.complete && data.result) {
+                    receivedComplete = true;
+                    setProgressState({
+                      step: 4,
+                      liveDetail: "Finalizing and ranking best combinations...",
+                    });
+                    // Brief fluid pause so user perceives the completed state
+                    await new Promise((r) => setTimeout(r, 350));
+                    setTripData({
+                      legs: [
+                        {
+                          from: effective.from,
+                          to: effective.to,
+                          date: effective.date,
+                        },
+                      ],
+                      results: [data.result],
+                    });
+                    setTripVersion((v) => v + 1);
+                    setLoading(false);
+                    return;
+                  } else if (typeof data.step === "number") {
+                    setProgressState({
+                      step: data.step,
+                      liveDetail: data.detail,
+                      hubs: data.hubs,
+                    });
+                  }
+                } catch {
+                  // ignore malformed JSON chunk
+                }
+              }
+            }
+          }
+        }
+      } catch (streamErr) {
+        console.warn(
+          "Streaming search failed, falling back to standard API:",
+          streamErr,
+        );
+      }
+
+      if (!receivedComplete) {
+        const fallbackRes = await fetch(`/api/search?${params}`);
+        const json: SearchResponse = await fallbackRes.json();
+        if (!fallbackRes.ok)
+          throw new Error(
+            json.error || `Request failed (${fallbackRes.status})`,
+          );
+        setTripData({
+          legs: [
+            { from: effective.from, to: effective.to, date: effective.date },
+          ],
+          results: [json],
+        });
+        setTripVersion((v) => v + 1);
+        setLoading(false);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
       setLoading(false);
     }
   }
@@ -245,14 +329,12 @@ export function PageInner() {
       )}
 
       {loading && !tripData && !error && (
-        <NarrativeBanner
-          tone="info"
-          narrative={{
-            headline:
-              "Checking direct trains and nearby junctions at the same time…",
-            detail:
-              "We don't wait to see if direct trains are thin before looking at alternatives — both are checked together, every time.",
-          }}
+        <SearchProgressLoader
+          from={form.from}
+          to={form.to}
+          currentStep={progressState.step}
+          liveDetail={progressState.liveDetail}
+          hubs={progressState.hubs}
         />
       )}
 

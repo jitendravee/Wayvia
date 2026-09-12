@@ -50,11 +50,11 @@ export interface AnnotatedJourney {
 }
 
 /** Builds the ordered, map-ready stop list for one journey's legs — origin, every hub, destination. */
-export function buildRouteStops(legs: Leg[]): RouteStop[] {
+export function buildRouteStops(legs: (Leg | AnnotatedLeg)[]): RouteStop[] {
   const stops: RouteStop[] = [];
   legs.forEach((leg, i) => {
     if (i === 0) {
-      const geo = getStationCoord(leg.from);
+      const geo = ("fromGeo" in leg && leg.fromGeo) ? leg.fromGeo : getStationCoord(leg.from);
       stops.push({
         code: leg.from,
         name: geo?.name ?? leg.from,
@@ -65,7 +65,7 @@ export function buildRouteStops(legs: Leg[]): RouteStop[] {
       });
     }
     const isLast = i === legs.length - 1;
-    const geo = getStationCoord(leg.to);
+    const geo = ("toGeo" in leg && leg.toGeo) ? leg.toGeo : getStationCoord(leg.to);
     stops.push({
       code: leg.to,
       name: geo?.name ?? leg.to,
@@ -189,7 +189,7 @@ export async function annotateWithAvailability(
       connections: legs.length - 1,
       gapsMin,
       modesUsed,
-      routeStops: buildRouteStops(c.legs),
+      routeStops: buildRouteStops(legs),
     };
   });
 }

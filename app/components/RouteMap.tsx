@@ -15,24 +15,30 @@ const LeafletMap = dynamic(() => import("./LeafletMap"), {
   ),
 });
 
-const COORDS = new Map(DEFAULT_HUBS.map((h) => [h.code, { lat: h.lat, lon: h.lon, name: h.name }]));
+const COORDS = new Map(
+  DEFAULT_HUBS.map((h) => [h.code, { lat: h.lat, lon: h.lon, name: h.name }]),
+);
 
 // One geocode per station code per browser session — avoids hammering Nominatim
 // when the same junction shows up across several journey cards.
 const geocodeCache = new Map<string, { lat: number; lon: number } | null>();
 
-async function geocodeStationCode(code: string): Promise<{ lat: number; lon: number } | null> {
+async function geocodeStationCode(
+  code: string,
+): Promise<{ lat: number; lon: number } | null> {
   if (geocodeCache.has(code)) return geocodeCache.get(code)!;
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in&q=${encodeURIComponent(
-        `${code} railway station India`
-      )}`
+        `${code} railway station India`,
+      )}`,
     );
     if (!res.ok) throw new Error("geocode failed");
     const data = (await res.json()) as { lat: string; lon: string }[];
     const hit = data[0];
-    const result = hit ? { lat: parseFloat(hit.lat), lon: parseFloat(hit.lon) } : null;
+    const result = hit
+      ? { lat: parseFloat(hit.lat), lon: parseFloat(hit.lon) }
+      : null;
     geocodeCache.set(code, result);
     return result;
   } catch {
@@ -52,7 +58,8 @@ export default function RouteMap({ legs }: { legs: AnnotatedLeg[] }) {
   const stops = useMemo<Stop[]>(() => {
     const out: Stop[] = [];
     legs.forEach((leg, i) => {
-      if (i === 0) out.push({ code: leg.from, time: leg.departure, kind: "origin" });
+      if (i === 0)
+        out.push({ code: leg.from, time: leg.departure, kind: "origin" });
       const isLast = i === legs.length - 1;
       // Build the object without the `meta` key at all when there's nothing to put in it,
       // rather than `meta: undefined` — required because MapPoint's `meta` is an optional
@@ -83,12 +90,19 @@ export default function RouteMap({ legs }: { legs: AnnotatedLeg[] }) {
     return m;
   }, [legs]);
 
-  const [resolved, setResolved] = useState<Map<string, { lat: number; lon: number }>>(new Map());
+  const [resolved, setResolved] = useState<
+    Map<string, { lat: number; lon: number }>
+  >(new Map());
   const [loadingGeo, setLoadingGeo] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    const missing = stops.filter((s) => !COORDS.has(s.code) && !serverCoords.has(s.code) && !resolved.has(s.code));
+    const missing = stops.filter(
+      (s) =>
+        !COORDS.has(s.code) &&
+        !serverCoords.has(s.code) &&
+        !resolved.has(s.code),
+    );
     if (missing.length === 0) return;
 
     setLoadingGeo(true);
@@ -151,10 +165,15 @@ export default function RouteMap({ legs }: { legs: AnnotatedLeg[] }) {
   }
 
   return (
-    <div className="mt-4 overflow-hidden rounded-xl border border-border">
-      <div className="flex items-center justify-between border-b border-border-soft bg-surface-alt px-4 py-2.5">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-dim">Route map</span>
-        <span className="font-mono text-[10px] text-ink-dim">
+    <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+      <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-4 py-2.5">
+        <div className="flex items-center gap-2">
+          <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+          <span className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-slate-700">
+            Route path map
+          </span>
+        </div>
+        <span className="font-mono text-[10px] text-slate-500">
           {points.length} stop{points.length === 1 ? "" : "s"} plotted
           {loadingGeo ? " · locating more…" : ""}
         </span>
