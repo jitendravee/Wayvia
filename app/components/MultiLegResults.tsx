@@ -395,47 +395,53 @@ function LegPanel({
       {ranked && (
         <>
           {hasMap && (
-            <div className="mb-4 flex items-center justify-center md:hidden">
-              <div className="inline-flex rounded-full border border-border bg-surface-alt p-1 shadow-2xs">
+            <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 md:hidden pointer-events-auto">
+              <div className="inline-flex items-center rounded-full border border-border/80 bg-white/95 p-1 shadow-xl shadow-ink/15 backdrop-blur-md">
                 <button
                   type="button"
-                  onClick={() => setMobileView("list")}
-                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[11.5px] font-semibold transition-all ${
+                  onClick={() => {
+                    setMobileView("list");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[12px] font-semibold transition-all ${
                     mobileView === "list"
-                      ? "bg-white text-ink shadow-xs"
+                      ? "bg-violet text-white shadow-sm"
                       : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   <List
                     size={13}
                     className={
-                      mobileView === "list" ? "text-violet" : "text-ink-dim"
+                      mobileView === "list" ? "text-white" : "text-ink-dim"
                     }
                   />
                   List ({displayList.length})
                 </button>
                 <button
                   type="button"
-                  onClick={() => setMobileView("map")}
-                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[11.5px] font-semibold transition-all ${
+                  onClick={() => {
+                    setMobileView("map");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[12px] font-semibold transition-all ${
                     mobileView === "map"
-                      ? "bg-white text-ink shadow-xs"
+                      ? "bg-violet text-white shadow-sm"
                       : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   <MapPinned
                     size={13}
                     className={
-                      mobileView === "map" ? "text-violet" : "text-ink-dim"
+                      mobileView === "map" ? "text-white" : "text-ink-dim"
                     }
                   />
-                  Map Overview
+                  Map View
                 </button>
               </div>
             </div>
           )}
 
-          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:items-start">
+          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:items-start pb-20 md:pb-0">
             <div
               className={`w-full ${
                 hasMap ? "lg:col-span-7 xl:col-span-7" : "lg:col-span-12"
@@ -451,6 +457,7 @@ function LegPanel({
                     isHighlighted={(hoveredRank ?? selectedRank) === i + 1}
                     onMouseEnter={() => setHoveredRank(i + 1)}
                     onMouseLeave={() => setHoveredRank(null)}
+                    searchDate={leg.date}
                   />
                 ))}
               </div>

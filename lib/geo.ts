@@ -177,3 +177,81 @@ export function registerStationCoord(coord: StationCoord): void {
   ALIAS_MAP.set(coord.code.toUpperCase(), coord);
   ALIAS_MAP.set(coord.name.toUpperCase(), coord);
 }
+
+/** Returns a clean, human-friendly city/station name from a station code or location string */
+export function getStationCityName(input: string): string {
+  if (!input) return "";
+  const raw = input.trim().toUpperCase();
+  const found = COORD_MAP.get(raw) || ALIAS_MAP.get(raw);
+  if (found) {
+    const clean = found.name
+      .replace(/\b(JN|JUNCTION|TERMINUS|TERMINAL|CANTT|CENTRAL|MAIN|RAILWAY STATION)\b/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    return clean || found.name;
+  }
+  return input;
+}
+
+/** Metro clusters for detecting when a connection lands at one station and departs another */
+export const METRO_CLUSTERS: Record<string, { city: string; stations: string[] }> = {
+  DELHI: {
+    city: "Delhi NCR",
+    stations: ["NDLS", "DLI", "NZM", "ANVT", "DEE", "DEC", "DSA", "GZB"],
+  },
+  MUMBAI: {
+    city: "Mumbai MMR",
+    stations: ["CSMT", "BCT", "MMCT", "BDTS", "LTT", "DDR", "PNVL", "TNA", "KYN", "BVI"],
+  },
+  KOLKATA: {
+    city: "Kolkata",
+    stations: ["HWH", "SDAH", "KOAA", "SHM", "SRC"],
+  },
+  BENGALURU: {
+    city: "Bengaluru",
+    stations: ["SBC", "KSR", "YPR", "SMVB", "BNC", "BAND"],
+  },
+  CHENNAI: {
+    city: "Chennai",
+    stations: ["MAS", "MS", "TBM", "PER"],
+  },
+  HYDERABAD: {
+    city: "Hyderabad",
+    stations: ["SC", "HYB", "KCG", "LPI"],
+  },
+  AHMEDABAD: {
+    city: "Ahmedabad",
+    stations: ["ADI", "SBT", "GER", "CLDY", "CYI"],
+  },
+  PUNE: {
+    city: "Pune",
+    stations: ["PUNE", "SVJR", "CCH", "HAD"],
+  },
+};
+
+/**
+ * Checks if two stations are in the same metro area but represent different stations,
+ * meaning a local city road transfer (cab/metro) is required between them.
+ */
+export function getCrossStationTransfer(
+  arrCode: string,
+  depCode: string
+): { isCrossStation: boolean; city: string; fromCode: string; toCode: string } | null {
+  if (!arrCode || !depCode) return null;
+  const a = arrCode.trim().toUpperCase();
+  const b = depCode.trim().toUpperCase();
+  if (a === b) return null;
+
+  for (const cluster of Object.values(METRO_CLUSTERS)) {
+    if (cluster.stations.includes(a) && cluster.stations.includes(b)) {
+      return {
+        isCrossStation: true,
+        city: cluster.city,
+        fromCode: a,
+        toCode: b,
+      };
+    }
+  }
+  return null;
+}
+

@@ -284,6 +284,7 @@ export default function LeafletMap({ points }: { points: MapPoint[] }) {
         center={center}
         zoom={6}
         scrollWheelZoom={false}
+        touchZoom={false}
         zoomControl={false}
         className="h-full w-full"
         ref={(m) => {

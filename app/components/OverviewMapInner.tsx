@@ -330,6 +330,7 @@ export default function OverviewMapInner({
         center={center}
         zoom={5}
         scrollWheelZoom={false}
+        touchZoom={false}
         zoomControl={false}
         className="h-full w-full"
         ref={(m) => {

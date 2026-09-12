@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import SearchForm, {
   ALL_SEARCH_MODES,
@@ -43,14 +43,6 @@ export function PageInner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Every search's results — a 1-leg trip (an ordinary single search) and
-  // a multi-city trip are the exact same shape here, `MultiSearchResponse`.
-  // There's no separate single-vs-multi state or rendering path: LegTabs
-  // inside MultiLegResults simply renders nothing for a 1-leg trip, so it
-  // already looks like an ordinary search result with no extra chrome.
-  // `tripVersion` bumps on every new search so MultiLegResults remounts
-  // with fresh internal per-leg state instead of carrying over the
-  // previous trip's filters/tab/page.
   const [tripData, setTripData] = useState<MultiSearchResponse | null>(null);
   const [tripVersion, setTripVersion] = useState(0);
   const [initialTransport, setInitialTransport] = useState<
@@ -64,10 +56,23 @@ export function PageInner() {
     step: 0,
   });
   const searchParams = useSearchParams();
+  const activeSearchAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      activeSearchAbortRef.current?.abort();
+    };
+  }, []);
 
   // Single-leg search — streams realtime progress from /api/search/stream,
   // falling back seamlessly to standard /api/search if streaming is unavailable.
   async function doSearch(effective: SearchFormValues, targetPage = 1) {
+    if (activeSearchAbortRef.current) {
+      activeSearchAbortRef.current.abort();
+    }
+    const abortController = new AbortController();
+    activeSearchAbortRef.current = abortController;
+
     setLoading(true);
     setTripData(null);
     setError(null);
@@ -94,13 +99,16 @@ export function PageInner() {
 
       // Try streaming endpoint for realtime status updates
       try {
-        const res = await fetch(`/api/search/stream?${params}`);
+        const res = await fetch(`/api/search/stream?${params}`, {
+          signal: abortController.signal,
+        });
         if (res.ok && res.body) {
           const reader = res.body.getReader();
           const decoder = new TextDecoder();
           let buffer = "";
 
           while (true) {
+            if (abortController.signal.aborted) return;
             const { value, done } = await reader.read();
             if (done) break;
             buffer += decoder.decode(value, { stream: true });
@@ -109,6 +117,7 @@ export function PageInner() {
             buffer = parts.pop() ?? "";
 
             for (const part of parts) {
+              if (abortController.signal.aborted) return;
               const line = part.trim();
               if (line.startsWith("data:")) {
                 try {
@@ -124,6 +133,7 @@ export function PageInner() {
                     });
                     // Brief fluid pause so user perceives the completed state
                     await new Promise((r) => setTimeout(r, 350));
+                    if (abortController.signal.aborted) return;
                     setTripData({
                       legs: [
                         {
@@ -152,15 +162,21 @@ export function PageInner() {
           }
         }
       } catch (streamErr) {
+        if (abortController.signal.aborted) return;
         console.warn(
           "Streaming search failed, falling back to standard API:",
           streamErr,
         );
       }
 
+      if (abortController.signal.aborted) return;
+
       if (!receivedComplete) {
-        const fallbackRes = await fetch(`/api/search?${params}`);
+        const fallbackRes = await fetch(`/api/search?${params}`, {
+          signal: abortController.signal,
+        });
         const json: SearchResponse = await fallbackRes.json();
+        if (abortController.signal.aborted) return;
         if (!fallbackRes.ok)
           throw new Error(
             json.error || `Request failed (${fallbackRes.status})`,
@@ -175,6 +191,9 @@ export function PageInner() {
         setLoading(false);
       }
     } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
       setError(err instanceof Error ? err.message : "Unknown error");
       setLoading(false);
     }
@@ -184,6 +203,12 @@ export function PageInner() {
   // chosen stop, not an auto-discovered hub, so it goes to /api/search/multi
   // which just runs the same single-leg pipeline once per leg in parallel.
   async function doMultiSearch(legs: TripLeg[]) {
+    if (activeSearchAbortRef.current) {
+      activeSearchAbortRef.current.abort();
+    }
+    const abortController = new AbortController();
+    activeSearchAbortRef.current = abortController;
+
     setLoading(true);
     setError(null);
     try {
@@ -195,18 +220,25 @@ export function PageInner() {
         maxConnections: String(form.maxConnections),
         pageSize: String(PAGE_SIZE),
         modes: form.modes.join(","),
-        // modes: "train",
       });
-      const res = await fetch(`/api/search/multi?${params}`);
+      const res = await fetch(`/api/search/multi?${params}`, {
+        signal: abortController.signal,
+      });
       const json: MultiSearchResponse = await res.json();
+      if (abortController.signal.aborted) return;
       if (!res.ok)
         throw new Error(json.error || `Request failed (${res.status})`);
       setTripData(json);
       setTripVersion((v) => v + 1);
     } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
-      setLoading(false);
+      if (!abortController.signal.aborted) {
+        setLoading(false);
+      }
     }
   }
 

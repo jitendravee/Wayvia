@@ -40,6 +40,43 @@ const MODES: {
   { id: "more", label: "More", icon: MoreHorizontal, enabled: true },
 ];
 
+const POPULAR_ROUTES = [
+  { label: "Delhi ⇄ Mumbai", origin: "New Delhi", dest: "Mumbai", emoji: "🚆" },
+  {
+    label: "Bengaluru ⇄ Goa",
+    origin: "Bengaluru",
+    dest: "Madgaon",
+    emoji: "🏖️",
+  },
+  {
+    label: "Delhi ⇄ Varanasi",
+    origin: "New Delhi",
+    dest: "Varanasi",
+    emoji: "🛕",
+  },
+  { label: "Kolkata ⇄ Puri", origin: "Kolkata", dest: "Puri", emoji: "🌊" },
+  {
+    label: "Hyderabad ⇄ Chennai",
+    origin: "Hyderabad",
+    dest: "Chennai",
+    emoji: "💼",
+  },
+];
+
+function getTomorrowIso(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function getWeekendIso(): string {
+  const d = new Date();
+  const day = d.getDay();
+  const daysUntilFriday = (5 - day + 7) % 7 || 7;
+  d.setDate(d.getDate() + daysUntilFriday);
+  return d.toISOString().slice(0, 10);
+}
+
 const LandingSearch = () => {
   // Default values as place IDs
   const [origin, setOrigin] = useState("New Delhi"); // New Delhi
@@ -54,6 +91,15 @@ const LandingSearch = () => {
   const { data: destinationPlace } = useResolvedPlace(stops[0]?.to ?? "");
 
   const multi = stops.length > 1;
+
+  const handleSelectRoute = (r: (typeof POPULAR_ROUTES)[0]) => {
+    setOrigin(r.origin);
+    setStops((prev) => [{ ...prev[0], to: r.dest }, ...prev.slice(1)]);
+  };
+
+  const setDateShortcut = (newDate: string) => {
+    setStops((prev) => [{ ...prev[0], date: newDate }, ...prev.slice(1)]);
+  };
 
   // stops[0] is always the base A→B search; anything after it chains from
   // the previous stop's destination — e.g. [B, C, D] with origin A becomes
@@ -93,7 +139,7 @@ const LandingSearch = () => {
     />
   );
   return (
-    <div className="flex flex-col gap-2.5 max-w-[800px] sm:gap-3">
+    <div className="flex flex-col  max-w-[800px] ">
       {/* One card: search fields + CTA, "Add a stop", and the mode switcher all live together */}
       <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-white/60 via-white/70 to-white/80 shadow-lg shadow-ink/10 backdrop-blur-sm">
         <div className="p-3.5 sm:p-4 md:p-5">
@@ -120,6 +166,66 @@ const LandingSearch = () => {
 
         {/* Mode tabs — only Trains is live today; the rest are staged for later.
             Icons stack above the label on phones, sit inline with it from `sm` up. */}
+
+        <div className="flex flex-col gap-3 p-4">
+          {/* Quick Date Shortcuts */}
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] sm:text-[11.5px] font-mono">
+            <span className="text-ink/60 text-[11px] font-medium mr-0.5">
+              Quick dates:
+            </span>
+            <button
+              type="button"
+              onClick={() => setDateShortcut(todayIso())}
+              className={`rounded-full px-2.5 py-0.5 border transition-all ${
+                stops[0]?.date === todayIso()
+                  ? "bg-violet text-white border-violet font-semibold shadow-2xs"
+                  : "bg-white/80 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
+              }`}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => setDateShortcut(getTomorrowIso())}
+              className={`rounded-full px-2.5 py-0.5 border transition-all ${
+                stops[0]?.date === getTomorrowIso()
+                  ? "bg-violet text-white border-violet font-semibold shadow-2xs"
+                  : "bg-white/80 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
+              }`}
+            >
+              Tomorrow
+            </button>
+            <button
+              type="button"
+              onClick={() => setDateShortcut(getWeekendIso())}
+              className={`rounded-full px-2.5 py-0.5 border transition-all ${
+                stops[0]?.date === getWeekendIso()
+                  ? "bg-violet text-white border-violet font-semibold shadow-2xs"
+                  : "bg-white/80 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
+              }`}
+            >
+              Weekend
+            </button>
+          </div>
+
+          {/* Popular Route Chips */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-ink/60 text-[11px] font-medium font-mono mr-0.5">
+              Popular:
+            </span>
+            {POPULAR_ROUTES.map((r, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => handleSelectRoute(r)}
+                className="flex items-center gap-1 rounded-full border border-border/70 bg-white/80 px-2.5 py-0.5 text-[11px] font-medium text-ink-muted shadow-2xs backdrop-blur-2xs transition-all hover:bg-white hover:border-violet-ring hover:text-violet hover:-translate-y-0.5 active:scale-95"
+              >
+                <span>{r.emoji}</span>
+                <span>{r.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex items-stretch gap-1 border-t border-ink/10 bg-white/40 px-2 py-1.5 sm:gap-1.5 sm:px-4 sm:py-2">
           {MODES.map((m) => {
             const Icon = m.icon;
@@ -157,6 +263,8 @@ const LandingSearch = () => {
           })}
         </div>
       </div>
+
+      {/* Quick Dates & Popular Route Chips */}
     </div>
   );
 };
