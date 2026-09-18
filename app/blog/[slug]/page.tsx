@@ -33,6 +33,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) return {};
+  const absoluteImage = post.coverImage.startsWith("http")
+    ? post.coverImage
+    : `${SITE_URL}${post.coverImage}`;
+
   return {
     title: post.title,
     description: post.excerpt,
@@ -42,7 +46,7 @@ export async function generateMetadata({
       type: "article",
       title: post.title,
       description: post.excerpt,
-      images: [post.coverImage],
+      images: [absoluteImage],
       publishedTime: post.date,
       authors: [post.author.name],
     },
@@ -50,7 +54,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
-      images: [post.coverImage],
+      images: [absoluteImage],
     },
   };
 }
@@ -73,13 +77,16 @@ export default async function BlogPostPage({
 
   const related = getRelatedPosts(post);
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
+  const absoluteImage = post.coverImage.startsWith("http")
+    ? post.coverImage
+    : `${SITE_URL}${post.coverImage}`;
 
   const jsonLdArticle = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
-    image: post.coverImage,
+    image: absoluteImage,
     datePublished: post.date,
     dateModified: post.date,
     author: {
@@ -93,13 +100,38 @@ export default async function BlogPostPage({
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/favicon.ico`,
+        url: `${SITE_URL}/logo.png`,
       },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": postUrl,
     },
+  };
+
+  const jsonLdBreadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${SITE_URL}/blog`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: postUrl,
+      },
+    ],
   };
 
   const jsonLdFaq =
@@ -124,6 +156,12 @@ export default async function BlogPostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLdArticle),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLdBreadcrumbs),
         }}
       />
       {jsonLdFaq && (
