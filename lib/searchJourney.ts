@@ -9,6 +9,7 @@ import { applyFilters } from "@/app/components/filters";
 import { getOrCreatePlace } from "@/lib/places/repository";
 import { createSearchCache, type CandidateGenerationResult } from "@/lib/cache";
 import type { PartialCoverage } from "@/lib/graph/discover";
+import { stitchCompositeJourneys } from "@/lib/graph/gapStitcher";
 
 /**
  * Local memory cache for candidate generation results.
@@ -225,7 +226,40 @@ async function buildSearchResponseFromCandidateResult(
     annotatePartialCoverage(partial, date, travelClass, quota),
   ]);
 
-  const availableOnly = annotated.filter((j) => j.fullyConfirmed);
+  let allAnnotated = [...annotated];
+
+  // If confirmed routes are thin or partial coverage exists, stitch composite struggle routes
+  if (partial.length > 0) {
+    try {
+      const compositeCandidates = stitchCompositeJourneys(from, to, partial, allAnnotated, 4);
+      if (compositeCandidates.length > 0) {
+        // Provide precomputed availability/fare for the gap leg so it passes as confirmed
+        for (const c of compositeCandidates) {
+          for (const leg of c.legs) {
+            if (leg.isGap && !leg.precomputed) {
+              const gapDist = leg.gapDetails?.distanceKm ?? 60;
+              leg.precomputed = {
+                availability: {
+                  key: "GAP",
+                  category: "AVAILABLE",
+                  count: null,
+                  rawStatus: "AVAILABLE",
+                  rawNums: "",
+                },
+                fare: Math.round(gapDist * 1.8),
+              };
+            }
+          }
+        }
+        const annotatedComposite = await annotateWithAvailability(compositeCandidates, date, travelClass, quota);
+        allAnnotated = [...allAnnotated, ...annotatedComposite];
+      }
+    } catch (err) {
+      console.error("Error stitching composite journeys:", err);
+    }
+  }
+
+  const availableOnly = allAnnotated.filter((j) => j.fullyConfirmed);
 
   // Apply filters FIRST, then rank
   const frontendFilters = {

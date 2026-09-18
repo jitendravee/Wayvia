@@ -3,6 +3,7 @@ import type { BetweenStationEntry } from "../erail/prettify";
 import { getLiveStations, getDiscoveredStations } from "../erail/stationDirectory";
 import { rankedCandidateHubs, ScoredHub, Hub, DEFAULT_HUBS, GeoPoint } from "./hubs";
 import { discoverHubsFromRoutes, RouteDerivedHub } from "./dynamicHubs";
+import { discoverStationExtensions } from "./stationExtensions";
 import type { Leg, JourneyCandidate, PartialCoverage } from "./types";
 
 /**
@@ -122,13 +123,21 @@ function isoToDDMMYYYY(iso: string): string {
 /** Below this many combined direct + 1-hub candidates, the expensive tiers (2-hub, dynamic-route hubs) kick in. */
 const THIN_RESULTS_THRESHOLD = 3;
 
-/** Direct trains between two stations, running on the given date. */
+/** Direct trains between two stations, running on the given date, plus station extensions and same-train splits. */
 export async function directSearch(from: string, to: string, opts: DiscoverOptions): Promise<JourneyCandidate[]> {
   const date = isoToDDMMYYYY(opts.date);
   const result = await getTrainsOnDate(from, to, date);
   if (!result.success) return [];
   const entries = result.data as BetweenStationEntry[];
-  return entries.map((e) => ({ legs: [withAbsoluteTimes(entryToLeg(e), 0)] }));
+  const direct = entries.map((e) => ({ legs: [withAbsoluteTimes(entryToLeg(e), 0)] }));
+
+  try {
+    const extensions = await discoverStationExtensions(from, to, entries, opts.date);
+    return [...direct, ...extensions];
+  } catch (err) {
+    console.error("discoverStationExtensions error:", err);
+    return direct;
+  }
 }
 
 /**
@@ -597,9 +606,12 @@ export async function discoverJourneys(from: string, to: string, opts: DiscoverO
 
   console.log(`[TRAIN discoverJourneys] START ${from} -> ${to} date=${opts.date} maxConnections=${maxConnections} maxHubs=${opts.maxHubs}`);
 
-  const [direct, hubResult] = await Promise.all([directSearch(from, to, opts), hubSearch(from, to, opts)]);
+  const [allDirect, hubResult] = await Promise.all([directSearch(from, to, opts), hubSearch(from, to, opts)]);
 
-  let viaHub = dedupe(hubResult.candidates);
+  const direct = allDirect.filter((c) => c.legs.length === 1);
+  const sameTrainSplits = allDirect.filter((c) => c.legs.length > 1);
+
+  let viaHub = dedupe([...sameTrainSplits, ...hubResult.candidates]);
   let viaTwoHub: JourneyCandidate[] = [];
   let viaThreeHub: JourneyCandidate[] = [];
   let dynamicHubsUsed = false;

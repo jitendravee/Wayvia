@@ -47,6 +47,12 @@ export interface AnnotatedJourney {
   modesUsed: Mode[];
   /** Ordered stop-by-stop map data for this exact journey (origin → every hub → destination), coordinates included wherever known. Ready to feed straight into a map component. */
   routeStops: RouteStop[];
+  /** Specialized alternate route type. */
+  extensionType?: "same_train_split" | "origin_extension" | "dest_extension" | "composite_gap";
+  /** Percentage of the total journey distance covered by confirmed transport (for composite struggle journeys). */
+  coveragePercent?: number;
+  /** True when the journey contains local transit / struggle gaps. */
+  hasGaps?: boolean;
 }
 
 /** Builds the ordered, map-ready stop list for one journey's legs — origin, every hub, destination. */
@@ -174,6 +180,7 @@ export async function annotateWithAvailability(
     const totalFare = legs.every((l) => l.fare !== null) ? legs.reduce((sum, l) => sum + (l.fare ?? 0), 0) : null;
     const totalDurationMin = legs[legs.length - 1].arrAbsMin - legs[0].depAbsMin;
     const gapsMin = legs.slice(1).map((l, i) => l.depAbsMin - legs[i].arrAbsMin);
+    const hasGaps = legs.some((l) => l.isGap);
     const modesUsed = Array.from(new Set(legs.map((l) => l.mode)));
 
     return {
@@ -182,6 +189,9 @@ export async function annotateWithAvailability(
       hub2: c.hub2,
       hub3: c.hub3,
       hubSource: c.hubSource,
+      extensionType: c.extensionType,
+      coveragePercent: c.coveragePercent,
+      hasGaps,
       fullyConfirmed,
       hasBlockedLeg,
       totalFare,

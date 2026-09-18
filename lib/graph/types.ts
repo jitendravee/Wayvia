@@ -33,6 +33,26 @@ export interface Leg {
    * annotateWithAvailability with its own lookup branch — either works.
    */
   precomputed?: { availability: import("../erail/avl").AvlAvailability | null; fare: number | null };
+  /** When true, this leg is part of a same-train split where the passenger stays on the same train but holds two tickets. */
+  isSameTrainSplit?: boolean;
+  /**
+   * If this leg is booked from an earlier origin station to secure General Quota seats,
+   * this is the passenger's actual boarding station (IRCTC Boarding Point).
+   */
+  boardingStation?: string;
+  /**
+   * If this leg is booked past the passenger's destination station to secure quota seats,
+   * this is the passenger's actual deboarding station.
+   */
+  deboardingStation?: string;
+  /** When true, this leg represents an unreserved/local transit gap (e.g. self-transfer or state bus). */
+  isGap?: boolean;
+  /** Actionable details for a local transit gap. */
+  gapDetails?: {
+    distanceKm: number;
+    estDurationMin: number;
+    transitTip: string;
+  };
 }
 
 export interface JourneyCandidate {
@@ -45,6 +65,10 @@ export interface JourneyCandidate {
   hub3?: string;
   /** Where the hub(s) for this candidate came from — static geo list, the live station directory, or real-route topology discovery. */
   hubSource?: "static" | "live" | "route-topology";
+  /** Specialized alternate route type. */
+  extensionType?: "same_train_split" | "origin_extension" | "dest_extension" | "composite_gap";
+  /** Percentage of the total journey distance covered by confirmed transport (for composite struggle journeys). */
+  coveragePercent?: number;
 }
 
 /**

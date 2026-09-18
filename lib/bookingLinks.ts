@@ -9,22 +9,39 @@ export interface BookingProviderOption {
   isPrimary?: boolean;
 }
 
-/** Formats a date string (e.g. YYYY-MM-DD) into DDMMYYYY for ConfirmTkt */
-function formatDDMMYYYY(dateStr?: string): string {
+/** Formats a date string (e.g. YYYY-MM-DD) into DD-MM-YYYY for ConfirmTkt */
+function formatConfirmTktDate(dateStr?: string, dayOffset = 0): string {
+  let d: Date;
   if (!dateStr) {
-    const d = new Date();
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    return `${day}${month}${d.getFullYear()}`;
+    d = new Date();
+  } else {
+    const clean = dateStr.slice(0, 10);
+    const parts = clean.split("-");
+    if (parts.length === 3 && parts[0].length === 4) {
+      // YYYY-MM-DD
+      const [y, m, day] = parts.map(Number);
+      d = new Date(Date.UTC(y, m - 1, day));
+    } else if (parts.length === 3 && parts[2].length === 4) {
+      // DD-MM-YYYY
+      const [day, m, y] = parts.map(Number);
+      d = new Date(Date.UTC(y, m - 1, day));
+    } else {
+      d = new Date(dateStr);
+    }
   }
-  const clean = dateStr.slice(0, 10);
-  const parts = clean.split("-");
-  if (parts.length === 3 && parts[0].length === 4) {
-    // YYYY-MM-DD
-    const [y, m, d] = parts;
-    return `${d.padStart(2, "0")}${m.padStart(2, "0")}${y}`;
+
+  if (Number.isNaN(d.getTime())) {
+    d = new Date();
   }
-  return dateStr.replace(/\D/g, "");
+
+  if (dayOffset > 0) {
+    d.setUTCDate(d.getUTCDate() + dayOffset);
+  }
+
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const yyyy = d.getUTCFullYear();
+  return `${dd}-${mm}-${yyyy}`;
 }
 
 /** Formats date into DD-MMM-YYYY for RedBus (e.g. "15-Sep-2026") */
@@ -51,6 +68,7 @@ function getCleanCityForBus(input: string): string {
 /**
  * Returns booking provider links for a train leg.
  * ConfirmTkt pre-fills the origin, destination, date, and train search directly.
+ * Format: https://www.confirmtkt.com/rbooking/trains/from/NDLS/to/MMCT/20-09-2026
  */
 export function getTrainBookingProviders(params: {
   from: string;
@@ -58,16 +76,17 @@ export function getTrainBookingProviders(params: {
   date?: string;
   trainNo?: string;
   travelClass?: string;
+  dayOffset?: number;
 }): BookingProviderOption[] {
-  const { from, to, date, trainNo } = params;
+  const { from, to, date, trainNo, dayOffset } = params;
   const fromCode = from.trim().toUpperCase();
   const toCode = to.trim().toUpperCase();
-  const dateFormatted = formatDDMMYYYY(date);
+  const dateFormatted = formatConfirmTktDate(date, dayOffset);
 
-  // ConfirmTkt deep link with pre-filled stations and journey date
-  const confirmTktUrl = `https://www.confirmtkt.com/rbooking/trains?fromStationCode=${encodeURIComponent(
+  // ConfirmTkt deep link with pre-filled stations and journey date in DD-MM-YYYY format
+  const confirmTktUrl = `https://www.confirmtkt.com/rbooking/trains/from/${encodeURIComponent(
     fromCode
-  )}&toStationCode=${encodeURIComponent(toCode)}&journeyDate=${encodeURIComponent(dateFormatted)}`;
+  )}/to/${encodeURIComponent(toCode)}/${encodeURIComponent(dateFormatted)}`;
 
   // Ixigo Trains route search
   const ixigoUrl = `https://www.ixigo.com/trains/${encodeURIComponent(fromCode)}-to-${encodeURIComponent(
@@ -182,6 +201,7 @@ export function getFlightBookingProviders(params: {
  * High-level helper to retrieve all options for a given leg.
  */
 export function getLegBookingOptions(leg: AnnotatedLeg, date?: string): BookingProviderOption[] {
+  const dayOffset = leg.depAbsMin ? Math.floor(leg.depAbsMin / 1440) : 0;
   if (leg.mode === "bus") {
     return getBusBookingProviders({
       from: leg.from,
@@ -202,6 +222,7 @@ export function getLegBookingOptions(leg: AnnotatedLeg, date?: string): BookingP
     to: leg.to,
     date,
     trainNo: leg.trainNo,
+    dayOffset,
   });
 }
 

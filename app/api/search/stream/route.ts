@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
           step: 0,
           id: "direct_routes",
           label: "Checking direct routes",
-          detail: `Resolving stations & searching direct routes between ${from.toUpperCase()} and ${to.toUpperCase()}...`,
+          detail: `Resolving stations & scanning direct routes between ${from.toUpperCase()} and ${to.toUpperCase()}...`,
         });
 
         // Resolve places
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
           step: 1,
           id: "nearby_connections",
           label: "Checking nearby connections",
-          detail: `Scanning junction nodes (${sampleHubs.join(", ")}) for split routes...`,
+          detail: `Scanning same-train splits, junction nodes (${sampleHubs.join(", ")}) & station extensions...`,
           hubs: sampleHubs,
         });
 
@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
           step: 2,
           id: "availability",
           label: "Checking availability",
-          detail: "Querying IRCTC live seat availability & connecting bus options...",
+          detail: "Querying IRCTC live seat availability, sectional quotas & connecting buses...",
         });
 
         // Run the real search
@@ -133,7 +133,7 @@ export async function GET(req: NextRequest) {
           step: 3,
           id: "prices",
           label: "Comparing prices",
-          detail: "Analyzing fare splits, buffer layover times & class availability...",
+          detail: "Analyzing fare splits, buffer layover times, transfer gaps & confirmed seats...",
         });
 
         const result = await searchPromise;
@@ -143,7 +143,7 @@ export async function GET(req: NextRequest) {
           step: 4,
           id: "best_combination",
           label: "Finding the best combination",
-          detail: "Ranking best match, cheapest & fastest multimodal options...",
+          detail: "Ranking best match, same-train splits & multimodal options...",
         });
 
         // Final Complete Event with Full Data

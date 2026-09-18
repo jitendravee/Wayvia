@@ -93,9 +93,10 @@ export async function searchJourneyPlaceFirst(
     console.log(`targetPlace: ${destination.name || destination.id}`);
     console.log(`---`);
 
+    const needsGenericSearch = requestedModes.some((m) => m !== "train");
     const [trainResult, genericPaths] = await Promise.all([
       hasTrain ? trainMultiHopSearch(origin, destination, trainOpts) : Promise.resolve(null),
-      multimodalGraphSearch(origin, destination, opts.date, genericFilters),
+      needsGenericSearch ? multimodalGraphSearch(origin, destination, opts.date, genericFilters) : Promise.resolve([]),
     ]);
 
     // --- Train's own multi-hop engine results (if train was requested) ---

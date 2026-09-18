@@ -200,16 +200,46 @@ export function TimelineLegConnector({ leg }: { leg: AnnotatedLeg }) {
       className={`flex ${TIMELINE_LEG_MIN_WIDTH} flex-1 flex-col items-center gap-1 px-1 pt-[5px]`}
     >
       <div className="flex w-full items-center gap-1">
-        <span className="h-px min-w-[8px] flex-1 bg-border" />
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-violet-ring bg-violet-soft text-violet">
+        <span
+          className={`h-px min-w-[8px] flex-1 ${
+            leg.isGap
+              ? "border-t-2 border-dashed border-amber-400 bg-transparent"
+              : "bg-border"
+          }`}
+        />
+        <span
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
+            leg.isGap
+              ? "border-amber-400 bg-amber-50 text-amber-700"
+              : "border-violet-ring bg-violet-soft text-violet"
+          }`}
+        >
           <Icon size={13} />
         </span>
-        <span className="h-px min-w-[8px] flex-1 bg-border" />
+        <span
+          className={`h-px min-w-[8px] flex-1 ${
+            leg.isGap
+              ? "border-t-2 border-dashed border-amber-400 bg-transparent"
+              : "bg-border"
+          }`}
+        />
       </div>
       <span className="w-full truncate text-center font-mono text-[10.5px] leading-tight text-ink-muted">
-        {leg.mode === "train" ? `Train #${leg.trainNo}` : leg.trainName}
+        {leg.isGap
+          ? "Local Transit Gap"
+          : leg.isSameTrainSplit
+            ? `Same Train #${leg.trainNo}`
+            : leg.mode === "train"
+              ? `Train #${leg.trainNo}`
+              : leg.trainName}
       </span>
-      <AvailabilityPill leg={leg} compact />
+      {leg.isGap ? (
+        <span className="shrink-0 whitespace-nowrap rounded-full font-mono font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 text-[9.5px]">
+          Self-Transfer
+        </span>
+      ) : (
+        <AvailabilityPill leg={leg} compact />
+      )}
     </div>
   );
 }
@@ -335,39 +365,98 @@ export function SegmentCard({
         </div>
       </div>
 
-      {/* Primary Booking Button & Secondary Provider Options */}
-      <div className="flex flex-col gap-1.5 mt-1 pt-2 border-t border-border-soft">
-        <a
-          href={primaryOption.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet px-4 py-2 font-display text-[13px] font-semibold text-white! shadow-sm shadow-violet-soft transition-transform hover:bg-violet-dark hover:scale-[1.01] active:scale-[0.99]"
-        >
-          Book on {primaryOption.name}
-          <MoveUpRight size={14} />
-        </a>
+      {/* Specialized Extension & Gap Notices */}
+      {leg.boardingStation && (
+        <div className="rounded-lg bg-sky-50 border border-sky-200 p-2.5 text-[11px] text-sky-900">
+          <span className="font-semibold block text-sky-950">
+            ⚡ Boarding Point: {leg.boardingStation} (
+            {getStationCityName(leg.boardingStation)})
+          </span>
+          <p className="mt-0.5 text-sky-800">
+            Ticket booked from origin station <strong>{leg.from}</strong> to
+            secure confirmed General Quota seats. When booking on IRCTC, select{" "}
+            <strong>{leg.boardingStation}</strong> as your Boarding Point.
+          </p>
+        </div>
+      )}
 
-        {bookingOptions.length > 1 && (
-          <div className="flex items-center justify-between px-0.5 pt-0.5">
-            <span className="text-[10px] text-ink-dim font-mono">Also on:</span>
-            <div className="flex items-center gap-1.5">
-              {bookingOptions
-                .filter((opt) => opt.id !== primaryOption.id)
-                .map((opt) => (
-                  <a
-                    key={opt.id}
-                    href={opt.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-md border border-border px-2 py-0.5 font-mono text-[10px] font-medium text-ink-muted hover:border-violet-ring hover:text-violet transition-colors"
-                  >
-                    {opt.name}
-                  </a>
-                ))}
-            </div>
+      {leg.deboardingStation && (
+        <div className="rounded-lg bg-teal-50 border border-teal-200 p-2.5 text-[11px] text-teal-900">
+          <span className="font-semibold block text-teal-950">
+            🎯 Early Deboard: {leg.deboardingStation} (
+            {getStationCityName(leg.deboardingStation)})
+          </span>
+          <p className="mt-0.5 text-teal-800">
+            Ticket booked to farther terminus <strong>{leg.to}</strong> to
+            bypass waitlist. Alight early at your destination station{" "}
+            <strong>{leg.deboardingStation}</strong>.
+          </p>
+        </div>
+      )}
+
+      {leg.isSameTrainSplit && (
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2 text-[11px] text-emerald-900">
+          <span className="font-semibold">⚡ Same-Train Split:</span> Remain on
+          Train #{leg.trainNo}. No platform or coach change required.
+        </div>
+      )}
+
+      {/* Booking Action or Local Transit Notice */}
+      {leg.isGap ? (
+        <div className="mt-1 pt-2 border-t border-amber-200 flex flex-col gap-1.5">
+          <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-amber-950">
+            <span className="font-semibold flex items-center gap-1.5 text-[12px] text-amber-900">
+              🚌 Local Transit Connection (No Reservation Needed)
+            </span>
+            <p className="mt-1 text-[11.5px] leading-relaxed text-amber-900/90">
+              {leg.gapDetails?.transitTip ??
+                "Frequent state transport buses, local trains, and shared cabs connect these stations. Self-transfer required."}
+            </p>
+            {leg.gapDetails && (
+              <div className="mt-2 flex items-center gap-3 font-mono text-[10.5px] text-amber-800">
+                <span>Distance: ~{leg.gapDetails.distanceKm} km</span>
+                <span>•</span>
+                <span>Est. Time: ~{leg.gapDetails.estDurationMin} min</span>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5 mt-1 pt-2 border-t border-border-soft">
+          <a
+            href={primaryOption.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet px-4 py-2 font-display text-[13px] font-semibold text-white! shadow-sm shadow-violet-soft transition-transform hover:bg-violet-dark hover:scale-[1.01] active:scale-[0.99]"
+          >
+            Book on {primaryOption.name}
+            <MoveUpRight size={14} />
+          </a>
+
+          {bookingOptions.length > 1 && (
+            <div className="flex items-center justify-between px-0.5 pt-0.5">
+              <span className="text-[10px] text-ink-dim font-mono">
+                Also on:
+              </span>
+              <div className="flex items-center gap-1.5">
+                {bookingOptions
+                  .filter((opt) => opt.id !== primaryOption.id)
+                  .map((opt) => (
+                    <a
+                      key={opt.id}
+                      href={opt.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-border px-2 py-0.5 font-mono text-[10px] font-medium text-ink-muted hover:border-violet-ring hover:text-violet transition-colors"
+                    >
+                      {opt.name}
+                    </a>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -499,6 +588,30 @@ export default function JourneyCard({
             hasBlockedLeg={journey.hasBlockedLeg}
           />
 
+          {journey.extensionType === "same_train_split" && (
+            <span className="flex shrink-0 items-center gap-1 rounded-full border border-violet-ring bg-violet-soft px-2.5 py-1 font-mono text-[10.5px] font-bold text-violet-dark shadow-2xs">
+              <Sparkles size={12} className="text-violet" /> SAME-TRAIN SPLIT
+            </span>
+          )}
+
+          {journey.extensionType === "origin_extension" && (
+            <span className="flex shrink-0 items-center gap-1 rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 font-mono text-[10.5px] font-bold text-sky-800 shadow-2xs">
+              🏷️ ORIGIN QUOTA
+            </span>
+          )}
+
+          {journey.extensionType === "dest_extension" && (
+            <span className="flex shrink-0 items-center gap-1 rounded-full border border-teal-300 bg-teal-50 px-2.5 py-1 font-mono text-[10.5px] font-bold text-teal-800 shadow-2xs">
+              🎯 BEYOND DESTINATION
+            </span>
+          )}
+
+          {journey.hasGaps && (
+            <span className="flex shrink-0 items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 font-mono text-[10.5px] font-bold text-amber-800 shadow-2xs">
+              🔄 {journey.coveragePercent ?? 75}% COVERED
+            </span>
+          )}
+
           <button
             type="button"
             onClick={() => setShowMap((v) => !v)}
@@ -510,6 +623,56 @@ export default function JourneyCard({
             />
           </button>
         </div>
+
+        {/* Same-Train Split Notice Banner */}
+        {journey.extensionType === "same_train_split" && (
+          <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-emerald-300 bg-emerald-50/90 p-2.5 text-emerald-950 shadow-2xs">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <div className="text-[12px] leading-snug">
+              <span className="font-semibold text-emerald-900">
+                Same-Train Split · Zero Train Change:
+              </span>{" "}
+              You stay on the exact same train ({journey.legs[0]?.trainName} #
+              {journey.legs[0]?.trainNo}) the entire way! Book two contiguous
+              tickets on IRCTC to bypass the waitlisted direct quota.
+            </div>
+          </div>
+        )}
+
+        {/* Origin Quota Boarding Point Notice Banner */}
+        {journey.legs[0]?.boardingStation && (
+          <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-sky-300 bg-sky-50/90 p-2.5 text-sky-950 shadow-2xs">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
+            <div className="text-[12px] leading-snug">
+              <span className="font-semibold text-sky-900">
+                General Quota Unlocked · Board at{" "}
+                {journey.legs[0].boardingStation}:
+              </span>{" "}
+              This seat is booked from origin station{" "}
+              <strong>{journey.legs[0].from}</strong> where General Quota seats
+              are confirmed. Simply select{" "}
+              <strong>{journey.legs[0].boardingStation}</strong> (
+              {getStationCityName(journey.legs[0].boardingStation)}) as your
+              official Boarding Point on IRCTC.
+            </div>
+          </div>
+        )}
+
+        {/* Composite Struggle Gap Notice Banner */}
+        {journey.hasGaps && (
+          <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-indigo-200 bg-indigo-50/90 p-2.5 text-indigo-950 shadow-2xs">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
+            <div className="text-[12px] leading-snug">
+              <span className="font-semibold text-indigo-900">
+                Guaranteed Majority Journey ({journey.coveragePercent ?? 75}%
+                Confirmed Distance):
+              </span>{" "}
+              Your long-distance journey has confirmed berths. The short
+              connection gap between stations can be covered via frequent local
+              state buses or passenger trains.
+            </div>
+          </div>
+        )}
 
         {/* Cross-Station Transfer Alert Banner */}
         {crossTransfers.length > 0 && (

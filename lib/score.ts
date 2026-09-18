@@ -44,9 +44,16 @@ export function rankJourneys(journeys: AnnotatedJourney[]): RankedResults | null
   function balancedScore(j: AnnotatedJourney): number {
     const durationScore = j.totalDurationMin / maxDuration;
     const fareScore = j.totalFare !== null ? j.totalFare / maxFare : 0.5; // neutral if unknown
-    const connectionPenalty = j.connections * 0.1;
+    // Same-train splits do not require physical train changes, so zero physical transfer penalty!
+    const effectiveConnections = j.extensionType === "same_train_split" ? 0 : j.connections;
+    const connectionPenalty = effectiveConnections * 0.1;
     const confirmedBonus = j.fullyConfirmed ? -0.3 : j.hasBlockedLeg ? 0.4 : 0;
-    return durationScore * 0.4 + fareScore * 0.4 + connectionPenalty + confirmedBonus;
+    // Small bonus for seamless same-train split and origin extension
+    const extensionBonus =
+      j.extensionType === "same_train_split" ? -0.15 : j.extensionType === "origin_extension" ? -0.1 : 0;
+    const gapPenalty = j.hasGaps ? 0.15 : 0;
+
+    return durationScore * 0.4 + fareScore * 0.4 + connectionPenalty + confirmedBonus + extensionBonus + gapPenalty;
   }
 
   const allSorted = [...journeys].sort((a, b) => balancedScore(a) - balancedScore(b));

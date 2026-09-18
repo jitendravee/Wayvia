@@ -42,6 +42,26 @@ export interface AnnotatedLeg {
   /** Coordinates for the boarding/alighting stations, when known server-side. Null means the frontend should fall back to live geocoding for that one stop. */
   fromGeo: StationCoord | null;
   toGeo: StationCoord | null;
+  /** When true, this leg is part of a same-train split where the passenger stays on the same train but holds two tickets. */
+  isSameTrainSplit?: boolean;
+  /**
+   * If this leg is booked from an earlier origin station to secure General Quota seats,
+   * this is the passenger's actual boarding station (IRCTC Boarding Point).
+   */
+  boardingStation?: string;
+  /**
+   * If this leg is booked past the passenger's destination station to secure quota seats,
+   * this is the passenger's actual deboarding station.
+   */
+  deboardingStation?: string;
+  /** When true, this leg represents an unreserved/local transit gap (e.g. self-transfer or state bus). */
+  isGap?: boolean;
+  /** Actionable details for a local transit gap. */
+  gapDetails?: {
+    distanceKm: number;
+    estDurationMin: number;
+    transitTip: string;
+  };
 }
 
 /** One stop along a journey, ready to plot on a map — origin, every hub/junction change, and the final destination. */
@@ -75,6 +95,12 @@ export interface AnnotatedJourney {
   modesUsed: Mode[];
   /** Ordered stop-by-stop map data for this journey — origin, every hub, destination — ready to plot. */
   routeStops: RouteStop[];
+  /** Specialized alternate route type. */
+  extensionType?: "same_train_split" | "origin_extension" | "dest_extension" | "composite_gap";
+  /** Percentage of the total journey distance covered by confirmed transport (for composite struggle journeys). */
+  coveragePercent?: number;
+  /** True when the journey contains local transit / struggle gaps. */
+  hasGaps?: boolean;
 }
 
 /** One labeled, colored route on the "ways to get there" overview map — the big multi-route picture, not a single journey's own path. */
