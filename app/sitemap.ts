@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { POPULAR_TRAINS } from "@/lib/trains";
 import { POPULAR_ROUTES } from "@/lib/popularRoutes";
 import { BLOG_POSTS } from "@/lib/blog/posts";
+import { JUNCTIONS_DATA } from "@/lib/junctions/junctionData";
 
 const base = process.env.NEXT_PUBLIC_SITE_URL || "https://wayvia.xyz";
 
@@ -9,8 +10,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "daily", priority: 1 },
     { url: `${base}/journey-planner`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/emergency-travel`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/tatkal-matrix`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/coach-position`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/junctions`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/running-status`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/pnr-status`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/refund-calculator`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/routes`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/blog`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/how-it-works`, changeFrequency: "monthly", priority: 0.6 },
@@ -45,5 +51,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: post.featured ? 0.7 : 0.6,
   }));
 
-  return [...staticPages, ...routePages, ...trainPages, ...blogPages];
+  const junctionPages: MetadataRoute.Sitemap = JUNCTIONS_DATA.map((j) => ({
+    url: `${base}/junctions/${j.slug}`,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...routePages, ...trainPages, ...blogPages, ...junctionPages];
 }

@@ -116,6 +116,465 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "irctc-coach-position-seat-map-guide-2026",
+    title: "IRCTC Coach Position & Seat Map Blueprint Guide (2026): Find Your Coach & Berth Before Train Arrival",
+    excerpt:
+      "Standing at the wrong end of a 24-coach train? Learn how Indian Railways orders coaches (SL, 3A, 3E, 2A, 1A), how platform escalator zones work, and explore interactive 2D berth blueprints.",
+    coverImage: "/blog/coach-position-hero.jpg",
+    category: "rail",
+    readTime: "9 min read",
+    date: "2026-09-20",
+    featured: true,
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "irctc coach position",
+      "train coach position at platform",
+      "seat map indian railways",
+      "berth layout 3a 2a sleeper",
+      "3e coach seat map side middle",
+      "find coach position online",
+      "indian railway platform coach indicator",
+      "where will my coach stand",
+      "wap-7 loco engine side coach",
+    ],
+    relatedSlugs: [
+      "pnr-status-explained-cnf-rac-wl-meaning",
+      "ultimate-split-ticketing-guide-irctc",
+      "irctc-tatkal-booking-secrets-60-second-guide-2026",
+      "indian-railway-junction-transfer-layover-guide-2026",
+    ],
+    faqs: [
+      {
+        question: "How do I check my train coach position before the train arrives at the station?",
+        answer:
+          "You can check your train coach position using Wayvia's Interactive Coach Position Explorer (/coach-position). Enter your train number (e.g. 12952) and seat number to see the full 22-coach rake formation, engine orientation, and whether your coach stops near the front escalator, center foot-over-bridge, or rear.",
+      },
+      {
+        question: "What is a 3E coach in Indian Railways and how is its seat map different?",
+        answer:
+          "3E stands for AC 3-Tier Economy. Unlike standard 3A coaches which have 64 or 72 berths, 3E coaches feature 83 berths by adding a Side Middle (SM) berth between the Side Lower (SL) and Side Upper (SU). The aisle is slightly narrower, but each berth includes dedicated AC vents and USB charging ports.",
+      },
+      {
+        question: "Which coaches are typically placed near the locomotive engine?",
+        answer:
+          "In standard LHB rakes, the locomotive is immediately followed by an EOG/SLR power car and unreserved General Second (GS) coaches. Sleeper coaches (S1 to S8) usually follow GS coaches, with Air-Conditioned coaches (B1-B12, A1-A3, H1) positioned towards the middle and rear for optimal platform escalator accessibility.",
+      },
+      {
+        question: "Can coach positions change at the last moment?",
+        answer:
+          "Yes. Operational requirements, loco reversals at junction stations, or maintenance rake substitutions can flip coach sequences. Always verify the digital overhead Coach Guidance Display (CGD) indicators on the platform upon arrival.",
+      },
+    ],
+    content: [
+      {
+        type: "heading",
+        id: "panic-of-24-coach-rake",
+        text: "The Panic of the 24-Coach Rake: Why Platform Position Matters",
+      },
+      {
+        type: "paragraph",
+        text: "A standard 24-coach Indian Railways express train stretches over **600 meters** from the WAP-7 electric locomotive to the rear guard van. At high-frequency junction stations like New Delhi, Kanpur Central, or Howrah, trains often halt for only 5 to 10 minutes. If you wait on the platform without knowing where your coach will stop, you risk a frantic 500-meter sprint through surging crowds while hauling heavy luggage.",
+      },
+      {
+        type: "tip",
+        text: "Most station foot-over-bridges (FOB) and escalators descend into the middle of the platform (typically near coaches 8 to 14). Knowing whether your coach is Engine-Side or Rear-Side lets you position yourself precisely before the train pulls in.",
+      },
+      {
+        type: "heading",
+        id: "standard-lhb-rake-composition",
+        text: "Standard Indian Railways Rake Composition Blueprint",
+      },
+      {
+        type: "paragraph",
+        text: "While exact compositions vary by train zone, premier Superfast and Mail/Express trains following the standard LHB (Linke Hofmann Busch) rake architecture generally follow this sequence:",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Locomotive: High-power WAP-7 electric or WDP-4D diesel engine",
+          "Front Power Car: EOG (End On Generation) / SLR (Seating cum Luggage Rake)",
+          "General Unreserved (GS / UR): 2 to 3 unreserved coaches immediately behind the engine",
+          "Sleeper Class (S1 to S7/S8): Non-AC sleeper coaches",
+          "Pantry Car (PC): Centrally located for dining service distribution across AC and Sleeper",
+          "AC 3-Tier Economy (3E): Modern high-density 83-berth AC coaches",
+          "AC 3-Tier (B1 to B8): Standard 72-berth three-tier air-conditioned coaches",
+          "AC 2-Tier (A1 to A3): Spacious 54-berth two-tier air-conditioned coaches without middle berths",
+          "First AC (H1): Premier 24-berth luxury cabins and coupes",
+          "Rear Power Car & General: Final GS coach and rear guard van",
+        ],
+      },
+      {
+        type: "heading",
+        id: "understanding-3e-economy-seat-map",
+        text: "Understanding the New 3E (AC 3-Economy) Layout with Side Middle Berths",
+      },
+      {
+        type: "paragraph",
+        text: "Introduced by Indian Railways to provide affordable air-conditioned travel, the **3E class** replaces traditional 72-berth 3A coaches with an 83-berth layout. The critical difference is the addition of the **Side Middle (SM)** berth. In standard 3A, the side bay has only Side Lower (SL) and Side Upper (SU). In 3E, every side bay has SL, SM, and SU, meaning vertical headroom is reduced. If you book 3E, knowing your berth number before boarding helps you plan luggage storage and seating comfort.",
+      },
+      {
+        type: "heading",
+        id: "interactive-seat-map-explorer",
+        text: "Use Wayvia's Interactive 2D Seat Map & Spotlight Finder",
+      },
+      {
+        type: "paragraph",
+        text: "Wayvia has engineered India's first fully interactive, 2D architectural coach position and seat layout tool. You can inspect exact door positions, restrooms (WC 1–4), central aisle walkways, and window orientations for all 7 coach classes (1A, 2A, 3A, 3E, CC, EC, SL). Enter your seat number, and our spotlight immediately pinpoints your exact berth with an animated beacon.",
+      },
+      {
+        type: "cta",
+        label: "Explore Interactive Coach Position & 2D Seat Maps",
+        href: "/coach-position",
+      },
+    ],
+  },
+  {
+    slug: "irctc-ticket-cancellation-charges-refund-calculator-guide",
+    title: "IRCTC Ticket Cancellation Charges Explained: The 2026 Guide to Slabs, GST, Tatkal & Instant Bank Refunds",
+    excerpt:
+      "Why was ₹189 or 50% deducted from your train ticket? Master IRCTC cancellation slabs, clerkage charges, 5% AC GST, and calculate your exact refund with Wayvia's smart refund tool.",
+    coverImage: "/blog/refund-rules-hero.jpg",
+    category: "tips",
+    readTime: "10 min read",
+    date: "2026-09-20",
+    featured: true,
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "irctc ticket cancellation charges",
+      "railway ticket refund rules 2026",
+      "how much refund on confirmed ticket",
+      "cancellation charge for 3rd ac",
+      "tatkal ticket refund rules",
+      "tdr refund irctc",
+      "railway refund calculator",
+      "gst on ticket cancellation fee",
+      "irctc waitlist cancellation clerkage",
+    ],
+    relatedSlugs: [
+      "train-ticket-cancellation-refund-rules-2026",
+      "vikalp-scheme-alternate-train-explained",
+      "train-passenger-rights-you-should-know",
+      "chart-preparation-time-explained-first-second-chart",
+    ],
+    faqs: [
+      {
+        question: "How much does IRCTC deduct for cancelling a confirmed 3rd AC (3A) ticket?",
+        answer:
+          "If cancelled more than 48 hours before scheduled train departure, IRCTC deducts a flat statutory fee of ₹180 + 5% GST = ₹189 per passenger. If cancelled between 48 and 12 hours before departure, 25% of the total fare is deducted (subject to a minimum of ₹189). Between 12 and 4 hours prior, 50% is deducted. Under 4 hours or after chart preparation, zero refund is granted.",
+      },
+      {
+        question: "Can I get a refund if I cancel a Confirmed Tatkal ticket?",
+        answer:
+          "Under standard IRCTC rules, Confirmed Tatkal tickets carry ZERO refund (100% of the fare is forfeited). The only exceptions where you can receive a 100% refund are if the train is cancelled by Indian Railways, or if the train is delayed by more than 3 hours at your boarding station and you file an online TDR before actual departure.",
+      },
+      {
+        question: "What is the cancellation charge for RAC and Waitlisted tickets?",
+        answer:
+          "RAC and Waitlisted tickets can be cancelled online up to 30 minutes before train departure with only a flat clerkage fee of ₹60 per passenger (+ 5% GST on AC classes = ₹63). Fully waitlisted e-tickets are automatically cancelled upon chart preparation with ₹60 clerkage deducted and the rest refunded to your bank account.",
+      },
+      {
+        question: "Why is 5% GST added to the cancellation fee on AC tickets?",
+        answer:
+          "Under Ministry of Finance GST circulars, cancellation charges for air-conditioned train services (1A, 2A, 3A, 3E, CC, EC) are classified as taxable service charges subject to 5% GST. Non-AC classes (Sleeper and Second Sitting 2S) are exempt from GST.",
+      },
+    ],
+    content: [
+      {
+        type: "heading",
+        id: "the-confusion-behind-irctc-refunds",
+        text: "Why IRCTC Deductions Confuse Millions of Indian Travelers",
+      },
+      {
+        type: "paragraph",
+        text: "Every day, thousands of travelers cancel train tickets on IRCTC and are startled to see unexpected deductions: ₹63, ₹189, 25%, 50%, or even a complete ₹0 refund. The Railway Passengers (Cancellation of Ticket and Refund of Fare) Rules are governed by strict statutory time brackets. Understanding these exact time thresholds can literally save you thousands of rupees.",
+      },
+      {
+        type: "tip",
+        text: "Chart preparation takes place 4 hours before scheduled departure. Cancelling a confirmed ticket 4 hours and 5 minutes before departure returns 50% of your money; cancelling at 3 hours and 55 minutes returns ₹0! Timing is everything.",
+      },
+      {
+        type: "heading",
+        id: "the-four-statutory-cancellation-slabs",
+        text: "The Four Statutory Cancellation Slabs Explained",
+      },
+      {
+        type: "paragraph",
+        text: "For **Confirmed (CNF)** tickets under General Quota, deductions are determined by when you cancel relative to scheduled train departure:",
+      },
+      {
+        type: "checklist",
+        items: [
+          "More than 48 Hours Prior: Flat statutory deduction per passenger (1A/EC: ₹240, 2A/FC: ₹200, 3A/3E/CC: ₹180, Sleeper: ₹120, 2S: ₹60) plus 5% GST for AC classes.",
+          "Between 48 Hours and 12 Hours Prior: 25% of the total base fare is deducted (subject to the flat minimum cancellation fee above) + 5% GST on AC.",
+          "Between 12 Hours and 4 Hours Prior (or before chart prep): 50% of the total base fare is deducted + 5% GST on AC.",
+          "Less than 4 Hours Prior / Chart Prepared: ZERO refund (100% fare forfeited) under normal cancellation.",
+        ],
+      },
+      {
+        type: "heading",
+        id: "tatkal-cancellation-and-tdr-exceptions",
+        text: "Confirmed Tatkal: The Zero-Refund Trap & Legal TDR Exemptions",
+      },
+      {
+        type: "paragraph",
+        text: "Under IRCTC Tatkal Scheme rules, cancelling a confirmed Tatkal ticket yields **₹0 refund**. However, many passengers do not realize that Indian Railways legally mandates a **100% full refund** under four specific operational conditions by filing an online Ticket Deposit Receipt (TDR):",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Train delayed by more than 3 hours at your boarding station and you choose not to travel.",
+          "Train is cancelled by Indian Railways.",
+          "Train route is diverted and does not halt at your destination station.",
+          "Air conditioner failure in an AC coach during the journey (difference between AC and Sleeper refunded).",
+        ],
+      },
+      {
+        type: "heading",
+        id: "calculate-your-refund-instantly",
+        text: "Calculate Your Exact Bank Refund with Wayvia",
+      },
+      {
+        type: "paragraph",
+        text: "Instead of doing mental math with GST and clerkage percentages, use Wayvia's [IRCTC Railway Ticket Cancellation & Refund Calculator](/refund-calculator). Enter your 10-digit PNR or paste your booking SMS, and get an instant itemized statement showing your exact bank credit amount, deductions, and a countdown timer to the next penalty slab.",
+      },
+      {
+        type: "cta",
+        label: "Calculate Your Exact Ticket Cancellation Refund",
+        href: "/refund-calculator",
+      },
+    ],
+  },
+  {
+    slug: "indian-railway-junction-transfer-layover-guide-2026",
+    title: "The Ultimate Indian Railways Junction Transfer & Layover Guide (2026): Cloakrooms, Lounges & Platform Survival",
+    excerpt:
+      "Connecting trains at New Delhi, Kanpur, Mathura, Itarsi, Vijayawada, or Howrah? Master station transfers, cloakroom padlock rules, executive lounges, and transit survival.",
+    coverImage: "/blog/junction-hub-hero.jpg",
+    category: "travel-guides",
+    readTime: "10 min read",
+    date: "2026-09-20",
+    featured: true,
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "indian railway junction transfer",
+      "connecting train layover rules",
+      "station cloakroom charges irctc",
+      "railway executive lounge booking",
+      "minimum connection time trains india",
+      "delhi station transfer ndls to nzm",
+      "howrah to sealdah transfer metro",
+      "junction hub guides wayvia",
+    ],
+    relatedSlugs: [
+      "delhi-to-mumbai-train-travel-guide-rajdhani-vande-bharat-connecting-routes",
+      "ultimate-split-ticketing-guide-irctc",
+      "emergency-train-ticket-booking-sold-out-rescue-guide",
+      "train-and-bus-multimodal-travel-guide-india",
+    ],
+    faqs: [
+      {
+        question: "How much buffer time should I keep between connecting trains in India?",
+        answer:
+          "For same-station connections at major junctions (like Kanpur Central, Mathura, or Itarsi), keep a minimum connection buffer of 45 to 60 minutes. For cross-city terminal transfers (such as New Delhi NDLS to Hazrat Nizamuddin NZM, or Howrah to Sealdah), keep a minimum buffer of 90 to 120 minutes to account for city traffic and metro transfers.",
+      },
+      {
+        question: "What are the rules and tariffs for Indian Railway station cloakrooms?",
+        answer:
+          "Railway cloakrooms charge approximately ₹20–₹30 for the first 24 hours per luggage piece. The most important rule is that all luggage MUST be securely locked with a physical padlock. Zippers or Velcro closures alone will be rejected by railway cloakroom staff for security compliance.",
+      },
+      {
+        question: "How do I transfer between New Delhi (NDLS) and Hazrat Nizamuddin (NZM)?",
+        answer:
+          "Exit New Delhi Station from the Ajmeri Gate side. Take the Delhi Metro Yellow Line from New Delhi Metro Station to Central Secretariat, then switch to the Violet Line towards Hazrat Nizamuddin. Total transit time is roughly 25 to 30 minutes, avoiding road traffic on Ring Road.",
+      },
+      {
+        question: "Can any passenger access IRCTC Executive Lounges at junction stations?",
+        answer:
+          "Yes. IRCTC Executive Lounges are open to all valid ticket holders (both AC and Sleeper). Hourly tariffs typically range from ₹150 to ₹180 for the first 2 hours, offering air-conditioned seating, high-speed Wi-Fi, clean washrooms, charging points, and buffet meals.",
+      },
+    ],
+    content: [
+      {
+        type: "heading",
+        id: "the-power-of-junction-connections",
+        text: "The Power of the Junction Connection: Beating the Sold-Out Direct Train",
+      },
+      {
+        type: "paragraph",
+        text: "When direct trains between major metropolitan cities show **Waitlist 200+** or **REGRET**, 95% of passengers give up. But seasoned Indian railway travelers know the golden secret: India's massive railway trunk network intersects at legendary junction hubs like Kanpur Central, Mathura Junction, Itarsi, Vijayawada, and Howrah. Splitting your journey at an intermediate junction unlocks fresh seat quotas that direct searches never display.",
+      },
+      {
+        type: "tip",
+        text: "Always check whether both arriving and departing trains share the same station code. In Delhi, trains arrive across NDLS, NZM, DLI, and ANVT; in Kolkata across HWH, SDAH, KOAA, and SHM; and in Mumbai across CSMT, MMCT, BDTS, and LTT.",
+      },
+      {
+        type: "heading",
+        id: "cross-terminal-transit-shortcuts",
+        text: "Cross-Terminal Transit Shortcuts in Delhi & Kolkata",
+      },
+      {
+        type: "paragraph",
+        text: "Navigating cross-city station transfers can be seamless if you take dedicated transit corridors instead of traffic-choked roads:",
+      },
+      {
+        type: "checklist",
+        items: [
+          "Delhi NDLS to NZM: Exit Ajmeri Gate > Yellow Line Metro to Central Secretariat > Violet Line to Hazrat Nizamuddin (30 mins vs 60 mins by cab).",
+          "Delhi NDLS to ANVT (Anand Vihar): Direct Delhi Metro Blue Line from New Delhi/Rajiv Chowk to Anand Vihar ISBT (35 mins).",
+          "Kolkata Howrah (HWH) to Sealdah (SDAH): Board the Green Line Underwater Metro directly under the Hooghly River to Sealdah Station in just 12 minutes!",
+        ],
+      },
+      {
+        type: "heading",
+        id: "cloakroom-padlock-rules-and-lounges",
+        text: "Cloakroom Padlock Rules, Tariffs & Executive Lounges",
+      },
+      {
+        type: "paragraph",
+        text: "If you have a 3-hour layover, do not drag your bags across platforms. Indian Railways operates secure cloakrooms on Platform 1 of almost every junction station. Costs are modest (₹25–₹30 per 24 hours), but the golden rule is non-negotiable: **every bag must have a physical lock**. Without a lock, staff will turn you away. For comfort, IRCTC Executive Lounges (available at NDLS, CNB, BZA, HWH) offer shower facilities, plush seating, and buffet dining for ₹150–₹180/hour.",
+      },
+      {
+        type: "heading",
+        id: "explore-junction-hub-guides",
+        text: "Explore Wayvia's In-Depth Junction Guides",
+      },
+      {
+        type: "paragraph",
+        text: "Wayvia has curated exhaustive transit guides for India's busiest railway junctions, complete with platform counts, minimum connection times (MCT), cloakroom locations, and connecting train shortcuts.",
+      },
+      {
+        type: "cta",
+        label: "View Indian Railways Junction Layover Guides",
+        href: "/junctions",
+      },
+    ],
+  },
+  {
+    slug: "emergency-train-ticket-booking-sold-out-rescue-guide",
+    title: "Emergency Train Travel in India: How to Reach Home When Every Train Is Sold Out (2026 Rescue Playbook)",
+    excerpt:
+      "Facing Regret or WL 200+ during Chhath Puja, Diwali, or a family emergency? Discover the 4 proven rescue strategies: Origin GN Quota Shifts, Expressway Bus Stitching, and Counter Tatkal.",
+    coverImage: "/blog/emergency-travel-hero.jpg",
+    category: "tips",
+    readTime: "11 min read",
+    date: "2026-09-20",
+    featured: true,
+    author: DEFAULT_AUTHOR,
+    keywords: [
+      "emergency train travel india",
+      "how to travel when train is sold out",
+      "diwali train ticket confirmed hack",
+      "chhath puja train ticket confirmation",
+      "multimodal train bus rescue",
+      "origin quota boarding station change",
+      "confirmtkt alternative wayvia",
+      "sold out train rescue portal",
+    ],
+    relatedSlugs: [
+      "ultimate-split-ticketing-guide-irctc",
+      "diwali-chhath-puja-train-booking-tips",
+      "what-to-do-when-your-train-is-fully-booked",
+      "train-and-bus-multimodal-travel-guide-india",
+    ],
+    faqs: [
+      {
+        question: "How does the Origin General Quota (GN) shift work on IRCTC?",
+        answer:
+          "Intermediate stations often share tiny remote quotas (RLWL or PQWL) with only 10 to 20 berths, which sell out months in advance. However, the train originating station has the master General Quota (GN) with hundreds of berths. By booking your ticket from the originating station and changing your boarding point online via IRCTC, you legally secure confirmed seats.",
+      },
+      {
+        question: "What should I do if Tatkal also sells out in 30 seconds?",
+        answer:
+          "If Tatkal sells out, do not panic. Use Wayvia's Emergency Rescue Portal (/emergency-travel) to synthesize a multimodal route: take a daytime Vande Bharat or Superfast train to an expressway junction (like Lucknow, Agra, or Pune) and catch an AC sleeper bus for the remaining stretch.",
+      },
+      {
+        question: "Can I change my boarding station after booking an origin quota ticket?",
+        answer:
+          "Yes. IRCTC allows you to change your boarding station online up to 4 hours before the scheduled departure of the train (prior to chart preparation). Once modified, your seat is reserved from your new boarding station, and the TTE cannot reallocate your berth.",
+      },
+      {
+        question: "What is the Current Booking counter at railway stations?",
+        answer:
+          "Current Booking counters open at railway stations 3 to 4 hours before train departure, immediately after the first chart is prepared. Any berths remaining vacant across emergency quotas (HO, defence, parliamentary) are released to the public at flat normal fares without Tatkal surcharges.",
+      },
+    ],
+    content: [
+      {
+        type: "heading",
+        id: "the-festive-travel-nightmare",
+        text: "The Festive Ticket Crisis: When Flights Hit ₹25,000 and Trains Show Regret",
+      },
+      {
+        type: "paragraph",
+        text: "During peak festive homecomings — Diwali, Chhath Puja, Holi, Durga Puja, and Sankranti — passenger demand outstrips seat supply by over 50x. Direct trains on heavy corridors like Delhi to Patna, Mumbai to Lucknow, and Bengaluru to Kolkata show **REGRET / WL 250+**, while airlines surge to ₹18,000–₹26,000 for a single one-way domestic flight.",
+      },
+      {
+        type: "tip",
+        text: "Never assume a corridor is impossible. By combining premier rail trunks with expressway sleeper buses, you can reach home on your chosen date with confirmed berths at 80% lower cost than surge flight tickets.",
+      },
+      {
+        type: "heading",
+        id: "strategy-origin-quota-shift",
+        text: "Strategy 1: Origin General Quota (GN) Shift with Online Boarding Change",
+      },
+      {
+        type: "paragraph",
+        text: "Most travelers search only from their exact boarding station to their exact destination. In Indian Railways' algorithmic quota structure, intermediate stations receive minuscule Remote Location Waitlists (RLWL) or Pooled Quota Waitlists (PQWL). If you search from the train's originating terminus, you tap into the primary **General Quota (GN)**.",
+      },
+      {
+        type: "paragraph",
+        text: "Once booked, use IRCTC's official **Change Boarding Station** feature (available under Booked Ticket History) to set your actual boarding point up to 4 hours prior to departure. You pay a slight fare difference for the originating distance, but you secure a 100% confirmed berth.",
+      },
+      {
+        type: "heading",
+        id: "strategy-expressway-multimodal-stitching",
+        text: "Strategy 2: Expressway Multimodal Stitching (Train + AC Sleeper Bus)",
+      },
+      {
+        type: "paragraph",
+        text: "When rail choke points are completely clogged at the destination end, bypass them by combining rail and highway layers. Take a high-speed daytime train (like Vande Bharat or Rajdhani) to an expressway junction city, and board an interstate luxury sleeper coach (e.g. Purvanchal Expressway, Yamuna Expressway, or Samruddhi Mahamarg).",
+      },
+      {
+        type: "modes",
+        items: [
+          {
+            icon: "train-bus",
+            title: "Rail + Expressway Bus Combo",
+            description: "Takes high-speed train to an expressway junction (e.g. Lucknow or Agra) then switches to an AC sleeper bus to bypass terminal choke points.",
+          },
+          {
+            icon: "bus",
+            title: "Overnight Highway Sleeper",
+            description: "High-frequency multi-axle Volvo/Scania buses with guaranteed instant booking when all trains are booked.",
+          },
+        ],
+      },
+      {
+        type: "heading",
+        id: "strategy-current-booking-counters",
+        text: "Strategy 3: Current Booking Counters (3–4 Hours Prior to Departure)",
+      },
+      {
+        type: "paragraph",
+        text: "Four hours before a train departs, the railway charting system prepares the first chart. Berths from unutilized VIP (HO), railway official, defence, and emergency quotas are pooled into **Current Booking**. These tickets are sold online via IRCTC and at station PRS Current Counters at normal base fares with no Tatkal premium.",
+      },
+      {
+        type: "heading",
+        id: "rescue-portal-on-wayvia",
+        text: "Try Wayvia's Emergency & Festival Sold-Out Travel Rescue Portal",
+      },
+      {
+        type: "paragraph",
+        text: "Wayvia has codified these rescue blueprints into an interactive portal. Select your festival corridor (Delhi-Patna, Mumbai-Lucknow, Delhi-Varanasi, Bengaluru-Kolkata) and see multimodal itineraries with Guaranteed Reach Scores of 92% to 98% and direct booking links.",
+      },
+      {
+        type: "cta",
+        label: "Open Emergency & Sold-Out Travel Rescue Portal",
+        href: "/emergency-travel",
+      },
+    ],
+  },
+  {
     slug: "ultimate-split-ticketing-guide-irctc",
     title: "The Ultimate Guide to IRCTC Split Ticketing: How to Find Hidden Seats on Sold-Out Trains (2026)",
     excerpt:
@@ -570,8 +1029,8 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         type: "cta",
-        label: "Discover Confirmed Backup Routes on Wayvia",
-        href: "/",
+        label: "Launch Live Tatkal Command Center & Autofill Generator",
+        href: "/tatkal-matrix",
       },
     ],
   },
@@ -2294,8 +2753,7 @@ export const BLOG_POSTS: BlogPost[] = [
           "Some ticket types (Foreign Tourist Quota, and certain counter-booked tickets) can't be cancelled online and need a PRS counter visit instead.",
         ],
       },
-      { type: "tip", text: "Rules like these get revised periodically — always cross-check the current cancellation policy on irctc.co.in before relying on any specific number, including the ones here, if your trip is months away." },
-      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+      { type: "cta", label: "Calculate Your Cancellation Refund on Wayvia", href: "/refund-calculator" },
     ],
   },
   {
@@ -2345,7 +2803,7 @@ export const BLOG_POSTS: BlogPost[] = [
         type: "paragraph",
         text: "Watch for special or Suvidha trains (numbered in the 0XXXX series) that Indian Railways typically adds during festival peaks — they're announced closer to the date and often have a separate, less crowded booking window. Opting into Vikalp for your existing waitlisted booking, and keeping Tatkal as a day-before backup, both remain useful even after the main window has closed.",
       },
-      { type: "cta", label: "Find a Way Now", href: "/journey-planner" },
+      { type: "cta", label: "Open Sold-Out Festival Travel Rescue Portal", href: "/emergency-travel" },
     ],
   },
   {

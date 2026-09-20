@@ -1,8 +1,88 @@
+import React from "react";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import type { ContentBlock } from "@/lib/blog/posts";
 import Tip from "./Tip";
 import ModeCards from "./ModeCards";
+
+function renderBoldCode(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} className="font-semibold text-ink">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code
+          key={i}
+          className="rounded bg-surface-alt px-1.5 py-0.5 font-mono text-[12px] text-ink"
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    return part;
+  });
+}
+
+function renderFormattedText(text: string): React.ReactNode {
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(
+        <React.Fragment key={`text-${lastIndex}`}>
+          {renderBoldCode(text.substring(lastIndex, match.index))}
+        </React.Fragment>,
+      );
+    }
+    const linkText = match[1];
+    const linkHref = match[2];
+    const isInternal = linkHref.startsWith("/") || linkHref.startsWith("#");
+
+    if (isInternal) {
+      parts.push(
+        <Link
+          key={`link-${match.index}`}
+          href={linkHref}
+          className="font-medium text-violet underline decoration-violet/30 underline-offset-2 transition-colors hover:text-violet-dark hover:decoration-violet"
+        >
+          {linkText}
+        </Link>,
+      );
+    } else {
+      parts.push(
+        <a
+          key={`link-${match.index}`}
+          href={linkHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-violet underline decoration-violet/30 underline-offset-2 transition-colors hover:text-violet-dark hover:decoration-violet"
+        >
+          {linkText}
+        </a>,
+      );
+    }
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(
+      <React.Fragment key={`text-${lastIndex}`}>
+        {renderBoldCode(text.substring(lastIndex))}
+      </React.Fragment>,
+    );
+  }
+
+  return parts.length > 0 ? parts : renderBoldCode(text);
+}
 
 export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
   return (
@@ -11,8 +91,11 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
         switch (block.type) {
           case "paragraph":
             return (
-              <p key={i} className="font-sans text-[14.5px] leading-relaxed text-ink-muted">
-                {block.text}
+              <p
+                key={i}
+                className="font-sans text-[14.5px] leading-relaxed text-ink-muted"
+              >
+                {renderFormattedText(block.text)}
               </p>
             );
 
@@ -35,7 +118,9 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-signal-green-soft text-signal-green">
                       <Check size={12} strokeWidth={3} />
                     </span>
-                    <span className="font-sans text-[14px] leading-relaxed text-ink">{item}</span>
+                    <span className="font-sans text-[14px] leading-relaxed text-ink">
+                      {item}
+                    </span>
                   </li>
                 ))}
               </ul>

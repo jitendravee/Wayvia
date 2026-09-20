@@ -3,16 +3,25 @@ import Link from "next/link";
 const PRODUCT_LINKS = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Find a Way", href: "/journey-planner" },
+  { label: "Emergency & Festival Travel", href: "/emergency-travel" },
+  { label: "Tatkal Matrix", href: "/tatkal-matrix" },
+  { label: "Coach Position & Seat Map", href: "/coach-position" },
+  { label: "Junction Hub Guides", href: "/junctions" },
   { label: "Explore Journeys", href: "#popular-journeys" },
   { label: "Running Status", href: "/running-status" },
   { label: "PNR Status", href: "/pnr-status" },
+  { label: "Refund Calculator", href: "/refund-calculator" },
 ];
 // const SOCIALS = [
 //   { label: "Twitter", href: "https://twitter.com/wayvia", icon: Twitter },
 //   { label: "Instagram", href: "https://instagram.com/wayvia", icon: Instagram },
 //   { label: "LinkedIn", href: "https://linkedin.com/company/wayvia", icon: Linkedin },
 // ];
-const COMPANY_LINKS = [ { label: "Blog", href: "/blog" }, { label: "Privacy Policy", href: "/privacy-policy" }, { label: "Terms Of Service", href: "/terms-of-service" }, ];
+const COMPANY_LINKS = [
+  { label: "Blog", href: "/blog" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms Of Service", href: "/terms-of-service" },
+];
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -29,7 +38,9 @@ export default function Footer() {
               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet to-indigo-500 font-display text-xs font-bold text-white">
                 W
               </span>
-              <span className="font-display text-base font-semibold text-ink">Wayvia</span>
+              <span className="font-display text-base font-semibold text-ink">
+                Wayvia
+              </span>
             </div>
             <p className="mt-2.5 text-[13px] leading-relaxed text-ink-muted">
               Finding better ways
@@ -61,7 +72,10 @@ export default function Footer() {
               <ul className="space-y-2.5 text-[13px] text-ink-muted">
                 {PRODUCT_LINKS.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="transition hover:text-violet">
+                    <Link
+                      href={link.href}
+                      className="transition hover:text-violet"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -77,11 +91,17 @@ export default function Footer() {
                 {COMPANY_LINKS.map((link) => (
                   <li key={link.label}>
                     {link.href.startsWith("mailto:") ? (
-                      <a href={link.href} className="transition hover:text-violet">
+                      <a
+                        href={link.href}
+                        className="transition hover:text-violet"
+                      >
                         {link.label}
                       </a>
                     ) : (
-                      <Link href={link.href} className="transition hover:text-violet">
+                      <Link
+                        href={link.href}
+                        className="transition hover:text-violet"
+                      >
                         {link.label}
                       </Link>
                     )}
