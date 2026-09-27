@@ -7,33 +7,37 @@ import { JUNCTIONS_DATA } from "@/lib/junctions/junctionData";
 const base = process.env.NEXT_PUBLIC_SITE_URL || "https://wayvia.xyz";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date();
+
   const staticPages: MetadataRoute.Sitemap = [
-    { url: `${base}/`, changeFrequency: "daily", priority: 1 },
-    { url: `${base}/journey-planner`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/emergency-travel`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/tatkal-matrix`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/coach-position`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/junctions`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/running-status`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/pnr-status`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/refund-calculator`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/journey-card`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/vande-bharat`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/fare-arbitrage`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/routes`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${base}/blog`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${base}/how-it-works`, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/about`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: `${base}/journey-planner`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/emergency-travel`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/tatkal-matrix`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/coach-position`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/junctions`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/running-status`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/pnr-status`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/refund-calculator`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/journey-card`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/vande-bharat`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/fare-arbitrage`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/routes`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: `${base}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+    { url: `${base}/how-it-works`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const routePages: MetadataRoute.Sitemap = POPULAR_ROUTES.map((r) => ({
     url: `${base}/routes/${r.slug}`,
+    lastModified: now,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
 
   const trainPages: MetadataRoute.Sitemap = POPULAR_TRAINS.map((t) => ({
     url: `${base}/running-status/${t.trainNo}`,
+    lastModified: now,
     changeFrequency: "hourly",
     priority: 0.7,
   }));
@@ -56,6 +60,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const junctionPages: MetadataRoute.Sitemap = JUNCTIONS_DATA.map((j) => ({
     url: `${base}/junctions/${j.slug}`,
+    lastModified: now,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
