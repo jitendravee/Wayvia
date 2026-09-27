@@ -112,7 +112,16 @@ export default function JourneySearchButton({
       params.set("legs", JSON.stringify(cleanLegs));
       if (travelClass) params.set("class", travelClass);
       if (quota) params.set("quota", quota);
-      if (transport) params.set("transport", transport);
+      if (transport) {
+        params.set("transport", transport);
+        if (
+          transport === "train" ||
+          transport === "bus" ||
+          transport === "flight"
+        ) {
+          params.set("modes", transport);
+        }
+      }
 
       onNavigate?.({ legs: cleanLegs });
       router.push(`/journey-planner?${params.toString()}`);
@@ -139,7 +148,16 @@ export default function JourneySearchButton({
     params.set("date", resolvedDate);
     if (travelClass) params.set("class", travelClass);
     if (quota) params.set("quota", quota);
-    if (resolvedTransport) params.set("transport", resolvedTransport);
+    if (resolvedTransport) {
+      params.set("transport", resolvedTransport);
+      if (
+        resolvedTransport === "train" ||
+        resolvedTransport === "bus" ||
+        resolvedTransport === "flight"
+      ) {
+        params.set("modes", resolvedTransport);
+      }
+    }
 
     onNavigate?.({ from: resolvedFrom, to: resolvedTo, date: resolvedDate });
     router.push(`/journey-planner?${params.toString()}`);

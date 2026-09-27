@@ -29,10 +29,15 @@ function PnrStatusInner() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch(`/api/erail/pnrStatus?pnr=${trimmed}`, { cache: "no-store" });
+      const res = await fetch(`/api/erail/pnrStatus?pnr=${trimmed}`, {
+        cache: "no-store",
+      });
       const json: PnrApiResponse = await res.json();
       if (!res.ok || !json.data) {
-        throw new Error(json.error || "Couldn't find that PNR. Double check the number and try again.");
+        throw new Error(
+          json.error ||
+            "Couldn't find that PNR. Double check the number and try again.",
+        );
       }
       setResult(json);
     } catch (err) {
@@ -45,19 +50,27 @@ function PnrStatusInner() {
   return (
     <main className="mx-auto max-w-2xl px-5 pb-24 pt-12 sm:px-6">
       <header className="text-center">
-        <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">PNR status</div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">
+          PNR status
+        </div>
         <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           Check your booking confirmation
         </h1>
         <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-ink-muted">
-          Enter your 10-digit PNR number to see confirmation status, coach and berth, and a visual seat map.
+          Enter your 10-digit PNR number to see confirmation status, coach and
+          berth, and a visual seat map.
         </p>
       </header>
 
-      <form onSubmit={handleSubmit} className="mx-auto mt-8 flex max-w-md gap-2">
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto mt-8 flex max-w-md gap-2"
+      >
         <input
           value={pnr}
-          onChange={(e) => setPnr(e.target.value.replace(/\D/g, "").slice(0, 10))}
+          onChange={(e) =>
+            setPnr(e.target.value.replace(/\D/g, "").slice(0, 10))
+          }
           placeholder="10-digit PNR number"
           inputMode="numeric"
           autoComplete="off"
@@ -86,8 +99,9 @@ function PnrStatusInner() {
 
       {!result && !error && (
         <p className="mx-auto mt-10 max-w-md text-center text-[12px] leading-relaxed text-ink-dim">
-          Your PNR is the 10-digit number printed on your ticket or e-ticket confirmation email. We only use it
-          to look up your booking — nothing is stored.
+          Your PNR is the 10-digit number printed on your ticket or e-ticket
+          confirmation email. We only use it to look up your booking — nothing
+          is stored.
         </p>
       )}
     </main>

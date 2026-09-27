@@ -13,13 +13,15 @@ export default function RunningStatusHub() {
   return (
     <main className="mx-auto max-w-3xl px-5 pb-24 pt-12 sm:px-6">
       <header className="text-center">
-        <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">Running status</div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">
+          Running status
+        </div>
         <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           Track any train, live
         </h1>
         <p className="mx-auto mt-2 max-w-xl text-[14px] leading-relaxed text-ink-muted">
-          Enter a train number or name below to see where it is right now, how delayed it is, and its full
-          station-by-station schedule.
+          Enter a train number or name below to see where it is right now, how
+          delayed it is, and its full station-by-station schedule.
         </p>
       </header>
 
@@ -28,7 +30,9 @@ export default function RunningStatusHub() {
       </div>
 
       <section className="mt-12">
-        <div className="mb-3 font-mono text-[11px] uppercase tracking-wider text-ink-dim">Popular trains</div>
+        <div className="mb-3 font-mono text-[11px] uppercase tracking-wider text-ink-dim">
+          Popular trains
+        </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {POPULAR_TRAINS.map((t) => (
             <Link
@@ -40,7 +44,9 @@ export default function RunningStatusHub() {
                 <span className="shrink-0 rounded-md bg-surface-alt px-1.5 py-0.5 font-mono text-[11px] font-semibold text-ink-muted">
                   {t.trainNo}
                 </span>
-                <span className="truncate font-medium text-ink">{t.trainName}</span>
+                <span className="truncate font-medium text-ink">
+                  {t.trainName}
+                </span>
               </span>
               <span className="shrink-0 font-mono text-[11px] text-ink-dim">
                 {t.from} → {t.to}

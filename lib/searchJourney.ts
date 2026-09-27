@@ -229,7 +229,9 @@ async function buildSearchResponseFromCandidateResult(
   let allAnnotated = [...annotated];
 
   // If confirmed routes are thin or partial coverage exists, stitch composite struggle routes
-  if (partial.length > 0) {
+  // (Gap legs use bus transit, so only stitch when non-train/bus modes are permissible)
+  const allowBusGaps = transport !== "train" && (!modes || modes.includes("bus"));
+  if (partial.length > 0 && allowBusGaps) {
     try {
       const compositeCandidates = stitchCompositeJourneys(from, to, partial, allAnnotated, 4);
       if (compositeCandidates.length > 0) {
@@ -459,13 +461,22 @@ export function parseCommonParams(searchParams: URLSearchParams) {
     ? (transportRaw as TransportFilter)
     : "any";
 
+  let effectiveModes = safeModes;
+  if (transport === "train") {
+    effectiveModes = ["train"];
+  } else if (transport === "bus") {
+    effectiveModes = ["bus"];
+  } else if (transport === "flight") {
+    effectiveModes = ["flight"];
+  }
+
   return {
     travelClass,
     quota,
     maxHubs,
     maxConnections,
     pageSize,
-    modes: safeModes,
+    modes: effectiveModes,
     sort,
     connections,
     confirmedOnly,

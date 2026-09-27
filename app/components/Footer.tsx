@@ -11,6 +11,9 @@ const PRODUCT_LINKS = [
   { label: "Running Status", href: "/running-status" },
   { label: "PNR Status", href: "/pnr-status" },
   { label: "Refund Calculator", href: "/refund-calculator" },
+  { label: "WhatsApp Journey Card", href: "/journey-card" },
+  { label: "Vande Bharat Explorer", href: "/vande-bharat" },
+  { label: "Fare Arbitrage Engine", href: "/fare-arbitrage" },
 ];
 // const SOCIALS = [
 //   { label: "Twitter", href: "https://twitter.com/wayvia", icon: Twitter },

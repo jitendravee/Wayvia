@@ -2,7 +2,7 @@
 import Link from "next/link";
 import SeatMap from "./SeatMap";
 import { PnrData } from "@/lib/erail/pnrTypes";
-import { Calculator } from "lucide-react";
+import { Calculator, Share2, Sparkles } from "lucide-react";
 
 const STATUS_TONE: Record<string, string> = {
   CNF: "bg-signal-green-soft text-signal-green",
@@ -60,6 +60,32 @@ export default function PnrResultCard({ data }: { data: PnrData }) {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="flex items-center justify-between rounded-2xl border border-emerald-300 bg-gradient-to-r from-emerald-50 via-surface-alt to-white p-4 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
+            <Share2 size={18} />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
+              <span>Share Live Journey Passport on WhatsApp</span>
+              <span className="rounded-full bg-emerald-100 px-1.5 py-0.2 font-mono text-[9px] text-emerald-800 uppercase font-semibold">
+                1-Click
+              </span>
+            </div>
+            <div className="text-[11px] text-ink-muted">
+              Send an aesthetic boarding pass with coach location &amp;
+              confirmation odds to family
+            </div>
+          </div>
+        </div>
+        <Link
+          href={`/journey-card?pnr=${data.pnrNumber}`}
+          className="shrink-0 rounded-xl bg-emerald-600 px-3.5 py-2 font-display text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all"
+        >
+          Generate Card →
+        </Link>
       </div>
 
       <div className="flex items-center justify-between rounded-2xl border border-violet/20 bg-gradient-to-r from-violet/5 via-surface-alt to-white p-4 shadow-2xs">

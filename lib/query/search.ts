@@ -90,8 +90,18 @@ export function toSearchParams(
   },
   filters: FilterState
 ): SearchParams {
+  const effectiveModes: Mode[] =
+    filters.transport === "train"
+      ? ["train"]
+      : filters.transport === "bus"
+      ? ["bus"]
+      : filters.transport === "flight"
+      ? ["flight"]
+      : base.modes;
+
   return {
     ...base,
+    modes: effectiveModes,
     sort: filters.sort,
     connections: filters.connections,
     confirmedOnly: filters.confirmedOnly,

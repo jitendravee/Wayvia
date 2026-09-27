@@ -18,6 +18,7 @@ import {
   buildLeadList,
   TransportFilter,
 } from "./filters";
+import { rankJourneys } from "@/lib/score";
 import type { MultiSearchResponse, SearchResponse, TripLeg } from "../types";
 import { useFillHeight } from "@/lib/hooks/useFillHeight";
 import { useDebouncedArray } from "@/lib/hooks/useDebouncedValue";
@@ -108,9 +109,15 @@ export default function MultiLegResults({
       maxConnections: data.maxConnections ?? maxConnections,
       maxHubs,
       modes:
-        data.modesAvailable && data.modesAvailable.length > 0
-          ? data.modesAvailable
-          : ["train"],
+        initialFilters.transport === "train"
+          ? ["train"]
+          : initialFilters.transport === "bus"
+            ? ["bus"]
+            : initialFilters.transport === "flight"
+              ? ["flight"]
+              : data.modesAvailable && data.modesAvailable.length > 0
+                ? data.modesAvailable
+                : ["train"],
       page: 1,
       filters: initialFilters,
     })),
@@ -189,7 +196,19 @@ export default function MultiLegResults({
   // initial fetch (doSearch/doMultiSearch — page 1, DEFAULT_FILTERS) sent?
   // If so, hydrate from the response already in hand instead of refetching
   // it on mount.
-  function matchesInitialFetch(params: SearchParams, leg: TripLeg): boolean {
+  function matchesInitialFetch(
+    params: SearchParams,
+    leg: TripLeg,
+    initialRes?: SearchResponse,
+  ): boolean {
+    if (!initialRes || !initialRes.results) return false;
+    if (params.transport !== "any") {
+      const hasViolatingJourney = initialRes.results.all.some((j) => {
+        if (params.transport === "mixed") return j.modesUsed.length <= 1;
+        return j.modesUsed.length !== 1 || j.modesUsed[0] !== params.transport;
+      });
+      if (hasViolatingJourney) return false;
+    }
     return (
       params.page === 1 &&
       params.sort === initialFilters.sort &&
@@ -216,7 +235,7 @@ export default function MultiLegResults({
     queries: searchParamsPerLeg.map((params, i) => ({
       queryKey: ["journey-search", params] as const,
       queryFn: () => fetchSearch(params),
-      initialData: matchesInitialFetch(params, legs[i])
+      initialData: matchesInitialFetch(params, legs[i], initial.results[i])
         ? initial.results[i]
         : undefined,
       // Keep the previous page's results on screen (instead of flashing to
@@ -300,31 +319,54 @@ function LegPanel({
   const [selectedRank, setSelectedRank] = useState<number | null>(null);
   const [hoveredRank, setHoveredRank] = useState<number | null>(null);
 
+  // Client-side safety filter: ensure journeys strictly match filters.transport
+  const effectiveRanked = useMemo(() => {
+    if (!ranked) return null;
+    if (filters.transport === "any") return ranked;
+    const matchingAll = ranked.all.filter((j) => {
+      if (filters.transport === "mixed") return j.modesUsed.length > 1;
+      return j.modesUsed.length === 1 && j.modesUsed[0] === filters.transport;
+    });
+    if (matchingAll.length === ranked.all.length) return ranked;
+    if (matchingAll.length === 0) return null;
+    return rankJourneys(matchingAll);
+  }, [ranked, filters.transport]);
+
   const fareCeiling = useMemo(
-    () => (ranked ? maxFareInSet(ranked.all) : 0),
-    [ranked],
+    () => (effectiveRanked ? maxFareInSet(effectiveRanked.all) : 0),
+    [effectiveRanked],
   );
   const durationCeiling = useMemo(
-    () => (ranked ? maxDurationInSet(ranked.all) : 0),
-    [ranked],
+    () => (effectiveRanked ? maxDurationInSet(effectiveRanked.all) : 0),
+    [effectiveRanked],
   );
 
   const listItems = useMemo(() => {
-    if (!ranked) return [];
-    if (page !== 1) return ranked.all;
-    const rest = ranked.all.filter((j) => j !== ranked.bestOverall);
-    return ranked.all.includes(ranked.bestOverall)
-      ? [ranked.bestOverall, ...rest]
-      : ranked.all;
-  }, [ranked, page]);
+    if (!effectiveRanked) return [];
+    if (page !== 1) return effectiveRanked.all;
+    const rest = effectiveRanked.all.filter(
+      (j) => j !== effectiveRanked.bestOverall,
+    );
+    return effectiveRanked.all.includes(effectiveRanked.bestOverall)
+      ? [effectiveRanked.bestOverall, ...rest]
+      : effectiveRanked.all;
+  }, [effectiveRanked, page]);
 
   const hasFilterableSet =
-    ranked !== null &&
-    (ranked.all.length > 1 ||
+    effectiveRanked !== null &&
+    (effectiveRanked.all.length > 1 ||
       (data.pagination !== undefined && data.pagination.total > 1));
 
-  const hasMap =
-    page === 1 && !!data.mapOverview && data.mapOverview.length > 0;
+  const effectiveMapOverview = useMemo(() => {
+    if (!data.mapOverview) return [];
+    if (filters.transport === "any") return data.mapOverview;
+    return data.mapOverview.filter((entry) => {
+      if (filters.transport === "mixed") return entry.modes.length > 1;
+      return entry.modes.length === 1 && entry.modes[0] === filters.transport;
+    });
+  }, [data.mapOverview, filters.transport]);
+
+  const hasMap = page === 1 && effectiveMapOverview.length > 0;
 
   const suggestion = (
     data as unknown as {
@@ -332,15 +374,18 @@ function LegPanel({
     }
   ).suggestion;
   const displayList = useMemo(() => {
-    if (!ranked) return [];
+    if (!effectiveRanked) return [];
     if (page !== 1) {
       // Later pages: no curated lead cards, just tag each journey relative
       // to the whole set (cheapest/fastest may still appear here if they
       // land on a later page after filtering).
-      return ranked.all.map((j) => ({ journey: j, tag: tagFor(j, ranked) }));
+      return effectiveRanked.all.map((j) => ({
+        journey: j,
+        tag: tagFor(j, effectiveRanked),
+      }));
     }
-    return buildLeadList(ranked);
-  }, [ranked, page]);
+    return buildLeadList(effectiveRanked);
+  }, [effectiveRanked, page]);
   return (
     <section>
       {page === 1 && data.partial && data.partial.length > 0 && (
@@ -368,7 +413,14 @@ function LegPanel({
         onChange={onFiltersChange}
         fareCeiling={fareCeiling}
         durationCeiling={durationCeiling}
-        resultCount={data.pagination?.total ?? (ranked ? ranked.all.length : 0)}
+        resultCount={
+          filters.transport === "any"
+            ? (data.pagination?.total ??
+              (effectiveRanked ? effectiveRanked.all.length : 0))
+            : effectiveRanked
+              ? effectiveRanked.all.length
+              : 0
+        }
         travelClass={data.travelClass ?? "3A"}
         quota={data.quota ?? "GN"}
         maxHubs={maxHubs}
@@ -376,7 +428,7 @@ function LegPanel({
         onRefine={onRefine}
         refining={loading}
       />
-      {!ranked && (
+      {!effectiveRanked && (
         <NoResultsState
           from={data.from}
           to={data.to}
@@ -392,7 +444,7 @@ function LegPanel({
           loading={loading}
         />
       )}
-      {ranked && (
+      {effectiveRanked && (
         <>
           {hasMap && (
             <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 md:hidden pointer-events-auto">
@@ -486,7 +538,7 @@ function LegPanel({
                 }`}
               >
                 <OverviewMap
-                  entries={data.mapOverview!}
+                  entries={effectiveMapOverview}
                   activeRouteRank={hoveredRank ?? selectedRank}
                   onSelectRouteRank={(rank) => {
                     setSelectedRank(rank);

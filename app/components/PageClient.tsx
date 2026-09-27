@@ -66,7 +66,11 @@ export function PageInner() {
 
   // Single-leg search — streams realtime progress from /api/search/stream,
   // falling back seamlessly to standard /api/search if streaming is unavailable.
-  async function doSearch(effective: SearchFormValues, targetPage = 1) {
+  async function doSearch(
+    effective: SearchFormValues,
+    targetPage = 1,
+    transportOverride?: TransportFilter,
+  ) {
     if (activeSearchAbortRef.current) {
       activeSearchAbortRef.current.abort();
     }
@@ -81,6 +85,8 @@ export function PageInner() {
       liveDetail: `Searching direct routes between ${effective.from.toUpperCase()} and ${effective.to.toUpperCase()}...`,
     });
 
+    const activeTransport = transportOverride ?? initialTransport;
+
     const params = new URLSearchParams({
       from: effective.from,
       to: effective.to,
@@ -93,6 +99,10 @@ export function PageInner() {
       pageSize: String(PAGE_SIZE),
       modes: effective.modes.join(","),
     });
+
+    if (activeTransport) {
+      params.set("transport", activeTransport);
+    }
 
     try {
       let receivedComplete = false;
@@ -202,7 +212,10 @@ export function PageInner() {
   // Multi-city: A→B on date1, B→C on date2, ... — every leg is a person-
   // chosen stop, not an auto-discovered hub, so it goes to /api/search/multi
   // which just runs the same single-leg pipeline once per leg in parallel.
-  async function doMultiSearch(legs: TripLeg[]) {
+  async function doMultiSearch(
+    legs: TripLeg[],
+    transportOverride?: TransportFilter,
+  ) {
     if (activeSearchAbortRef.current) {
       activeSearchAbortRef.current.abort();
     }
@@ -212,6 +225,7 @@ export function PageInner() {
     setLoading(true);
     setError(null);
     try {
+      const activeTransport = transportOverride ?? initialTransport;
       const params = new URLSearchParams({
         legs: JSON.stringify(legs),
         class: form.travelClass,
@@ -221,6 +235,9 @@ export function PageInner() {
         pageSize: String(PAGE_SIZE),
         modes: form.modes.join(","),
       });
+      if (activeTransport) {
+        params.set("transport", activeTransport);
+      }
       const res = await fetch(`/api/search/multi?${params}`, {
         signal: abortController.signal,
       });
@@ -248,6 +265,13 @@ export function PageInner() {
   // (or ?mode=multi&legs=[...]) from the hero search or any
   // JourneySearchButton shows results without an extra click.
   useEffect(() => {
+    const VALID_TRANSPORTS: TransportFilter[] = [
+      "train",
+      "bus",
+      "flight",
+      "mixed",
+    ];
+
     const mode = searchParams.get("mode");
     const legsRaw = searchParams.get("legs");
 
@@ -261,19 +285,30 @@ export function PageInner() {
         ) {
           const cls = searchParams.get("class");
           const quota = searchParams.get("quota");
-          if (cls || quota) {
+          const transportRaw = searchParams.get("transport");
+          const transport: TransportFilter | null =
+            transportRaw &&
+            VALID_TRANSPORTS.includes(
+              transportRaw.toLowerCase() as TransportFilter,
+            )
+              ? (transportRaw.toLowerCase() as TransportFilter)
+              : null;
+
+          if (cls || quota || transport) {
             setForm((f) => ({
               ...f,
               ...(cls ? { travelClass: cls.toUpperCase() } : {}),
               ...(quota ? { quota: quota.toUpperCase() } : {}),
+              ...(transport === "train" ? { modes: ["train"] } : {}),
             }));
           }
+          if (transport) setInitialTransport(transport);
           setExtraStops(
             parsed
               .slice(1)
               .map((l, i) => ({ id: `url-${i}`, to: l.to, date: l.date })),
           );
-          doMultiSearch(parsed);
+          doMultiSearch(parsed, transport ?? undefined);
           return;
         }
       } catch {
@@ -289,24 +324,13 @@ export function PageInner() {
     const modesRaw = searchParams.get("modes");
     const transportRaw = searchParams.get("transport");
 
-    const VALID_TRANSPORTS: TransportFilter[] = [
-      "train",
-      "bus",
-      "flight",
-      "mixed",
-    ];
     const transport: TransportFilter | null =
       transportRaw &&
       VALID_TRANSPORTS.includes(transportRaw.toLowerCase() as TransportFilter)
         ? (transportRaw.toLowerCase() as TransportFilter)
         : null;
 
-    // modes ONLY comes from an explicit ?modes= override. `transport` NEVER
-    // narrows this — it's a pure client-side display filter, applied after
-    // the fact via initialTransport below. This keeps the backend call (and
-    // therefore its cache key) identical whether transport=train, transport=bus,
-    // or no transport param at all — always the full mode set.
-    const modes = modesRaw
+    let modes = modesRaw
       ? modesRaw
           .split(",")
           .map((m) => m.trim().toLowerCase())
@@ -315,6 +339,13 @@ export function PageInner() {
               m === "train" || m === "bus" || m === "flight",
           )
       : null;
+
+    // When transport is explicitly set and modes wasn't overridden, align search modes
+    if (!modes && transport) {
+      if (transport === "train") modes = ["train"];
+      else if (transport === "bus") modes = ["bus"];
+      else if (transport === "flight") modes = ["flight"];
+    }
 
     if (!from && !to && !date && !cls && !quota && !modes && !transport) return;
 
@@ -331,7 +362,7 @@ export function PageInner() {
     if (transport) setInitialTransport(transport);
 
     if (effective.from && effective.to && effective.date) {
-      doSearch(effective, 1);
+      doSearch(effective, 1, transport ?? undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
