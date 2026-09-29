@@ -7,6 +7,7 @@ import type { LegalSectionData } from "../components/legal/LegalSection";
 export const metadata = {
   title: "Terms of Service — Wayvia",
   description: "The terms that govern your use of Wayvia.",
+  alternates: { canonical: "/terms-of-service" },
 };
 
 const sections: LegalSectionData[] = [
@@ -58,25 +59,53 @@ const sections: LegalSectionData[] = [
 ];
 
 export default function TermsOfServicePage() {
-  return (
-    <LegalPageLayout
-      title="Terms of Service"
-      lastUpdated="May 20, 2025"
-      intro="Please read these Terms of Service carefully before using Wayvia. By accessing or using our platform, you agree to be bound by these terms."
-      variant="terms"
-      sections={sections}
-      footerNote={
-        <LegalFooterNote icon={CheckCircle2}>
-          By using Wayvia, you agree to these Terms of Service and our{" "}
-          <Link
-            href="/privacy-policy"
-            className="font-semibold text-violet underline underline-offset-2 transition hover:text-violet-dark"
-          >
-            Privacy Policy
-          </Link>
-          .
-        </LegalFooterNote>
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": "Wayvia Terms of Service",
+        "description": "The terms that govern your use of Wayvia.",
+        "url": "https://wayvia.xyz/terms-of-service",
+        "publisher": { "@type": "Organization", "name": "Wayvia", "url": "https://wayvia.xyz" },
+        "dateModified": "2025-05-20",
+        "inLanguage": "en-IN"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://wayvia.xyz" },
+          { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://wayvia.xyz/terms-of-service" }
+        ]
       }
-    />
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <LegalPageLayout
+        title="Terms of Service"
+        lastUpdated="May 20, 2025"
+        intro="Please read these Terms of Service carefully before using Wayvia. By accessing or using our platform, you agree to be bound by these terms."
+        variant="terms"
+        sections={sections}
+        footerNote={
+          <LegalFooterNote icon={CheckCircle2}>
+            By using Wayvia, you agree to these Terms of Service and our{" "}
+            <Link
+              href="/privacy-policy"
+              className="font-semibold text-violet underline underline-offset-2 transition hover:text-violet-dark"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </LegalFooterNote>
+        }
+      />
+    </>
   );
 }

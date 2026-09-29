@@ -7,6 +7,7 @@ import type { LegalSectionData } from "../components/legal/LegalSection";
 export const metadata = {
   title: "Privacy Policy — Wayvia",
   description: "How Wayvia collects, uses, and protects your information.",
+  alternates: { canonical: "/privacy-policy" },
 };
 
 const sections: LegalSectionData[] = [
@@ -59,25 +60,53 @@ const sections: LegalSectionData[] = [
 ];
 
 export default function PrivacyPolicyPage() {
-  return (
-    <LegalPageLayout
-      title="Privacy Policy"
-      lastUpdated="May 20, 2025"
-      intro="At Wayvia, your privacy is important to us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform."
-      variant="privacy"
-      sections={sections}
-      footerNote={
-        <LegalFooterNote icon={ShieldCheck}>
-          By using Wayvia, you agree to this Privacy Policy and our{" "}
-          <Link
-            href="/terms-of-service"
-            className="font-semibold text-violet underline underline-offset-2 transition hover:text-violet-dark"
-          >
-            Terms of Service
-          </Link>
-          .
-        </LegalFooterNote>
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": "Wayvia Privacy Policy",
+        "description": "How Wayvia collects, uses, and protects your information.",
+        "url": "https://wayvia.xyz/privacy-policy",
+        "publisher": { "@type": "Organization", "name": "Wayvia", "url": "https://wayvia.xyz" },
+        "dateModified": "2025-05-20",
+        "inLanguage": "en-IN"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://wayvia.xyz" },
+          { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://wayvia.xyz/privacy-policy" }
+        ]
       }
-    />
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <LegalPageLayout
+        title="Privacy Policy"
+        lastUpdated="May 20, 2025"
+        intro="At Wayvia, your privacy is important to us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform."
+        variant="privacy"
+        sections={sections}
+        footerNote={
+          <LegalFooterNote icon={ShieldCheck}>
+            By using Wayvia, you agree to this Privacy Policy and our{" "}
+            <Link
+              href="/terms-of-service"
+              className="font-semibold text-violet underline underline-offset-2 transition hover:text-violet-dark"
+            >
+              Terms of Service
+            </Link>
+            .
+          </LegalFooterNote>
+        }
+      />
+    </>
   );
 }

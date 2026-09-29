@@ -44,6 +44,15 @@ export const metadata: Metadata = {
     "Indian railway running status",
     "train current location",
     "train delay status",
+    "erail alternative",
+    "split ticketing Indian railways",
+    "break journey train finder",
+    "irctc refund calculator",
+    "tatkal booking alternative",
+    "Vande Bharat schedule",
+    "railway junction hub transfer",
+    "multimodal journey planner india",
+    "train bus combo route india",
   ],
   openGraph: {
     type: "website",
@@ -78,24 +87,69 @@ export default function RootLayout({
     "@graph": [
       {
         "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
         name: "Wayvia",
         url: SITE_URL,
         description:
-          "Wayvia gives you live Indian Railways train running status and PNR status, with a station-by-station journey tracker and visual seat maps.",
-        logo: `${SITE_URL}/favicon.ico`,
+          "Wayvia is a smart journey discovery platform for India. Find confirmed train seats, connecting routes via junction hubs, bus alternatives, live running status, and PNR checks with visual seat maps.",
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/favicon.ico`,
+        },
+        areaServed: {
+          "@type": "Country",
+          name: "India",
+        },
+        knowsAbout: [
+          "Indian Railways",
+          "Train journey planning",
+          "PNR status check",
+          "Train running status",
+          "IRCTC ticket booking alternatives",
+          "Tatkal booking",
+          "Connecting train routes",
+          "Railway refund calculation",
+        ],
       },
       {
         "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
         name: "Wayvia",
         url: SITE_URL,
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${SITE_URL}/running-status/{train}`,
+        description:
+          "Smart train journey planner with live running status, PNR checks, fare arbitrage, refund calculator, and alternative route discovery for Indian Railways.",
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        inLanguage: "en-IN",
+        potentialAction: [
+          {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${SITE_URL}/running-status/{train}`,
+            },
+            "query-input": "required name=train",
           },
-          "query-input": "required name=train",
-        },
+          {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${SITE_URL}/pnr/{pnr}`,
+            },
+            "query-input": "required name=pnr",
+          },
+        ],
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${SITE_URL}/#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: SITE_URL,
+          },
+        ],
       },
     ],
   };

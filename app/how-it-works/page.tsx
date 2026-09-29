@@ -7,6 +7,21 @@ export const metadata: Metadata = {
   description:
     "How Wayvia's journey engine works: we search direct trains and connecting routes through nearby junctions at the same time, check live availability, and rank every option by price, speed, and reliability.",
   alternates: { canonical: "/how-it-works" },
+  openGraph: {
+    title: "How Wayvia finds your route",
+    description:
+      "How Wayvia's journey engine works: we search direct trains and connecting routes through nearby junctions at the same time, check live availability.",
+    url: "https://wayvia.xyz/how-it-works",
+    siteName: "Wayvia",
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "How Wayvia finds your route",
+    description:
+      "How Wayvia's journey engine works: we search direct trains and connecting routes through nearby junctions.",
+  },
 };
 
 const STEPS = [
@@ -33,8 +48,52 @@ const STEPS = [
 ];
 
 export default function HowItWorksPage() {
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How Wayvia's journey finding engine works",
+    description: "A step-by-step guide to how Wayvia discovers and ranks direct and connecting routes.",
+    step: STEPS.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.title,
+      text: s.body
+    }))
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "How does Wayvia's journey search engine work?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Wayvia simultaneously searches direct trains and connecting routes through nearby railway junctions. Every candidate combination is checked against live seat availability data from Indian Railways. Results are then ranked by price, total journey time, number of connections, reliability, and convenience — surfaced as clear picks like Best Overall, Cheapest, Fastest, Easiest, and Most Reliable."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "Is Wayvia a ticket booking site?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "No, Wayvia is a journey discovery platform. It finds and compares the smartest ways to travel between two cities in India — including routes you'd never find on a regular booking site — but doesn't sell tickets directly. You book through IRCTC or other ticketing platforms."
+        }
+      }
+    ]
+  };
+
   return (
     <main className="mx-auto max-w-3xl px-5 pb-24 pt-12 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">
         How it works
       </div>

@@ -6,11 +6,55 @@ export const metadata: Metadata = {
   description:
     "Wayvia is building a smart journey discovery platform. We find the best way to get from A to B by exploring direct and connecting routes, checking live availability, and ranking by price, time, and reliability.",
   alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About Wayvia — a journey discovery platform",
+    description:
+      "Wayvia is a smart journey discovery platform exploring direct and connecting routes to find the best way to get from A to B.",
+    url: "https://wayvia.xyz/about",
+    siteName: "Wayvia",
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Wayvia — a journey discovery platform",
+    description:
+      "Wayvia is a smart journey discovery platform exploring direct and connecting routes to find the best way to get from A to B.",
+  },
 };
 
 export default function AboutPage() {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Wayvia",
+    url: "https://wayvia.xyz",
+    logo: "https://wayvia.xyz/logo.png",
+    description: "Wayvia is a smart journey discovery platform exploring direct and connecting routes, checking live availability, and ranking by price, time, and reliability.",
+  };
+
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "About Wayvia",
+    url: "https://wayvia.xyz/about",
+    description: "Learn about Wayvia, a smart journey discovery platform.",
+    publisher: {
+      "@type": "Organization",
+      name: "Wayvia"
+    }
+  };
+
   return (
     <main className="mx-auto max-w-3xl px-5 pb-24 pt-12 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-violet">
         About
       </div>

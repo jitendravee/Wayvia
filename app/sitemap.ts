@@ -26,6 +26,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/how-it-works`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/privacy-policy`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${base}/terms-of-service`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
   ];
 
   const routePages: MetadataRoute.Sitemap = POPULAR_ROUTES.map((r) => ({

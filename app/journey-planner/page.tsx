@@ -29,11 +29,58 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   await connection();
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "Wayvia Smart Journey Planner",
+      applicationCategory: "TravelApplication",
+      operatingSystem: "All",
+      url: "https://wayvia.xyz/journey-planner",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "How does Wayvia find alternative train routes?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Wayvia's journey engine simultaneously searches direct trains and connecting routes through nearby railway junctions. It checks live seat availability on each leg — Available, RAC, Waitlist, or Not Available — and only recommends combinations that are actually bookable, ranked by price, speed, reliability, and convenience."
+          }
+        },
+        {
+          "@type": "Question",
+          name: "What is a connecting train route?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "A connecting route splits your journey into 2 or more legs through an intermediate junction station. For example, Delhi → Mumbai might show Delhi → Vadodara → Mumbai if the direct trains are waitlisted but both connecting legs have confirmed seats. Wayvia checks real availability before recommending any connection."
+          }
+        },
+        {
+          "@type": "Question",
+          name: "Can Wayvia find bus + train combinations?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes, Wayvia supports multimodal search. If a gap between two train legs can't be covered by another train, Wayvia searches for bus connections to bridge the gap, showing you combined train-bus options with total journey time and cost."
+          }
+        }
+      ]
+    }
+  ];
+
   return (
-    <Suspense fallback={null}>
-      <div className="mt-20">
-        <PageInner />
-      </div>
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Suspense fallback={null}>
+        <div className="mt-20">
+          <PageInner />
+        </div>
+      </Suspense>
+    </>
   );
 }

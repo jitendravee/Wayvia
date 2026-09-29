@@ -75,16 +75,28 @@ export default async function JunctionDetailPage({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Place",
-    name: junc.name,
-    identifier: junc.code,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: junc.city,
-      addressRegion: junc.state,
-      addressCountry: "IN",
-    },
-    description: junc.overview,
+    "@graph": [
+      {
+        "@type": "TrainStation",
+        name: junc.name,
+        identifier: junc.code,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: junc.city,
+          addressRegion: junc.state,
+          addressCountry: "IN",
+        },
+        description: junc.overview,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://wayvia.xyz" },
+          { "@type": "ListItem", "position": 2, "name": "Junctions", "item": "https://wayvia.xyz/junctions" },
+          { "@type": "ListItem", "position": 3, "name": junc.name, "item": `https://wayvia.xyz/junctions/${junc.slug}` },
+        ],
+      },
+    ],
   };
 
   return (
