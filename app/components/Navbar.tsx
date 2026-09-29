@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  appleDropdownSpring,
+  appleSheetSpring,
+} from "@/lib/motion";
+import {
   Menu,
   X,
   Compass,
@@ -216,18 +220,18 @@ export default function Navbar() {
           transition-all duration-200 ease-out
           ${
             scrolled || mobileMenuOpen || openDropdown !== null
-              ? "border-b border-slate-200/90 bg-white/95 shadow-sm backdrop-blur-xl"
-              : "border-b border-slate-200/50 bg-white/80 backdrop-blur-md"
+              ? "border-b border-slate-200/80 bg-white/90 shadow-[0_4px_20px_-4px_rgba(24,19,31,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl"
+              : "border-b border-slate-200/40 bg-white/75 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
           }
         `}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* LOGO */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href="/" className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform duration-100">
             <img
               src="/logo.png"
               alt="Wayvia"
-              className="h-8 w-8 rounded-lg object-contain shadow-2xs"
+              className="h-8 w-8 rounded-xl object-contain shadow-sm border border-black/5"
             />
             <span className="font-display text-lg font-bold tracking-tight text-ink">
               Wayvia
@@ -235,7 +239,7 @@ export default function Navbar() {
           </Link>
 
           {/* DESKTOP CATEGORIZED NAVIGATION (>= lg) */}
-          <nav className="hidden items-center gap-1.5 lg:flex">
+          <nav className="hidden items-center gap-1 lg:flex">
             {CATEGORIES.map((cat) => {
               const active = isCategoryActive(cat);
               const isOpen = openDropdown === cat.id;
@@ -251,15 +255,15 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setOpenDropdown(isOpen ? null : cat.id)}
-                    className={`flex items-center gap-1 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-all active:scale-95 ${
                       isOpen || active
-                        ? "bg-violet-soft text-violet"
-                        : "text-ink hover:bg-slate-100 hover:text-violet"
+                        ? "bg-violet-soft text-violet shadow-2xs"
+                        : "text-ink hover:bg-slate-100/80 hover:text-violet"
                     }`}
                   >
                     <span>{cat.label}</span>
                     <ChevronDown
-                      size={14}
+                      size={13}
                       className={`transition-transform duration-200 ${
                         isOpen ? "rotate-180 text-violet" : "text-ink-dim"
                       }`}
@@ -270,15 +274,16 @@ export default function Navbar() {
                   <AnimatePresence>
                     {isOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                        initial={{ opacity: 0, y: 6, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        exit={{ opacity: 0, y: 4, scale: 0.97 }}
+                        transition={appleDropdownSpring}
+                        style={{ transformOrigin: "top left" }}
                         className="absolute left-0 top-full pt-2 z-[110] w-80"
                         onMouseEnter={() => handleMouseEnter(cat.id)}
                         onMouseLeave={handleMouseLeave}
                       >
-                        <div className="rounded-2xl border border-slate-200 bg-white/98 p-2 shadow-xl shadow-slate-900/10 backdrop-blur-2xl">
+                        <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_12px_36px_-6px_rgba(24,19,31,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl">
                           <div className="space-y-1">
                             {cat.items.map((sub) => {
                               const SubIcon = sub.icon;
@@ -289,16 +294,16 @@ export default function Navbar() {
                                   key={sub.href}
                                   href={sub.href}
                                   onClick={() => setOpenDropdown(null)}
-                                  className={`group flex items-start gap-3 rounded-xl p-2.5 transition-all ${
+                                  className={`group flex items-start gap-3 rounded-xl p-2.5 transition-all active:scale-[0.98] ${
                                     isSubActive
-                                      ? "bg-violet-soft text-violet"
+                                      ? "bg-violet-soft text-violet font-semibold"
                                       : "hover:bg-slate-50 text-slate-800 hover:text-violet"
                                   }`}
                                 >
                                   <div
                                     className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
                                       isSubActive
-                                        ? "bg-violet text-white shadow-2xs"
+                                        ? "bg-violet text-white shadow-xs"
                                         : "bg-slate-100 text-slate-600 group-hover:bg-violet-soft group-hover:text-violet"
                                     }`}
                                   >
@@ -334,10 +339,10 @@ export default function Navbar() {
             {/* Direct Blog Link */}
             <Link
               href="/blog"
-              className={`rounded-xl px-3.5 py-2 text-[13px] font-semibold transition-all ${
+              className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-all active:scale-95 ${
                 pathname.startsWith("/blog")
-                  ? "bg-violet-soft text-violet"
-                  : "text-ink hover:bg-slate-100 hover:text-violet"
+                  ? "bg-violet-soft text-violet shadow-2xs"
+                  : "text-ink hover:bg-slate-100/80 hover:text-violet"
               }`}
             >
               Blog
@@ -349,7 +354,7 @@ export default function Navbar() {
             {/* Desktop Quick CTA */}
             <Link
               href="/pnr-status"
-              className="hidden items-center gap-1.5 rounded-full bg-ink px-4 py-2 font-display text-[12.5px] font-semibold text-white! shadow-xs transition-colors hover:bg-violet sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-full bg-ink px-4 py-2 font-display text-[12.5px] font-semibold text-white! shadow-xs transition-all active:scale-95 hover:bg-violet sm:inline-flex"
             >
               <Ticket size={13} />
               Check PNR
@@ -365,7 +370,7 @@ export default function Navbar() {
                   : "Open navigation menu"
               }
               aria-expanded={mobileMenuOpen}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white/90 text-ink shadow-2xs backdrop-blur-md transition-all hover:border-violet/40 hover:bg-white active:scale-95 lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white/90 text-ink shadow-2xs backdrop-blur-md transition-all hover:border-violet/40 hover:bg-white active:scale-90 lg:hidden"
             >
               {mobileMenuOpen ? (
                 <X size={20} className="text-ink" />
@@ -393,11 +398,12 @@ export default function Navbar() {
 
             {/* SLIDE-DOWN DRAWER MENU PANEL */}
             <motion.div
-              initial={{ opacity: 0, y: -16, scale: 0.98 }}
+              initial={{ opacity: 0, y: -16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.98 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed inset-x-3 top-[70px] z-[95] max-h-[calc(100vh-85px)] overflow-y-auto rounded-3xl border border-slate-200 bg-white/98 p-4 shadow-2xl backdrop-blur-2xl sm:inset-x-6 sm:p-5 lg:hidden"
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={appleSheetSpring}
+              style={{ transformOrigin: "top center" }}
+              className="fixed inset-x-3 top-[70px] z-[95] max-h-[calc(100vh-85px)] overflow-y-auto rounded-3xl border border-slate-200/80 bg-white/96 p-4 shadow-[0_16px_48px_-8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl sm:inset-x-6 sm:p-5 lg:hidden"
             >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">

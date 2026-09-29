@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { motion } from "framer-motion";
+import { appleSpring } from "@/lib/motion";
 import {
   ArrowRight,
   BusFront,
@@ -264,52 +265,42 @@ function Stat({ label, value }: { label: string; value: string }) {
 function BestMatchCard({ className = "" }: { className?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.45, delay: 0.35, ease: "easeOut" }}
-      className={`relative rounded-2xl border border-violet/25 bg-white p-4 shadow-lg shadow-violet-soft/40 ${className}`}
+      transition={appleSpring}
+      className={`relative rounded-3xl apple-glass p-5 shadow-[0_12px_36px_-6px_rgba(124,58,237,0.12),inset_0_1px_0_rgba(255,255,255,0.95)] ${className}`}
     >
-      {" "}
       <motion.span
-        animate={{ scale: [0.9, 1, 0.9] }}
-        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-        className="inline-flex items-center rounded-full bg-violet px-2.5 py-1  text-[10px] font-bold uppercase tracking-wide text-white font-display"
+        animate={{ scale: [0.96, 1, 0.96] }}
+        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center rounded-full bg-violet px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white font-display shadow-xs"
       >
-        {" "}
-        Best match{" "}
-      </motion.span>{" "}
-      <div className="mt-3 flex items-center gap-2 flex-wrap">
-        {" "}
+        Best match
+      </motion.span>
+      <div className="mt-3.5 flex items-center gap-2 flex-wrap">
         {BEST_MATCH.legs.map((mode, i) => {
           const Icon = MODE_ICON[mode];
           return (
             <Fragment key={i}>
-              {" "}
               {i > 0 && (
                 <ArrowRight size={13} className="shrink-0 text-ink-dim" />
-              )}{" "}
-              <span className="flex items-center gap-2 ">
-                {" "}
-                <span className="flex  shrink-0 items-center justify-center rounded-full  text-ink">
-                  {" "}
-                  <Icon size={14} />{" "}
-                </span>{" "}
+              )}
+              <span className="flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 shadow-2xs">
+                <Icon size={14} className="text-violet" />
                 <span className="font-display text-[12px] font-semibold text-ink">
-                  {" "}
-                  {MODE_LABEL[mode]}{" "}
-                </span>{" "}
-              </span>{" "}
+                  {MODE_LABEL[mode]}
+                </span>
+              </span>
             </Fragment>
           );
-        })}{" "}
-      </div>{" "}
-      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3">
-        {" "}
-        <Stat label="Duration" value={BEST_MATCH.duration} />{" "}
-        <Stat label="Total Fare" value={BEST_MATCH.fare} />{" "}
-        <Stat label="Changes" value={String(BEST_MATCH.changes)} />{" "}
-      </div>{" "}
+        })}
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-slate-200/60 pt-3.5">
+        <Stat label="Duration" value={BEST_MATCH.duration} />
+        <Stat label="Total Fare" value={BEST_MATCH.fare} />
+        <Stat label="Changes" value={String(BEST_MATCH.changes)} />
+      </div>
     </motion.div>
   );
 }

@@ -49,20 +49,20 @@ const VARIANT_CLASS: Record<
   string
 > = {
   primary:
-    "bg-gradient-to-r from-violet to-violet-dark text-white shadow-sm shadow-violet-soft hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100",
+    "apple-button-primary text-white font-semibold disabled:opacity-50 disabled:hover:scale-100 disabled:filter-none",
   outline:
-    "border border-violet bg-white text-violet hover:bg-violet-soft/60 disabled:opacity-50",
+    "border border-violet/80 bg-white/90 text-violet hover:bg-violet-soft/70 active:scale-[0.97] transition-all duration-100 disabled:opacity-50",
   ghost:
-    "bg-violet-soft/60 text-violet-dark hover:bg-violet-soft disabled:opacity-50",
+    "bg-violet-soft/80 text-violet-dark hover:bg-violet-soft active:scale-[0.97] transition-all duration-100 disabled:opacity-50",
 };
 
 const SIZE_CLASS: Record<
   NonNullable<JourneySearchButtonProps["size"]>,
   string
 > = {
-  sm: "h-9 px-3.5 text-[12.5px]",
-  md: "h-11 px-5 text-sm",
-  lg: "h-[52px] px-7 text-[15px]",
+  sm: "h-9 px-3.5 text-[12.5px] rounded-xl",
+  md: "h-11 px-5 text-sm rounded-xl",
+  lg: "h-[52px] px-7 text-[15px] rounded-2xl",
 };
 
 /**

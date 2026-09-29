@@ -139,9 +139,9 @@ const LandingSearch = () => {
     />
   );
   return (
-    <div className="flex flex-col  max-w-[800px] ">
+    <div className="flex flex-col max-w-[800px]">
       {/* One card: search fields + CTA, "Add a stop", and the mode switcher all live together */}
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-white/60 via-white/70 to-white/80 shadow-lg shadow-ink/10 backdrop-blur-sm">
+      <div className="overflow-hidden rounded-3xl apple-glass shadow-[0_12px_40px_-10px_rgba(24,19,31,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
         <div className="p-3.5 sm:p-4 md:p-5">
           <JourneyStopsForm
             idPrefix="hero"
@@ -167,7 +167,7 @@ const LandingSearch = () => {
         {/* Mode tabs — only Trains is live today; the rest are staged for later.
             Icons stack above the label on phones, sit inline with it from `sm` up. */}
 
-        <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-col gap-3 p-4 border-t border-slate-200/50 bg-white/40">
           {/* Quick Date Shortcuts */}
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] sm:text-[11.5px] font-mono">
             <span className="text-ink/60 text-[11px] font-medium mr-0.5">
@@ -176,10 +176,10 @@ const LandingSearch = () => {
             <button
               type="button"
               onClick={() => setDateShortcut(todayIso())}
-              className={`rounded-full px-2.5 py-0.5 border transition-all ${
+              className={`rounded-full px-2.5 py-0.5 border transition-all active:scale-95 ${
                 stops[0]?.date === todayIso()
                   ? "bg-violet text-white border-violet font-semibold shadow-2xs"
-                  : "bg-white/80 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
+                  : "bg-white/90 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
               }`}
             >
               Today
@@ -187,10 +187,10 @@ const LandingSearch = () => {
             <button
               type="button"
               onClick={() => setDateShortcut(getTomorrowIso())}
-              className={`rounded-full px-2.5 py-0.5 border transition-all ${
+              className={`rounded-full px-2.5 py-0.5 border transition-all active:scale-95 ${
                 stops[0]?.date === getTomorrowIso()
                   ? "bg-violet text-white border-violet font-semibold shadow-2xs"
-                  : "bg-white/80 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
+                  : "bg-white/90 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
               }`}
             >
               Tomorrow
@@ -198,10 +198,10 @@ const LandingSearch = () => {
             <button
               type="button"
               onClick={() => setDateShortcut(getWeekendIso())}
-              className={`rounded-full px-2.5 py-0.5 border transition-all ${
+              className={`rounded-full px-2.5 py-0.5 border transition-all active:scale-95 ${
                 stops[0]?.date === getWeekendIso()
                   ? "bg-violet text-white border-violet font-semibold shadow-2xs"
-                  : "bg-white/80 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
+                  : "bg-white/90 text-ink-muted border-border/80 hover:bg-white hover:text-ink shadow-2xs"
               }`}
             >
               Weekend
@@ -218,7 +218,7 @@ const LandingSearch = () => {
                 key={i}
                 type="button"
                 onClick={() => handleSelectRoute(r)}
-                className="flex items-center gap-1 rounded-full border border-border/70 bg-white/80 px-2.5 py-0.5 text-[11px] font-medium text-ink-muted shadow-2xs backdrop-blur-2xs transition-all hover:bg-white hover:border-violet-ring hover:text-violet hover:-translate-y-0.5 active:scale-95"
+                className="flex items-center gap-1 rounded-full border border-border/70 bg-white/90 px-2.5 py-0.5 text-[11px] font-medium text-ink-muted shadow-2xs backdrop-blur-2xs transition-all hover:bg-white hover:border-violet-ring hover:text-violet active:scale-95"
               >
                 <span>{r.emoji}</span>
                 <span>{r.label}</span>
@@ -226,7 +226,7 @@ const LandingSearch = () => {
             ))}
           </div>
         </div>
-        <div className="flex items-stretch gap-1 border-t border-ink/10 bg-white/40 px-2 py-1.5 sm:gap-1.5 sm:px-4 sm:py-2">
+        <div className="flex items-stretch gap-1 border-t border-slate-200/50 bg-white/50 px-2 py-1.5 sm:gap-1.5 sm:px-4 sm:py-2">
           {MODES.map((m) => {
             const Icon = m.icon;
             const active = mode === m.id;
@@ -237,7 +237,7 @@ const LandingSearch = () => {
                 onClick={() => m.enabled && setMode(m.id)}
                 disabled={!m.enabled}
                 title={m.enabled ? undefined : "Coming soon"}
-                className={`relative flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 font-sans text-[11px] whitespace-nowrap transition-colors sm:flex-none sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:text-[13.5px] ${
+                className={`relative flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 font-sans text-[11px] whitespace-nowrap transition-colors active:scale-95 sm:flex-none sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:text-[13.5px] ${
                   active
                     ? "font-semibold text-ink"
                     : m.enabled

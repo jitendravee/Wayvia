@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { appleDropdownSpring } from "@/lib/motion";
 import { TrainSummary } from "@/lib/trains";
 import { RunningStatusResult } from "@/lib/erail/runningStatus";
 
@@ -139,104 +141,113 @@ export default function TrainSearchBox({ autoFocus = false }: { autoFocus?: bool
             onChange={(e) => handleType(e.target.value)}
             onFocus={() => query.trim().length > 0 && setOpen(true)}
             onKeyDown={handleKeyDown}
-            placeholder="Enter train number or name — e.g. 10103 or Mandovi Express"
+            placeholder="Enter train number or name — e.g. 12951 or Rajdhani"
             role="combobox"
             aria-expanded={open}
             aria-autocomplete="list"
-            className="w-full rounded-xl border border-border bg-white py-3.5 pl-11 pr-4 font-mono text-[15px] text-ink outline-none transition-colors focus:border-violet focus:ring-4 focus:ring-violet-ring"
+            className="w-full rounded-2xl border border-slate-200/90 bg-white py-3.5 pl-11 pr-4 font-mono text-[15px] text-ink outline-none transition-all shadow-xs focus:border-violet focus:ring-4 focus:ring-violet-ring"
           />
         </div>
         <button
           type="submit"
-          className="shrink-0 rounded-xl bg-violet px-6 py-3.5 font-display text-[14px] font-semibold text-white shadow-sm shadow-violet-soft transition-colors hover:bg-violet-dark"
+          className="shrink-0 rounded-2xl apple-button-primary px-6 py-3.5 font-display text-[14px] font-semibold text-white shadow-sm"
         >
           Track train
         </button>
       </form>
 
-      {open && (suggestions.length > 0 || loading) && (
-        <div className="absolute top-full z-40 mt-2 w-full overflow-hidden rounded-xl border border-border bg-white shadow-xl">
-          <ul role="listbox" className="max-h-72 overflow-auto py-1">
-            {loading && suggestions.length === 0 && (
-              <li className="px-4 py-3 font-mono text-[12px] text-ink-dim">Searching…</li>
-            )}
-            {suggestions.map((t, i) => (
-              <li
-                key={t.trainNo}
-                role="option"
-                aria-selected={i === highlight}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  pick(t);
-                }}
-                onMouseEnter={() => setHighlight(i)}
-                className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 text-[13.5px] ${
-                  i === highlight ? "bg-violet-soft text-violet-dark" : "text-ink"
-                }`}
-              >
-                <span className="flex items-center gap-2.5 truncate">
-                  <span className="shrink-0 rounded-md bg-surface-alt px-1.5 py-0.5 font-mono text-[11px] font-semibold text-ink-muted">
-                    {t.trainNo}
+      <AnimatePresence>
+        {open && (suggestions.length > 0 || loading) && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.98 }}
+            transition={appleDropdownSpring}
+            style={{ transformOrigin: "top center" }}
+            className="absolute top-full z-40 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200/90 bg-white/98 shadow-[0_16px_40px_-8px_rgba(24,19,31,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl"
+          >
+            <ul role="listbox" className="max-h-72 overflow-auto py-1">
+              {loading && suggestions.length === 0 && (
+                <li className="px-4 py-3 font-mono text-[12px] text-ink-dim">Searching…</li>
+              )}
+              {suggestions.map((t, i) => (
+                <li
+                  key={t.trainNo}
+                  role="option"
+                  aria-selected={i === highlight}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    pick(t);
+                  }}
+                  onMouseEnter={() => setHighlight(i)}
+                  className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 text-[13.5px] transition-colors ${
+                    i === highlight ? "bg-violet-soft text-violet font-medium" : "text-ink"
+                  }`}
+                >
+                  <span className="flex items-center gap-2.5 truncate">
+                    <span className="shrink-0 rounded-md bg-surface-alt px-1.5 py-0.5 font-mono text-[11px] font-semibold text-ink-muted">
+                      {t.trainNo}
+                    </span>
+                    <span className="truncate font-medium">{t.trainName}</span>
                   </span>
-                  <span className="truncate font-medium">{t.trainName}</span>
-                </span>
-                {t.from && t.to && (
-                  <span className="shrink-0 font-mono text-[11px] text-ink-dim">
-                    {t.from} → {t.to}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-
-          {topSuggestion && (
-            <div className="border-t border-border-soft bg-surface-alt px-4 py-3">
-              <div className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-dim">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet" />
-                Live preview · {topSuggestion.trainNo} {topSuggestion.trainName}
-              </div>
-              {previewLoading && <div className="font-mono text-[12px] text-ink-muted">Checking live status…</div>}
-              {!previewLoading && preview && preview.success && (
-                <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-ink">
-                  {preview.summary?.statusMessage ? (
-                    <span className="text-ink-muted">{preview.summary.statusMessage}</span>
-                  ) : (
-                    <span className="text-ink-muted">Status available — open for full details.</span>
-                  )}
-                  {typeof preview.summary?.departure.delayMin === "number" && (
-                    <span
-                      className={`rounded-md px-1.5 py-0.5 font-mono text-[11px] ${
-                        preview.summary.departure.delayMin > 0
-                          ? "bg-signal-amber-soft text-signal-amber"
-                          : "bg-signal-green-soft text-signal-green"
-                      }`}
-                    >
-                      {preview.summary.departure.delayMin > 0
-                        ? `Running ${preview.summary.departure.delayMin}m late`
-                        : "On time"}
+                  {t.from && t.to && (
+                    <span className="shrink-0 font-mono text-[11px] text-ink-dim">
+                      {t.from} → {t.to}
                     </span>
                   )}
+                </li>
+              ))}
+            </ul>
+
+            {topSuggestion && (
+              <div className="border-t border-slate-100 bg-surface-alt/70 px-4 py-3">
+                <div className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-dim">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet" />
+                  Live preview · {topSuggestion.trainNo} {topSuggestion.trainName}
                 </div>
-              )}
-              {!previewLoading && preview && !preview.success && (
-                <div className="font-mono text-[12px] text-ink-dim">
-                  {preview.message ?? "No live status available right now."}
-                </div>
-              )}
-              <button
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  goToTrain(topSuggestion.trainNo);
-                }}
-                className="mt-2 font-display text-[12.5px] font-semibold text-violet hover:text-violet-dark"
-              >
-                Open full tracker →
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+                {previewLoading && <div className="font-mono text-[12px] text-ink-muted">Checking live status…</div>}
+                {!previewLoading && preview && preview.success && (
+                  <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-ink">
+                    {preview.summary?.statusMessage ? (
+                      <span className="text-ink-muted">{preview.summary.statusMessage}</span>
+                    ) : (
+                      <span className="text-ink-muted">Status available — open for full details.</span>
+                    )}
+                    {typeof preview.summary?.departure.delayMin === "number" && (
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 font-mono text-[11px] ${
+                          preview.summary.departure.delayMin > 0
+                            ? "bg-signal-amber-soft text-signal-amber"
+                            : "bg-signal-green-soft text-signal-green"
+                        }`}
+                      >
+                        {preview.summary.departure.delayMin > 0
+                          ? `Running ${preview.summary.departure.delayMin}m late`
+                          : "On time"}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {!previewLoading && preview && !preview.success && (
+                  <div className="font-mono text-[12px] text-ink-dim">
+                    {preview.message ?? "No live status available right now."}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    goToTrain(topSuggestion.trainNo);
+                  }}
+                  className="mt-2 font-display text-[12.5px] font-semibold text-violet hover:text-violet-dark active:scale-95 transition-transform"
+                >
+                  Open full tracker →
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

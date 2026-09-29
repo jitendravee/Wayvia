@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
+import { appleSpring } from "@/lib/motion";
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                 */
@@ -334,8 +335,8 @@ function RouteCard({ card }: { card: RouteCardData }) {
 /* Carousel                                                             */
 /* ------------------------------------------------------------------ */
 
-const SWIPE_THRESHOLD = 60;
-const SWIPE_VELOCITY = 400;
+const SWIPE_THRESHOLD = 50;
+const SWIPE_VELOCITY = 300;
 
 export default function MoreWaysToGetThere() {
   const cardsPerPage = useCardsPerPage();
@@ -381,7 +382,7 @@ export default function MoreWaysToGetThere() {
             aria-label="Previous routes"
             onClick={() => goTo(page - 1)}
             disabled={page === 0}
-            className="absolute left-0 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white p-2 text-ink shadow-sm transition hover:bg-surface-alt disabled:pointer-events-none disabled:opacity-30 sm:flex"
+            className="absolute left-0 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white p-2 text-ink shadow-sm transition-all active:scale-90 hover:bg-surface-alt disabled:pointer-events-none disabled:opacity-30 sm:flex"
           >
             <ChevronLeft size={16} />
           </button>
@@ -389,19 +390,18 @@ export default function MoreWaysToGetThere() {
 
         <div className="overflow-hidden">
           <motion.div
-            className="flex"
+            className="flex cursor-grab active:cursor-grabbing"
             drag={pageCount > 1 ? "x" : false}
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.06}
-            dragMomentum={false}
+            dragElastic={0.08}
             onDragEnd={handleDragEnd}
             animate={{ x: `${-page * 100}%` }}
-            transition={{ type: "spring", stiffness: 320, damping: 32 }}
+            transition={appleSpring}
           >
             {pages.map((group, pi) => (
               <div
                 key={pi}
-                className="grid w-full shrink-0 grid-cols-1  sm:grid-cols-2  sm:gap-5 lg:grid-cols-4"
+                className="grid w-full shrink-0 grid-cols-1 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4"
               >
                 {group.map((card) => (
                   <RouteCard key={card.id} card={card} />

@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------
-   Wayvia design tokens
-   Clean, light, travel-app surface: white as the primary canvas, violet
-   as the single confident accent/CTA color. Signal colors (availability
-   states) stay semantically green/amber/red, tuned for a light UI.
+   Wayvia Design Tokens & Apple Fluid Interface System
+   Translating Apple's WWDC Human Interface & Fluid Motion principles
+   into the web platform: instant press feedback, physical springs,
+   optical typography, translucent layered materials, and depth.
 ------------------------------------------------------------------------ */
 
 @theme {
@@ -31,26 +31,57 @@
   --color-signal-amber-soft: #fef4e6;
   --color-signal-red: #dc2626;
   --color-signal-red-soft: #fdeded;
-  --font-display: var(--font-geist), "Inter", system-ui, sans-serif;
-  --font-body: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Typography tokens */
+  --font-display: var(--font-geist), "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --font-body: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  /* Apple Fluid Motion Curves */
+  --ease-apple-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-apple-smooth: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html,
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
 body {
   padding: 0;
   margin: 0;
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-body);
+  line-height: 1.5;
 }
 
 a {
   color: inherit;
+}
+
+/* ---------------------------------------------------------------------
+   Apple Optical Typography Rules
+   - Display headings: tighter negative tracking and tight leading
+   - Body text: comfortable line-height, neutral tracking
+   - Digits (timetables, PNR, train nos): tabular numerals
+------------------------------------------------------------------------ */
+
+h1, h2, h3, .font-display {
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.tabular-nums, .font-mono {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
 }
 
 ::selection {
@@ -61,18 +92,115 @@ a {
 *:focus-visible {
   outline: 2px solid var(--color-violet);
   outline-offset: 2px;
+  border-radius: inherit;
 }
 
+/* ---------------------------------------------------------------------
+   Interactive Cursor & Pointer Affordances
+   Ensuring all clickable elements have clear cursor: pointer feedback
+------------------------------------------------------------------------ */
+
+a,
+button,
+[role="button"],
+[role="tab"],
+[role="option"],
+[role="combobox"],
+[role="menuitem"],
+[role="switch"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="date"],
+select,
+summary,
+label[for],
+.cursor-pointer,
+.pressable,
+[data-card] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"]:disabled,
+[aria-disabled="true"],
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+button, [role="button"], .pressable {
+  touch-action: manipulation;
+}
+
+button:active:not(:disabled),
+.pressable:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 100ms var(--ease-apple-smooth);
+}
+
+/* ---------------------------------------------------------------------
+   Apple Materials & Glassmorphism
+   Translucent chrome layers with specular top light reflection
+------------------------------------------------------------------------ */
+
+.apple-glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(228, 224, 240, 0.65);
+  box-shadow: 
+    0 4px 20px -2px rgba(24, 19, 31, 0.05),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+}
+
+.apple-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  box-shadow: 
+    0 2px 8px -2px rgba(24, 19, 31, 0.04),
+    0 8px 24px -4px rgba(24, 19, 31, 0.04);
+  transition: transform 180ms var(--ease-apple-smooth), box-shadow 180ms var(--ease-apple-smooth);
+}
+
+.apple-card:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 4px 12px -2px rgba(24, 19, 31, 0.06),
+    0 12px 32px -4px rgba(124, 58, 237, 0.08);
+}
+
+.apple-button-primary {
+  background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    0 2px 6px rgba(109, 40, 217, 0.25),
+    0 8px 20px -4px rgba(109, 40, 217, 0.35);
+  transition: transform 120ms var(--ease-apple-smooth), filter 150ms ease-out;
+}
+
+.apple-button-primary:hover {
+  filter: brightness(1.05);
+}
+
+.apple-button-primary:active {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
+
+/* Scrollbar polish */
 ::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 6px;
+  width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: rgba(151, 145, 161, 0.3);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-violet-ring);
+  background: rgba(124, 58, 237, 0.5);
 }
 
 @keyframes fade-up {
@@ -87,13 +215,37 @@ a {
 }
 
 .fade-up {
-  animation: fade-up 0.35s ease both;
+  animation: fade-up 0.35s var(--ease-apple-spring) both;
 }
 
+/* ---------------------------------------------------------------------
+   Apple Accessibility & Reduced Motion / Transparency
+------------------------------------------------------------------------ */
+
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .apple-glass,
+  header {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .apple-glass,
+  .apple-card,
+  button {
+    border-color: #000000 !important;
   }
 }
 

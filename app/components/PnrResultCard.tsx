@@ -23,8 +23,8 @@ export default function PnrResultCard({ data }: { data: PnrData }) {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-        <div className="border-b border-border-soft bg-surface-alt px-5 py-4">
+      <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]">
+        <div className="border-b border-slate-100 bg-surface-alt/70 px-5 py-4">
           <div className="font-mono text-[11px] uppercase tracking-wider text-ink-dim">
             PNR {data.pnrNumber} · {data.chartStatus ?? "Status unknown"}
           </div>
@@ -48,7 +48,7 @@ export default function PnrResultCard({ data }: { data: PnrData }) {
         </div>
 
         {data.informationMessage && data.informationMessage.length > 0 && (
-          <div className="space-y-1 border-t border-border-soft px-5 py-3">
+          <div className="space-y-1 border-t border-slate-100 px-5 py-3">
             {data.informationMessage.map((m, i) => (
               <div
                 key={i}
@@ -62,7 +62,7 @@ export default function PnrResultCard({ data }: { data: PnrData }) {
         )}
       </div>
 
-      <div className="flex items-center justify-between rounded-2xl border border-emerald-300 bg-gradient-to-r from-emerald-50 via-surface-alt to-white p-4 shadow-2xs">
+      <div className="flex items-center justify-between rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50/80 via-white to-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
             <Share2 size={18} />
@@ -82,13 +82,13 @@ export default function PnrResultCard({ data }: { data: PnrData }) {
         </div>
         <Link
           href={`/journey-card?pnr=${data.pnrNumber}`}
-          className="shrink-0 rounded-xl bg-emerald-600 px-3.5 py-2 font-display text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all"
+          className="shrink-0 rounded-xl bg-emerald-600 px-3.5 py-2 font-display text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 active:scale-95 transition-all duration-100"
         >
           Generate Card →
         </Link>
       </div>
 
-      <div className="flex items-center justify-between rounded-2xl border border-violet/20 bg-gradient-to-r from-violet/5 via-surface-alt to-white p-4 shadow-2xs">
+      <div className="flex items-center justify-between rounded-2xl border border-violet/20 bg-gradient-to-r from-violet/5 via-white to-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet text-white shadow-xs">
             <Calculator size={18} />
@@ -104,7 +104,7 @@ export default function PnrResultCard({ data }: { data: PnrData }) {
         </div>
         <Link
           href={`/refund-calculator?pnr=${data.pnrNumber}`}
-          className="shrink-0 rounded-xl bg-violet px-3.5 py-2 font-display text-xs font-semibold text-white shadow-sm hover:bg-violet-dark transition-all"
+          className="shrink-0 rounded-xl apple-button-primary px-3.5 py-2 font-display text-xs font-semibold text-white shadow-xs"
         >
           Calculate Refund →
         </Link>
